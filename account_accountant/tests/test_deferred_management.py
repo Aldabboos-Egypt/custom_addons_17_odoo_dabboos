@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=C0326
-from odoo import fields, Command
+import datetime
+
+from odoo import Command, fields
 from odoo.tests import tagged
+
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
@@ -372,3 +375,46 @@ class TestDeferredManagement(AccountTestInvoicingCommon):
         move.action_post()
 
         self.assert_invoice_lines(move, expected_line_values, self.expense_accounts[0], self.company_data['default_account_deferred_expense'])
+
+    def test_deferred_tax_key(self):
+        """
+        Test that the deferred tax key is correctly computed.
+        and is the same between _compute_tax_key and _compute_all_tax
+        """
+        lines = [
+            [self.expense_accounts[0], 1000, '2023-01-01', '2023-04-30'],
+            [self.expense_accounts[0], 1000, False, False],
+        ]
+        move = self.create_invoice('in_invoice', self.company_data['default_journal_purchase'], self.partner_a, lines, post=True)
+        original_amount_total = move.amount_total
+        self.assertEqual(len(move.line_ids.filtered(lambda l: l.display_type == 'tax')), 1)
+        move.button_draft()
+        move.action_post()
+        # The number of tax lines shouldn't change, nor the total amount
+        self.assertEqual(len(move.line_ids.filtered(lambda l: l.display_type == 'tax')), 1)
+        self.assertEqual(move.amount_total, original_amount_total)
+
+    def test_compute_empty_start_date(self):
+        """
+        Test that the deferred start date is computed when empty and posting the move.
+        """
+        lines = [[self.expense_accounts[0], 1000, False, '2023-04-30']]
+        move = self.create_invoice('in_invoice', self.company_data['default_journal_purchase'], self.partner_a, lines, post=False)
+
+        # We don't have a deferred date in the beginning
+        self.assertFalse(move.line_ids[0].deferred_start_date)
+
+        move.action_post()
+        # Deferred start date is set after post
+        self.assertEqual(move.line_ids[0].deferred_start_date, datetime.date(2023, 1, 1))
+
+        move.button_draft()
+        move.line_ids[0].deferred_start_date = False
+        move.invoice_date = '2023-02-01'
+        # Start date is set when changing invoice date
+        self.assertEqual(move.line_ids[0].deferred_start_date, datetime.date(2023, 2, 1))
+
+        move.line_ids[0].deferred_start_date = False
+        move.line_ids[0].deferred_end_date = '2023-05-31'
+        # Start date is set when changing deferred end date
+        self.assertEqual(move.line_ids[0].deferred_start_date, datetime.date(2023, 2, 1))

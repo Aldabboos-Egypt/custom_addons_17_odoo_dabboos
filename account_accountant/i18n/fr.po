@@ -1061,7 +1061,7 @@ msgstr "La date enfreint-elle la date de verrouillage des mouvements"
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
 msgid "Items"
-msgstr "Articles"
+msgstr "Transactions"
 
 #. module: account_accountant
 #: model:ir.model,name:account_accountant.model_account_journal
@@ -1425,11 +1425,6 @@ msgstr "Montant ouvert en devise"
 #, python-format
 msgid "Open balance: %s"
 msgstr "Solde ouvert : %s"
-
-#. module: account_accountant
-#: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
-msgid "Operations"
-msgstr "Opérations"
 
 #. module: account_accountant
 #: model:ir.model.fields.selection,name:account_accountant.selection__account_auto_reconcile_wizard__search_mode__one_to_one
@@ -2075,6 +2070,11 @@ msgstr "Total résiduel en devise"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_search_bank_rec_widget
 msgid "Transaction"
 msgstr "Transaction"
+
+#. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
+msgid "Transactions"
+msgstr "Transactions"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget__transaction_currency_id

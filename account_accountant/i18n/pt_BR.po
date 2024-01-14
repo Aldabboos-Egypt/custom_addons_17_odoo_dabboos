@@ -1363,7 +1363,7 @@ msgstr "Não identificado"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_tree_bank_rec_widget
 #, python-format
 msgid "Notes"
-msgstr "Observações"
+msgstr "Notas"
 
 #. module: account_accountant
 #. odoo-python
@@ -1420,11 +1420,6 @@ msgid "Open balance: %s"
 msgstr "Saldo aberto: %s"
 
 #. module: account_accountant
-#: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
-msgid "Operations"
-msgstr "Operações"
-
-#. module: account_accountant
 #: model:ir.model.fields.selection,name:account_accountant.selection__account_auto_reconcile_wizard__search_mode__one_to_one
 msgid "Opposite balances one by one"
 msgstr "Saldos opostos um por um"
@@ -1463,42 +1458,42 @@ msgstr "Saída"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_move_line_reconcile_search
 #, python-format
 msgid "Partner"
-msgstr "Usuário"
+msgstr "Parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget_line__partner_currency_id
 msgid "Partner Currency"
-msgstr "Moeda do usuário"
+msgstr "Moeda do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget__partner_name
 msgid "Partner Name"
-msgstr "Nome do usuário"
+msgstr "Nome do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget_line__partner_payable_account_id
 msgid "Partner Payable Account"
-msgstr "Conta a pagar do usuário"
+msgstr "Conta a pagar do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget_line__partner_payable_amount
 msgid "Partner Payable Amount"
-msgstr "Valor a pagar do usuário"
+msgstr "Valor a pagar do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget_line__partner_receivable_account_id
 msgid "Partner Receivable Account"
-msgstr "Conta a receber do usuário"
+msgstr "Conta a receber do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget_line__partner_receivable_amount
 msgid "Partner Receivable Amount"
-msgstr "Valor a receber do usuário"
+msgstr "Valor a receber do parceiro"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_account_auto_reconcile_wizard__partner_ids
 msgid "Partners"
-msgstr "Usuários"
+msgstr "Parceiros"
 
 #. module: account_accountant
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_account_move_line_reconcile_search
@@ -2063,6 +2058,11 @@ msgstr "Total residual na moeda"
 #: model_terms:ir.ui.view,arch_db:account_accountant.view_bank_statement_line_search_bank_rec_widget
 msgid "Transaction"
 msgstr "Transação"
+
+#. module: account_accountant
+#: model_terms:ir.ui.view,arch_db:account_accountant.account_journal_dashboard_kanban_view
+msgid "Transactions"
+msgstr "Transações"
 
 #. module: account_accountant
 #: model:ir.model.fields,field_description:account_accountant.field_bank_rec_widget__transaction_currency_id

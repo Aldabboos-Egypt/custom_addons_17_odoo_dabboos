@@ -136,7 +136,7 @@ class AccountMove(models.Model):
     def _get_deferred_amounts_by_line(self, lines, periods):
         """
         :return: a list of dictionaries containing the deferred amounts for each line and each period
-        E.g. (where period1 = (date1, date2), period2 = (date2, date3), ...)
+        E.g. (where period1 = (date1, date2, label1), period2 = (date2, date3, label2), ...)
         [
             {'account_id': 1, period_1: 100, period_2: 200},
             {'account_id': 1, period_1: 100, period_2: 200},
@@ -147,7 +147,6 @@ class AccountMove(models.Model):
         for line in lines:
             line_start = fields.Date.to_date(line['deferred_start_date'])
             line_end = fields.Date.to_date(line['deferred_end_date'])
-            later_date = fields.Date.to_date(DEFERRED_DATE_MAX)
             if line_end < line_start:
                 # This normally shouldn't happen, but if it does, would cause calculation errors later on.
                 # To not make the reports crash, we just set both dates to the same day.
@@ -155,20 +154,24 @@ class AccountMove(models.Model):
                 line_end = line_start
 
             columns = {}
-            for i, period in enumerate(periods):
-                # periods = [Total, Before, ..., Current, ..., Later]
+            for period in periods:
+                if period[2] == 'not_started' and line_start <= period[0]:
+                    # The 'Not Started' column only considers lines starting the deferral after the report end date
+                    columns[period] = 0.0
+                    continue
+                # periods = [Total, Not Started, Before, ..., Current, ..., Later]
                 # The dates to calculate the amount for the current period
                 period_start = max(period[0], line_start)
                 period_end = min(period[1], line_end)
                 if (
-                    period[1] == later_date and period[0] < line_start
+                    period[2] in ('not_started', 'later') and period[0] < line_start
                     or len(periods) <= 1
-                    or i not in (1, len(periods) - 1)
+                    or period[2] not in ('not_started', 'before', 'later')
                 ):
-                    # We are subtracting 1 day to `period_start` because the start date should be included when:
-                    # - in the 'Later' period if the deferral has not started yet (line_start, line_end)
+                    # We are subtracting 1 day from `period_start` because the start date should be included when:
+                    # - in the 'Not Started' or 'Later' period if the deferral has not started yet (line_start, line_end)
                     # - we only have one period
-                    # - not in the 'Before' or 'Later' period
+                    # - not in the 'Not Started', 'Before' or 'Later' period
                     period_start -= relativedelta(days=1)
                 columns[period] = self._get_deferred_period_amount(
                     self.env.company.deferred_amount_computation_method,
@@ -436,7 +439,7 @@ class AccountMoveLine(models.Model):
         if not self._is_compatible_account():
             self.deferred_end_date = False
 
-    @api.depends('deferred_end_date', 'move_id.invoice_date')
+    @api.depends('deferred_end_date', 'move_id.invoice_date', 'move_id.state')
     def _compute_deferred_start_date(self):
         for line in self:
             if not line.deferred_start_date and line.move_id.invoice_date and line.deferred_end_date:
@@ -450,28 +453,36 @@ class AccountMoveLine(models.Model):
             elif line.deferred_start_date and line.deferred_end_date and line.deferred_start_date > line.deferred_end_date:
                 raise UserError(_("You cannot create a deferred entry with a start date later than the end date."))
 
+    @api.model
+    def _get_deferred_tax_key(self, line, tax_key, tax_repartition_line_id):
+        if (
+            line.deferred_start_date
+            and line.deferred_end_date
+            and line._is_compatible_account()
+            and tax_repartition_line_id
+            and not tax_repartition_line_id.use_in_tax_closing
+        ):
+            return frozendict(
+                **tax_key,
+                deferred_start_date=line.deferred_start_date,
+                deferred_end_date=line.deferred_end_date,
+            )
+        return tax_key
+
     @api.depends('deferred_start_date', 'deferred_end_date')
     def _compute_tax_key(self):
         super()._compute_tax_key()
         for line in self:
-            if line.deferred_start_date and line.deferred_end_date and line._is_compatible_account():
-                line.tax_key = frozendict(
-                    **line.tax_key,
-                    deferred_start_date=line.deferred_start_date,
-                    deferred_end_date=line.deferred_end_date
-                )
+            line.tax_key = self._get_deferred_tax_key(line, line.tax_key, line.tax_repartition_line_id)
 
     @api.depends('deferred_start_date', 'deferred_end_date')
     def _compute_all_tax(self):
         super()._compute_all_tax()
         for line in self:
-            if line.deferred_start_date and line.deferred_end_date and line._is_compatible_account():
-                for key in list(line.compute_all_tax.keys()):
-                    rep_line = self.env['account.tax.repartition.line'].browse(key.get('tax_repartition_line_id'))
-                    deferred_start_date = line.deferred_start_date if not rep_line.use_in_tax_closing else False
-                    deferred_end_date = line.deferred_end_date if not rep_line.use_in_tax_closing else False
-                    new_key = frozendict(**key, deferred_start_date=deferred_start_date, deferred_end_date=deferred_end_date)
-                    line.compute_all_tax[new_key] = line.compute_all_tax.pop(key)
+            for key in list(line.compute_all_tax.keys()):
+                tax_repartition_line_id = self.env['account.tax.repartition.line'].browse(key.get('tax_repartition_line_id'))
+                new_key = self._get_deferred_tax_key(line, key, tax_repartition_line_id)
+                line.compute_all_tax[new_key] = line.compute_all_tax.pop(key)
 
     @api.model
     def _get_deferred_ends_of_month(self, start_date, end_date):
@@ -495,7 +506,7 @@ class AccountMoveLine(models.Model):
         """
         self.ensure_one()
         periods = [
-            (max(self.deferred_start_date, date.replace(day=1)), min(date, self.deferred_end_date))
+            (max(self.deferred_start_date, date.replace(day=1)), min(date, self.deferred_end_date), 'current')
             for date in self._get_deferred_ends_of_month(self.deferred_start_date, self.deferred_end_date)
         ]
         if not periods or len(periods) == 1 and periods[0][0].replace(day=1) == self.date.replace(day=1):
@@ -602,15 +613,24 @@ class AccountMoveLine(models.Model):
         parsed_description = ' | '.join(parsed_description.split())
 
         from_clause, where_clause, params = (query if query is not None else self._build_predictive_query()).get_sql()
+        mask_from_clause, mask_where_clause, mask_params = self._build_predictive_query().get_sql()
         try:
+            account_move_line = self.env.cr.mogrify(
+                f"SELECT account_move_line.* FROM {mask_from_clause} WHERE {mask_where_clause}",
+                mask_params,
+            ).decode()
+            group_by_clause = ""
+            if "(" in field:  # aggregate function
+                group_by_clause = "GROUP BY account_move_line.id, account_move_line.name, account_move_line.partner_id"
             self.env.cr.execute(f"""
-                WITH source AS ({'(' + ') UNION ALL ('.join([self.env.cr.mogrify(f'''
+                WITH account_move_line AS MATERIALIZED ({account_move_line}),
+                source AS ({'(' + ') UNION ALL ('.join([self.env.cr.mogrify(f'''
                     SELECT {field} AS prediction,
                            setweight(to_tsvector(%%(lang)s, account_move_line.name), 'B')
                            || setweight(to_tsvector('simple', 'account_move_line'), 'A') AS document
                       FROM {from_clause}
                      WHERE {where_clause}
-                  GROUP BY account_move_line.id
+                  {group_by_clause}
                 ''', params).decode()] + (additional_queries or [])) + ')'}
                 ),
 
@@ -643,11 +663,34 @@ class AccountMoveLine(models.Model):
         query.left_join('account_move_line', 'id', 'account_move_line_account_tax_rel', 'account_move_line_id', 'tax_rel')
         query.left_join('account_move_line__tax_rel', 'account_tax_id', 'account_tax', 'id', 'tax_ids')
         query.add_where('account_move_line__tax_rel__tax_ids.active IS NOT FALSE')
+        predicted_tax_ids = self._predicted_field(field, query)
+        if predicted_tax_ids == [None]:
+            return False
+        if predicted_tax_ids is not False and set(predicted_tax_ids) != set(self.tax_ids.ids):
+            return predicted_tax_ids
+        return False
+
+    def _predict_specific_tax(self, amount_type, amount, type_tax_use):
+        field = 'array_agg(account_move_line__tax_rel__tax_ids.id ORDER BY account_move_line__tax_rel__tax_ids.id)'
+        query = self._build_predictive_query()
+        query.left_join('account_move_line', 'id', 'account_move_line_account_tax_rel', 'account_move_line_id', 'tax_rel')
+        query.left_join('account_move_line__tax_rel', 'account_tax_id', 'account_tax', 'id', 'tax_ids')
+        query.add_where("""
+            account_move_line__tax_rel__tax_ids.active IS NOT FALSE
+            AND account_move_line__tax_rel__tax_ids.amount_type = %s
+            AND account_move_line__tax_rel__tax_ids.type_tax_use = %s
+            AND account_move_line__tax_rel__tax_ids.amount = %s
+        """, (amount_type, type_tax_use, amount))
         return self._predicted_field(field, query)
 
     def _predict_product(self):
-        query = self._build_predictive_query(['|', ('product_id', '=', False), ('product_id.active', '=', True)])
-        return self._predicted_field('account_move_line.product_id', query)
+        predict_product = int(self.env['ir.config_parameter'].sudo().get_param('account_predictive_bills.predict_product', '1'))
+        if predict_product and self.company_id.predict_bill_product:
+            query = self._build_predictive_query(['|', ('product_id', '=', False), ('product_id.active', '=', True)])
+            predicted_product_id = self._predicted_field('account_move_line.product_id', query)
+            if predicted_product_id and predicted_product_id != self.product_id.id:
+                return predicted_product_id
+        return False
 
     def _predict_account(self):
         field = 'account_move_line.account_id'
@@ -666,34 +709,36 @@ class AccountMoveLine(models.Model):
             SQL("setweight(to_tsvector(%s, name), 'B') AS document", psql_lang),
         )).decode()]
         query = self._build_predictive_query([('account_id', 'in', account_query)])
-        return self._predicted_field(field, query, additional_queries)
+
+        predicted_account_id = self._predicted_field(field, query, additional_queries)
+        if predicted_account_id and predicted_account_id != self.account_id.id:
+            return predicted_account_id
+        return False
 
     @api.onchange('name')
     def _onchange_name_predictive(self):
-        if (self.move_id.quick_edit_mode or self.move_id.move_type == 'in_invoice')and self.name and self.display_type == 'product':
-            predict_product = int(self.env['ir.config_parameter'].sudo().get_param('account_predictive_bills.predict_product', '1'))
+        if ((self.move_id.quick_edit_mode or self.move_id.move_type == 'in_invoice') and self.name and self.display_type == 'product'
+            and not self.env.context.get('disable_onchange_name_predictive', False)):
 
-            if predict_product and not self.product_id and self.company_id.predict_bill_product:
+            if not self.product_id:
                 predicted_product_id = self._predict_product()
-                if predicted_product_id and predicted_product_id != self.product_id.id:
+                if predicted_product_id:
                     name = self.name
                     self.product_id = predicted_product_id
                     self.name = name
 
-            # Product may or may not have been set above, if it has been set, account and taxes are set too
+            # In case no product has been set, the account and taxes
+            # will not depend on any product and can thus be predicted
             if not self.product_id:
                 # Predict account.
                 predicted_account_id = self._predict_account()
-                if predicted_account_id and predicted_account_id != self.account_id.id:
+                if predicted_account_id:
                     self.account_id = predicted_account_id
 
-                if not self.tax_ids:
-                    # Predict taxes
-                    predicted_tax_ids = self._predict_taxes()
-                    if predicted_tax_ids == [None]:
-                        predicted_tax_ids = []
-                    if predicted_tax_ids is not False and set(predicted_tax_ids) != set(self.tax_ids.ids):
-                        self.tax_ids = self.env['account.tax'].browse(predicted_tax_ids)
+                # Predict taxes
+                predicted_tax_ids = self._predict_taxes()
+                if predicted_tax_ids:
+                    self.tax_ids = [Command.set(predicted_tax_ids)]
 
     def _read_group_groupby(self, groupby_spec, query):
         # enable grouping by :abs_rounded on fields, which is useful when trying

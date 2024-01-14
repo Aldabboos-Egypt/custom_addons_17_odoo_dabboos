@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import ast
 from collections import defaultdict
 
 from odoo import models, api, fields, Command, _
@@ -73,7 +74,8 @@ class AccountTaxReportHandler(models.AbstractModel):
             action['res_id'] = moves.id
         else:
             action['domain'] = [('id', 'in', moves.ids)]
-
+            action['context'] = dict(ast.literal_eval(action['context']))
+            action['context'].pop('search_default_posted', None)
         return action
 
     def _generate_tax_closing_entries(self, report, options, closing_moves=None, companies=None):
@@ -140,8 +142,6 @@ class AccountTaxReportHandler(models.AbstractModel):
                 move_vals = {}
                 if line_ids_vals:
                     move_vals['line_ids'] = line_ids_vals
-
-                move_vals['tax_report_control_error'] = bool(move_options.get('tax_report_control_error'))
 
                 move.write(move_vals)
 

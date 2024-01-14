@@ -80,6 +80,16 @@ class JournalReportCustomHandler(models.AbstractModel):
         if self.user_has_groups('base.group_multi_currency'):
             options['multi_currency'] = True
 
+    def _custom_line_postprocessor(self, report, options, lines, warnings=None):
+        if options['export_mode'] != 'print':
+            return lines
+        new_lines = []
+        for line in lines:
+            model_info = self.env['account.report']._get_model_info_from_id(line['id'])
+            if model_info[0] == 'account.journal' and line.get('unfolded', False) or model_info[0] != 'account.journal':
+                new_lines.append(line)
+        return new_lines
+
     def _query_journal(self, options):
         params = []
         queries = []
@@ -104,11 +114,13 @@ class JournalReportCustomHandler(models.AbstractModel):
                     j.currency_id,
                     journal_curr.name as currency_name,
                     cp.currency_id as company_currency
-                FROM {tables}
-                JOIN account_journal j ON j.id = "account_move_line".journal_id
-                JOIN res_company cp ON cp.id = "account_move_line".company_id
+                FROM account_journal j
+                JOIN account_move_line ON j.id = account_move_line.journal_id
+                JOIN res_company cp ON cp.id = j.company_id
                 LEFT JOIN res_currency journal_curr on journal_curr.id = j.currency_id
                 WHERE {where_clause}
+                GROUP BY
+                    j.id, {j_name}, j.code, j.type, j.currency_id, journal_curr.name, cp.currency_id
                 ORDER BY j.id
             """)
 
@@ -492,7 +504,7 @@ class JournalReportCustomHandler(models.AbstractModel):
                     if column.get('expression_label') == 'account':
                         col_value = '%s %s' % (values['account_code'], values['partner_name'] or values['account_name'])
                     elif column.get('expression_label') == 'label':
-                        col_value = values['debit']
+                        col_value = values['name']
                     elif column.get('expression_label') == 'invoice_date':
                         if values['journal_type'] == 'sale':
                             col_value = values['invoice_date'] if values['debit'] else ''
