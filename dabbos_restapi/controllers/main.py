@@ -542,21 +542,25 @@ class APIController(http.Controller):
         journal = int(payment_details.get("journal"))
         memo = payment_details.get("memo")
         amount = payment_details.get("amount")
+
+        # print(max(ssssssssssssss))
         if not (invoice_id or journal):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
         invoice_obj=request.env['account.move'].browse(int(invoice_id))
+        # print("fddddddddddddddd")
+        #
+        # if float(amount) >invoice_obj.amount_residual:
+        #     return invalid_response(
+        #         "Amount Is Greater Than Invoice Amount Residual  .",
+        #     )
+        # print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs")
 
-        if float(amount) >invoice_obj.amount_residual:
-            return invalid_response(
-                "Amount Is Greater Than Invoice Amount Residual  .",
-            )
         # payment_journal =request.env['account.journal'].search([('api_payment','=',True)],limit=1)
         # payment_method =request.env['account.payment.method'].search([('api_payment','=',True)],limit=1)
 
         # try:
-
         payment = request.env['account.payment'].create({
             'currency_id': invoice_obj.currency_id.id,
             'amount': amount,
