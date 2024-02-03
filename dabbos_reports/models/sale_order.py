@@ -1,7 +1,3 @@
-# Fixed discount amount on Sale Order Lines and Invoice Lines
-# Copyright (c) 2021 Sayed Hassan (sh-odoo@hotmail.com)
-# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
-
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command
@@ -11,7 +7,7 @@ from odoo.fields import Command
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    fixed_discount = fields.Float(string="خصم ", digits="Product Price")
+    fixed_discount = fields.Float(string="Fixed Discount ", digits="Product Price")
 
     @api.onchange("discount")
     def _onchange_discount(self):
@@ -72,3 +68,83 @@ class SaleOrderLine(models.Model):
         if self.display_type:
             res['account_id'] = False
         return res
+
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    invoice_notes = fields.Char(string='Payment Notes')
+    general_notes = fields.Char(string='Notes')
+    total_product = fields.Integer(string='Total Product:', compute='_get_total_product', help="total Products" ,default=0)
+    total_quantity = fields.Integer(string='Total Quantity:', compute='_get_total_quantity', help="total Quantity")
+    total_quantity_packet = fields.Integer(string='Total Quantity Packet:', compute='_get_total_quantity',
+                                           help="total Quantity Packet")
+    total_quantity_carton = fields.Integer(string='Total Quantity Carton:', compute='_get_total_quantity',
+                                           help="total Quantity Carton")
+
+    total_before_discount = fields.Monetary(" Total Before Discount", compute='total_discount')
+    discount_total = fields.Monetary("Discount Total", compute='total_discount')
+    discount_total_line = fields.Monetary("Discount Total Line ", compute='total_discount')
+    total_with_line_discount = fields.Monetary(" Total With Line Discount ", compute='total_discount')
+    all_discounts = fields.Monetary("Discount ", compute='total_discount')
+
+
+    # Count the total discount
+    @api.depends('order_line.product_uom_qty', 'order_line.price_unit', 'order_line.discount')
+    def total_discount(self):
+        for invoice in self:
+            final_discount_amount = 0
+            final_discount_amount_line = 0
+            if invoice:
+                for line in invoice.order_line:
+                    if line:
+                        total_price = line.product_uom_qty * line.price_unit
+                        if total_price:
+                            discount_amount = total_price - line.price_subtotal
+                            if discount_amount:
+                                final_discount_amount = final_discount_amount + discount_amount
+                            if line.price_unit < 0 and line.product_id.is_discount:
+                                final_discount_amount_line = final_discount_amount_line + line.price_subtotal
+
+
+                invoice.update({
+                    'discount_total': final_discount_amount,
+                    'discount_total_line': final_discount_amount_line,
+                    'total_with_line_discount': invoice.amount_total - final_discount_amount_line,
+                    'all_discounts': abs(final_discount_amount_line) + abs(final_discount_amount),
+                    'total_before_discount': invoice.amount_total + abs(final_discount_amount_line) + abs(
+                        final_discount_amount),
+
+                })
+
+    @api.depends('order_line')
+    def _get_total_product(self):
+        for record in self:
+            record.total_product = 0
+
+            product_list=[]
+            for line in record.order_line:
+                if line.product_id.is_discount  :
+                    continue
+                product_list.append(line.product_id)
+            record.total_product = len(set(product_list))
+
+
+    @api.depends('order_line')
+    def _get_total_quantity(self):
+        for record in self:
+            total_qty = 0
+            total_qty_packet = 0
+            total_qty_carton = 0
+            for line in record.order_line:
+                if line.product_id.is_discount  :
+                    continue
+                total_qty = total_qty + line.product_uom_qty
+                total_qty_packet= total_qty_packet + (line.product_uom_qty if line.product_uom.qty_type=='packet' else 0)
+                total_qty_carton = total_qty_carton + (line.product_uom_qty if line.product_uom.qty_type == 'carton' else 0)
+            record.total_quantity = total_qty
+            record.total_quantity_packet = total_qty_packet
+            record.total_quantity_carton = total_qty_carton
+
+
