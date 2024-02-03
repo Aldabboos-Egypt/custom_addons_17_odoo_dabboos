@@ -18,7 +18,7 @@
                       <page string="Locations Access" name="loaction">
                           <group>
                           <field name="allowed_locations" options="{'no_create': True}"  widget="many2many_tags"/>
-
+                       <field name="is_admin"/>
                           </group>
 
                       </page>
@@ -37,9 +37,7 @@
                      <field name="area"/>
                     <field name="state"/>
                     <field name="description"/>
-                    <field name="lat"/>
-                    <field name="lang"/>
-                    <field name="date"/>
+
                 </field>
             </field>
         </record>

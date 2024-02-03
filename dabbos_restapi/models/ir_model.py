@@ -32,9 +32,6 @@ class Partner(models.Model):
     area = fields.Char(string='Area')
     state = fields.Char(string='State')
     description = fields.Text(string='Description')
-    lat = fields.Char(string='Latitude')
-    lang = fields.Char(string='Longitude')
-    date = fields.Date(string='Date')
 
 
     def create_partner(self, vals):

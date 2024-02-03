@@ -386,10 +386,10 @@ class APIController(http.Controller):
     @http.route('/salesperson/new_customer', methods=["post"], type="http", auth="none", csrf=False)
     def create_customer(self, **post):
 
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "lat", "lang", "date", "user_id"]
+        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization", "user_id"]
 
         params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, lat, lang, date, user_id = (
+        name, mobile, phone, city, state_id, street, comment, partner_latitude, partner_longitude, date_localization, user_id = (
             params.get("name"),
             params.get("mobile"),
             params.get("phone"),
@@ -397,9 +397,9 @@ class APIController(http.Controller):
             params.get("state_id"),
             params.get("street"),
             params.get("comment"),
-            params.get("lat"),
-            params.get("lang"),
-            params.get("date"),
+            params.get("partner_latitude"),
+            params.get("partner_longitude"),
+            params.get("date_localization"),
             params.get("user_id")
 
         )
@@ -408,7 +408,7 @@ class APIController(http.Controller):
                 "missing error", "Name   are missing  ", 403,
             )
 
-        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
         try:
             request.env['res.partner'].sudo().create_partner({
                 'name': name,
@@ -418,9 +418,9 @@ class APIController(http.Controller):
                 'state_id': int(state_id),
                 'street': street,
                 'comment': comment,
-                'lat': lat,
-                'lang': lang,
-                'date': date_obj,
+                'partner_latitude': partner_latitude,
+                'partner_longitude': partner_longitude,
+                'date_localization': date_obj,
                 "user_id": int(user_id)
 
             })
@@ -450,11 +450,11 @@ class APIController(http.Controller):
                 "missing error", "At least one non-empty field is missing", 403,
             )
 
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "lat", "lang", "date", "user_id",
+        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization", "user_id",
                   "customer_id"]
 
         params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, lat, lang, date, user_id, customer_id = (
+        name, mobile, phone, city, state_id, street, comment, partner_latitude, partner_longitude, date_localization, user_id, customer_id = (
             params.get("name"),
             params.get("mobile"),
             params.get("phone"),
@@ -462,14 +462,14 @@ class APIController(http.Controller):
             params.get("state_id"),
             params.get("street"),
             params.get("comment"),
-            params.get("lat"),
-            params.get("lang"),
-            params.get("date"),
+            params.get("partner_latitude"),
+            params.get("partner_longitude"),
+            params.get("date_localization"),
             params.get("user_id"),
             params.get("customer_id")
         )
 
-        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
 
         print(customer_id)
 
@@ -477,7 +477,7 @@ class APIController(http.Controller):
         print(partner)
         if partner:
             # Define the fields that can be updated
-            allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "lat", "lang", "date",
+            allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization",
                               "user_id"]
 
             # Filter the allowed fields based on the provided parameters
@@ -542,21 +542,25 @@ class APIController(http.Controller):
         journal = int(payment_details.get("journal"))
         memo = payment_details.get("memo")
         amount = payment_details.get("amount")
+
+        # print(max(ssssssssssssss))
         if not (invoice_id or journal):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
         invoice_obj=request.env['account.move'].browse(int(invoice_id))
+        # print("fddddddddddddddd")
+        #
+        # if float(amount) >invoice_obj.amount_residual:
+        #     return invalid_response(
+        #         "Amount Is Greater Than Invoice Amount Residual  .",
+        #     )
+        # print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs")
 
-        if float(amount) >invoice_obj.amount_residual:
-            return invalid_response(
-                "Amount Is Greater Than Invoice Amount Residual  .",
-            )
         # payment_journal =request.env['account.journal'].search([('api_payment','=',True)],limit=1)
         # payment_method =request.env['account.payment.method'].search([('api_payment','=',True)],limit=1)
 
         # try:
-
         payment = request.env['account.payment'].create({
             'currency_id': invoice_obj.currency_id.id,
             'amount': amount,

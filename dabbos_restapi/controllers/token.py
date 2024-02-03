@@ -92,6 +92,7 @@ class AccessToken(http.Controller):
                     "username": username,
                     "id": uid,
                     "name": request.env.user.partner_id.name,
+                    "admin": request.env.user.is_admin,
 
                 }
             ),
