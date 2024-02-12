@@ -9,7 +9,7 @@
     "category": "Accounting",
     "summary": "Journal Security Journal Restricted Users Journal Restrictions Restrict Creation Of Journal Restriction for User access on Journal Restriction Access Allowed Journal Account Journal Restriction Journal Base User Access Odoo",
     "description": """This module restricts journals for specific users. You can add access users on journal configuration, only allowed users can access that journal. Users are allocated in specific journals like invoice, bill, cash, bank, sale & purchase, So users can not access a journal where the journal is not available for that user.""",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "depends": [
         "account"
     ],

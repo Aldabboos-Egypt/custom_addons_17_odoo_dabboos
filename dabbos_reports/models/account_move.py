@@ -18,9 +18,10 @@ class UomUom(models.Model):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    driver_id = fields.Many2one(comodel_name='res.partner', string='السائق')
-    invoice_notes = fields.Char(string='ملاحظة دفع الفاتورة')
-    general_notes = fields.Char(string='ملاحظات')
+    driver_id = fields.Many2one(comodel_name='res.partner', string='Driver')
+    # narration = fields.Text(string='ملاحظة دفع الفاتورة')
+    invoice_notes = fields.Char(string='Payment Notes')
+    general_notes = fields.Char(string='Notes')
     total_product = fields.Integer(string='Total Product:',compute='_total_product',help="total Products")
     total_quantity = fields.Integer(string='Total Quantity:',compute='_total_quantity',help="total Quantity")
     total_quantity_packet = fields.Integer(string='Total Quantity Packet:',compute='_total_quantity',help="total Quantity Packet")
@@ -98,10 +99,10 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    fixed_discount = fields.Float( string="خصم", digits="Product Price", default=0.000)
-    discount = fields.Float(string='خصم (%)', digits='Discount', default=0.0, readonly=False)
-    gift = fields.Char(string='الهدايا', )
-    notes = fields.Char(string='الملاحظات', )
+    fixed_discount = fields.Float( string="Fixed Discount", digits="Product Price", default=0.000)
+    discount = fields.Float(string='Discount (%)', digits='Discount', default=0.0, readonly=False)
+    gift = fields.Char(string='Gift', )
+    notes = fields.Char(string='Notes', )
 
     @api.onchange("discount")
     def _onchange_discount(self):
@@ -144,6 +145,33 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
     balance = fields.Float(string='Balance', compute="compute_balance")
 
+    related_user_id = fields.Many2one('res.users',
+                                      string='Related User', readonly=True,
+                                      help='This field contains the related '
+                                           'user of the partner if there is any.')
+    is_have_user = fields.Boolean(string='Have User',
+                                  help='This field helps to check if there is '
+                                       'any user related to the partner.')
+
+    @api.model
+    def get_views(self, views, options=None):
+        """ Super get_views function to write into related user when opening
+        the view.
+            :param views: list of [view_id, view_type]
+            :param dict options: a dict optional boolean flags, set to enable:
+            :return: dictionary with fields_views, fields and optionally filters
+        """
+        res = super().get_views(views, options)
+        res_users = self.env['res.users'].search([])
+        for users in res_users:
+            res_partner = self.search([])
+            for partner in res_partner:
+                if users.partner_id.id == partner.id:
+                    partner.write({
+                        'related_user_id': users,
+                        'is_have_user': True
+                    })
+        return res
     def compute_balance(self):
         for rec in self:
-            rec.balance = rec.debit - rec.credit
+            rec.balance = rec.credit - rec.debit

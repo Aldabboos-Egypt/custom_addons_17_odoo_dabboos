@@ -38,18 +38,14 @@ class ShAccountJournalRestrict(models.Model):
 
     # To apply domain to load menu_________ 1
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, ):
+    def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
         _ = self._context or {}
         if (
             self.env.user.has_group("sh_journal_restrict.group_journal_restrict_feature") and not
             (self.env.user.has_group("base.group_erp_manager"))
         ):
-            args += [
+            domain += [
                 ("user_ids", "in", self.env.user.id),
             ]
-        return super(ShAccountJournalRestrict, self).search(
-            args,
-            offset=offset,
-            limit=limit,
-            order=order,
-        )
+        return super(ShAccountJournalRestrict, self).search_fetch(
+            domain, field_names, offset, limit, order)

@@ -15,6 +15,21 @@
                 <field name="fixed_discount" />
              </xpath>
 
+       <xpath expr="//field[@name='tax_totals']" position="before">
+                    <field name="total_before_discount"/>
+                    <field name="all_discounts"/>
+            </xpath>
+
+<xpath expr="//field[@name='note']" position="after">
+                      <field name="invoice_notes"/>
+                <field name="general_notes"/>
+                <field name="total_product"/>
+                <field name="total_quantity"/>
+                <field name="total_quantity_packet"/>
+                <field name="total_quantity_carton"/>
+
+            </xpath>
+
 
         </field>
     </record>
