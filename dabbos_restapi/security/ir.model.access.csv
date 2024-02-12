@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_api_access_token,access_api_access_token,model_api_access_token,,1,1,1,1
 fetch_data_id,fetch_data,model_fetch_data,,1,1,1,1
+ir_model_id,ir_model,base.model_ir_model,,1,1,1,1
+ir_model_fields_id,ir_model_fields,base.model_ir_model_fields,,1,1,1,1

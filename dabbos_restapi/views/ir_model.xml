@@ -38,7 +38,7 @@
     </record>
 
    <!-- This Menu Item must have a parent and an action -->
-   <menuitem id="fetch_data_api" name="Fetch Data "  action="action_fetch_data" sequence="1"/>
+   <menuitem id="fetch_data_api1" name="Fetch Data " groups="base.group_system" action="action_fetch_data" sequence="1"/>
 
 
 <record id="sale_order_inherit_in_form_view17" model="ir.ui.view">

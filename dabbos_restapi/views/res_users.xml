@@ -28,19 +28,19 @@
 
 
 
-        <record model="ir.ui.view" id="res_partner_form_view_inherited">
-            <field name="name">res.partner.form.inherited</field>
-            <field name="model">res.partner</field>
-            <field name="inherit_id" ref="base.view_partner_form"/>
-            <field name="arch" type="xml">
-                <field name="vat" position="after">
-                     <field name="area"/>
-                    <field name="state"/>
-                    <field name="description"/>
+<!--        <record model="ir.ui.view" id="res_partner_form_view_inherited">-->
+<!--            <field name="name">res.partner.form.inherited</field>-->
+<!--            <field name="model">res.partner</field>-->
+<!--            <field name="inherit_id" ref="base.view_partner_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <field name="vat" position="after">-->
+<!--                     <field name="area"/>-->
+<!--                    <field name="state"/>-->
+<!--                    <field name="description"/>-->
 
-                </field>
-            </field>
-        </record>
+<!--                </field>-->
+<!--            </field>-->
+<!--        </record>-->
 
 
         <record model="ir.ui.view" id="account_journal_form_view_inherited">
