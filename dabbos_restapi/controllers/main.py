@@ -77,7 +77,7 @@ class APIController(http.Controller):
             domain_fields_dict = ast.literal_eval(domain_fields_dict)
             domain_fields_keys = list(domain_fields_dict.keys())
             for rec in range(0, len(domain_fields_keys) - 1):
-                domain += ['|']
+                domain += ['&']
             for key in domain_fields_keys:
                 if type(domain_fields_dict.get(key)) is list:
                     domain += [(key, 'in', domain_fields_dict.get(key))]
@@ -108,7 +108,7 @@ class APIController(http.Controller):
             )
         except AccessError as e:
 
-            return invalid_response("Access error", "Error: %s" % e.name)
+            return invalid_response("Access error", "Error: %s" % e)
 
     @validate_token
     @http.route("/salesperson/get_products_categories", methods=["GET"], type="http", auth="none", csrf=False)
