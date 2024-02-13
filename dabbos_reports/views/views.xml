@@ -9,9 +9,15 @@
             <field name="orientation">Portrait</field>
             <field name="margin_right">0</field>
             <field name="margin_left">0</field>
+<<<<<<< HEAD
+            <field name="margin_top">50</field>
+            <field name="margin_bottom">25</field>
+            <field name="header_spacing">50</field>
+=======
             <field name="margin_top">40</field>
             <field name="margin_bottom">30</field>
             <field name="header_spacing">45</field>
+>>>>>>> fe3bc8804efa48d5443d88d866dafd7ad15dd0e9
             <field name="dpi">90</field>
         </record>
 
