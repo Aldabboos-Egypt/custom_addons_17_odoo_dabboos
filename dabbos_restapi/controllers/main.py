@@ -422,7 +422,7 @@ class APIController(http.Controller):
                 'partner_longitude': partner_longitude,
                 'date_localization': date_obj,
                 "user_id": int(user_id),
-                "sales_persons_ids":  [(4, [int(user_id)])],
+                "sales_persons_ids":  [(4,int(user_id))],
 
 
             })
