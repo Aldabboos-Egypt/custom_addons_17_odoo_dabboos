@@ -644,7 +644,7 @@ class APIController(http.Controller):
     def create_sale_order(self, **kwargs):
             try:
                 # Extract the list of dictionaries from the request body
-                sale_order_lines = json.loads(request.httprequest.data)
+                data = json.loads(request.httprequest.data)
 
 
                 # Ensure that the data is in the correct format
@@ -653,9 +653,9 @@ class APIController(http.Controller):
 
                 # Create the sale order and sale order lines
 
-                data=sale_order_lines.get('sale_order_lines')
+                lines=data.get('sale_order_lines')
                 order_lines=[]
-                for line in data:
+                for line in lines:
                     order_lines.append(
                         (0, 0, {
                             'product_id': line.get('product_id'),
@@ -668,13 +668,22 @@ class APIController(http.Controller):
                             # Add other relevant fields
                         })
                     )
+                global_discount=data.get('global_discount')
+                if global_discount:
+                        order_lines.append(
+                            (0, 0, {
+                                'product_id': global_discount.get('product_id'),
+                                'product_uom_qty': 1,
+                                'price_unit': - global_discount.get('price_unit'),
 
+                            })
+                        )
                 sale_order = request.env['sale.order'].create_order({
-                    'partner_id': sale_order_lines.get('partner_id'),
-                    'user_id': sale_order_lines.get('user_id'),
+                    'partner_id': data.get('partner_id'),
+                    'user_id': data.get('user_id'),
 
-                    'date_order': sale_order_lines.get('date_order'),
-                    'note': sale_order_lines.get('extra_notes'),
+                    'date_order': data.get('date_order'),
+                    'note': data.get('extra_notes'),
                     'order_line': order_lines,
 
                     # Add other relevant fields

@@ -1,0 +1,125 @@
+<odoo>
+    <data>
+
+<!--        <record id="demo_contact_fields" model="fetch.data">-->
+<!--            <field name="model_id" ref="base.model_res_partner"/>-->
+<!--            <field name="field_ids" model="ir.model.fields" search="[ ('name', 'in',-->
+<!--             ['category_id', 'city', 'comment', 'id', 'image_128', 'mobile', 'name', 'phone',-->
+<!--              'property_product_pricelist', 'sales_persons_ids', 'state_id', 'street', 'user_id', 'user_ids'] ),-->
+<!--              ('model_id.model','=','res.partner')-->
+<!--              ]"/>-->
+<!--        </record>-->
+<!--        -->
+
+<!-- res.partner -->
+<record id="demo_res_partner_fields" model="fetch.data">
+    <field name="model_id" ref="base.model_res_partner"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['category_id', 'city', 'comment', 'id', 'image_128', 'mobile', 'name', 'phone',
+        'property_product_pricelist', 'sales_persons_ids', 'state_id', 'street', 'user_id', 'user_ids']),
+        ('model_id.model','=','res.partner')
+        ]"/>
+</record>
+
+<!-- product.category -->
+<record id="demo_product_category_fields" model="fetch.data">
+    <field name="model_id" ref="product.model_product_category"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['child_id', 'id', 'name', 'parent_id']),
+        ('model_id.model','=','product.category')
+        ]"/>
+</record>
+
+<!-- product.template -->
+<record id="demo_product_template_fields" model="fetch.data">
+    <field name="model_id" ref="product.model_product_template"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['id', 'image_128', 'name', 'qty_available', 'type', 'uom_id']),
+        ('model_id.model','=','product.template')
+        ]"/>
+</record>
+
+
+<record id="demo_product_product_fields" model="fetch.data">
+    <field name="model_id" ref="product.model_product_product"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['id', 'image_128', 'name', 'qty_available', 'type', 'uom_id', 'uom_name']),
+        ('model_id.model','=','product.product')
+        ]"/>
+</record>
+
+<!-- sale.order -->
+<record id="demo_sale_order_fields" model="fetch.data">
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['activity_state', 'amount_total', 'currency_id', 'date_order', 'display_name', 'id', 'invoice_ids', 'invoice_status', 'order_line', 'partner_id', 'state']),
+        ('model_id.model','=','sale.order')
+        ]"/>
+</record>
+
+<!-- product.pricelist -->
+<record id="demo_product_pricelist_fields" model="fetch.data">
+    <field name="model_id" ref="product.model_product_pricelist"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['activity_exception_decoration', 'currency_id', 'display_name']),
+        ('model_id.model','=','product.pricelist')
+        ]"/>
+</record>
+
+<!-- account.journal -->
+<record id="demo_account_journal_fields" model="fetch.data">
+    <field name="model_id" ref="account.model_account_journal"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['display_name', 'user_ids']),
+        ('model_id.model','=','account.journal')
+        ]"/>
+</record>
+
+<!-- account.move -->
+<record id="demo_account_move_fields" model="fetch.data">
+    <field name="model_id" ref="account.model_account_move"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['amount_residual', 'amount_total', 'create_date', 'currency_id', 'date', 'display_name', 'invoice_date_due', 'invoice_line_ids', 'invoice_user_id', 'partner_id', 'payment_state', 'state']),
+        ('model_id.model','=','account.move')
+        ]"/>
+</record>
+
+<!-- res.country.state -->
+<record id="demo_res_country_state_fields" model="fetch.data">
+    <field name="model_id" ref="base.model_res_country_state"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['display_name', 'id']),
+        ('model_id.model','=','res.country.state')
+        ]"/>
+</record>
+
+<!-- sale.order.line -->
+<record id="demo_sale_order_line_fields" model="fetch.data">
+    <field name="model_id" ref="sale.model_sale_order_line"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['discount', 'display_name', 'price_subtotal', 'price_total', 'price_unit', 'product_uom', 'product_uom_qty']),
+        ('model_id.model','=','sale.order.line')
+        ]"/>
+</record>
+
+<!-- account.move.line -->
+<record id="demo_account_move_line_fields" model="fetch.data">
+    <field name="model_id" ref="account.model_account_move_line"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['discount', 'display_name', 'id', 'price_total', 'price_unit', 'product_uom_id', 'quantity']),
+        ('model_id.model','=','account.move.line')
+        ]"/>
+</record>
+
+<!-- res.users -->
+<record id="demo_res_users_fields" model="fetch.data">
+    <field name="model_id" ref="base.model_res_users"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
+        ['name']),
+        ('model_id.model','=','res.users')
+        ]"/>
+</record>
+
+    </data>
+</odoo>
+
