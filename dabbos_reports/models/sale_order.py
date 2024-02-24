@@ -6,6 +6,8 @@ from odoo.fields import Command
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
+    gift = fields.Char(string='Gift', )
+    notes = fields.Char(string='Notes', )
 
     fixed_discount = fields.Float(string="Fixed Discount ", digits="Product Price")
 
@@ -48,8 +50,10 @@ class SaleOrderLine(models.Model):
             'quantity': self.qty_to_invoice,
             'discount': self.discount,
             'fixed_discount': self.fixed_discount,
+            'gift': self.gift,
+            'notes': self.notes,
 
-            'price_unit': self.price_unit,
+        'price_unit': self.price_unit,
             'tax_ids': [Command.set(self.tax_id.ids)],
             'sale_line_ids': [Command.link(self.id)],
             'is_downpayment': self.is_downpayment,
@@ -73,6 +77,7 @@ class SaleOrderLine(models.Model):
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+    driver_id = fields.Many2one(comodel_name='res.partner', string='Driver')
 
     invoice_notes = fields.Char(string='Payment Notes')
     general_notes = fields.Char(string='Notes')
