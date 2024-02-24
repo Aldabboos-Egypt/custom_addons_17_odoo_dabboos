@@ -1,4 +1,6 @@
 # Part of odoo. See LICENSE file for full copyright and licensing details.
+import json
+
 from odoo import api, models, fields,SUPERUSER_ID
 
 from odoo import api, fields, models
@@ -59,6 +61,12 @@ class AccountPaymentMethod(models.Model):
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+
+
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        required=True, index=True,
+        default=lambda self: self.env.user.company_id)
 
     extra_notes= fields.Char(
         string='Notes',

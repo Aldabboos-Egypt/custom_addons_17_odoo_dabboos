@@ -8,27 +8,27 @@
         <field name="inherit_id" ref="sale.view_order_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/form//label[@for='discount']" position="before">
-                <field name="fixed_discount" />
-             </xpath>
+                <field name="fixed_discount"/>
+            </xpath>
 
             <xpath expr="//field[@name='order_line']/tree/field[@name='discount']" position="before">
-                <field name="fixed_discount" />
-             </xpath>
-                  <xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
+                <field name="fixed_discount"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
                 <field name="gift"/>
                 <field name="notes"/>
             </xpath>
 
 
-       <xpath expr="//field[@name='tax_totals']" position="before">
-                    <field name="total_before_discount"/>
-                    <field name="all_discounts"/>
+            <xpath expr="//field[@name='tax_totals']" position="before">
+                <field name="total_before_discount"/>
+                <field name="all_discounts"/>
             </xpath>
 
-<xpath expr="//field[@name='note']" position="after">
+            <xpath expr="//field[@name='note']" position="after">
 
-                      <field name="driver_id"/>
-                      <field name="invoice_notes"/>
+                <field name="driver_id"/>
+                <field name="invoice_notes"/>
                 <field name="general_notes"/>
                 <field name="total_product"/>
                 <field name="total_quantity"/>
