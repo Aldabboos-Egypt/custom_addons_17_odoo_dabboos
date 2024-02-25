@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+  <data>
+    <record model="ir.ui.view" id="dusal_purchase_order_form_view">
+      <field name="name">dusal.purchase.order.form</field>
+      <field name="model">purchase.order</field>
+      <field name="inherit_id" ref="purchase.purchase_order_form"/>
+      <field name="arch" type="xml">
+        <data>
+          <xpath expr="//sheet/group/group" position="after">
+            <group>
+              <field name="print_line_number"/>
+              <field name="print_image"/>
+              <field name="image_size"/>
+            </group>
+          </xpath>
+          <xpath expr="//sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']" position="after">
+            <field name="product_image_small" readonly="1" widget="image" style="max-width: 80px; max-height: 80px;"/>
+            <!-- <field name="product_image" style="max-width: 80px; max-height: 80px;" widget="image"/> -->
+          </xpath>
+        </data>
+      </field>
+    </record>
+  </data>
+</openerp>
