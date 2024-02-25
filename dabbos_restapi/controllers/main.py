@@ -684,7 +684,6 @@ class APIController(http.Controller):
 
                     'date_order': data.get('date_order'),
                     'note': data.get('extra_notes'),
-                    'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
                     'order_line': order_lines,
 
                     # Add other relevant fields
