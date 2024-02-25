@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Matter Type Tree view -->
+    <record id="sh_law_erp_matter_category_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.category.tree</field>
+        <field name="model">sh.law.matter.category</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Matter Type Action -->
+    <record id="sh_law_erp_matter_category_action" model="ir.actions.act_window">
+        <field name="name">Matter Category</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.matter.category</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="sh_law_erp_matter_category_menu" action="sh_law_erp_matter_category_action" name="Matters Category" parent="sh_law_erp_matter_sub_menu" sequence="82" />
+</odoo>

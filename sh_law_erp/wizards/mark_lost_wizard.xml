@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Mark Lost Reason Wizard From View -->
+    <record id="sh_law_matter_mark_lost_reason_wizard" model="ir.ui.view">
+        <field name="name">sh.law.matter.mark.lost.reason.wizard</field>
+        <field name="model">sh.law.matter.mark.lost.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reason">
+                <group>
+                    <field name="mark_lost" />
+                </group>
+                <footer>
+                    <button name="reason_submit" string="Submit" type="object" class="btn-primary" />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Law Mark Lost Reason Wizard Action -->
+    <record id="sh_law_matter_mark_lost_reason_wizard_action" model="ir.actions.act_window">
+        <field name="name">Mark Lost Reason</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.matter.mark.lost.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sh_law_matter_mark_lost_reason_wizard" />
+        <field name="target">new</field>
+    </record>
+</odoo>

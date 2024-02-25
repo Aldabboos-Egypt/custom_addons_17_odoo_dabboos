@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Trial Tree View -->
+    <record id="sh_law_erp_trial_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.trial.tree</field>
+        <field name="model">sh.law.erp.trial</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="partner_id" />
+                <field name="trial_date" />
+                <field name="judge_id" />
+                <field name="matter" />
+                <field name="court_name_id" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Erp Trial Form View -->
+    <record id="sh_law_erp_trial_form_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.trial.form</field>
+        <field name="model">sh.law.erp.trial</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" />
+                    <button name="trial_close" string="Close" type="object" class="btn-primary" attrs="{'invisible': [('state', '=', 'close')]}"></button>
+                    <button name="trial_open" string="Reopen" type="object" class="btn-primary" attrs="{'invisible': [('state', '=', 'draft')]}"></button>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button groups="account.group_account_invoice" name="action_view_invoices" class="oe_stat_button" type="object" icon="fa-pencil-square-o">
+                            <field name="invoice_count" string="Invoice" widget="statinfo" />
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="partner_id" />
+                            <field name="trial_date" />
+                            <field name="close_date" attrs="{'invisible': [('close_date', '=', False)]}" />
+                            <field name="judge_id" />
+                        </group>
+                        <group>
+                            <field name="matter" />
+                            <field name="court_name_id" />
+                            <field name="invoice_id" domain="[('partner_id','=',partner_id)]" invisible="1" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="trial_detail" string="Description">
+                            <tree>
+                                <field name="description" placeholder="Description..." />
+                            </tree>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Law Erp Trial Search View -->
+    <record id="sh_law_erp_trial_search_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.trial.search</field>
+        <field name="model">sh.law.erp.trial</field>
+        <field name="arch" type="xml">
+            <search>
+                <field
+                    name="name"
+                    filter_domain="['|','|','|','|','|',('name', 'ilike', self),('partner_id', 'ilike', self),('judge_id', 'ilike', self),('matter', 'ilike', self),('court_name_id', 'ilike', self),('invoice_id', 'ilike', self)]"
+                />
+                <field name="partner_id" filter_domain="[('partner_id', 'ilike', self)]" />
+                <field name="judge_id" filter_domain="[('judge_id', 'ilike', self)]" />
+                <field name="matter" filter_domain="[('matter', 'ilike', self)]" />
+                <field name="court_name_id" filter_domain="[('court_name_id', 'ilike', self)]" />
+                <field name="invoice_id" filter_domain="[('invoice_id', 'ilike', self)]" />
+                <group expand="0" string="Group By">
+                    <filter string="Judges" name="judge_id" context="{'group_by':'judge_id'}" />
+                </group>
+                <group expand="0" string="Group By">
+                    <filter string="Matters" name="matter" context="{'group_by':'matter'}" />
+                </group>
+                <group expand="0" string="Group By">
+                    <filter string="Courts" name="court_name_id" context="{'group_by':'court_name_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Erp Trial Action -->
+    <record id="sh_law_erp_trial_action" model="ir.actions.act_window">
+        <field name="name">Trials</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.trial</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="sh_law_erp_trial_menu" action="sh_law_erp_trial_action" parent="sh_law_client_request_main_menu" name="Trials" />
+</odoo>

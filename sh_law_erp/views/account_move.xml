@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Account Move -->
+    <record id="sh_law_matter_account_move_form" model="ir.ui.view">
+        <field name="name">sh.law.matter.account.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="matter_id" />
+                <field name="trial_ids" widget="many2many_tags" attrs="{'invisible' : [('payment_by','!=','trial')]}" />
+                <field name="lawyer" />
+                <field name="payment_by" />
+                <field name="hours" attrs="{'invisible' : [('payment_by','!=','hour')]}" readonly="1" />
+                <field name="to_price_unit" readonly="1" />
+            </xpath>
+        </field>
+    </record>
+</odoo>

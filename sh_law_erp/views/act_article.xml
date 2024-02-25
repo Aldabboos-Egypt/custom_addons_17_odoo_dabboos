@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Act Article Tree view -->
+    <record id="sh_law_erp_act_article_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.act.article.tree</field>
+        <field name="model">sh.law.erp.act.article</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="act_article_name" />
+                <field name="act_article_no" />
+                <field name="act_article_type" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Erp Act Article Form view -->
+    <record id="sh_law_erp_act_article_form_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.act.article.Form</field>
+        <field name="model">sh.law.erp.act.article</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="act_article_name" />
+                            <field name="act_article_type" />
+                        </group>
+                        <group>
+                            <field name="act_article_no" />
+                        </group>
+                    </group>
+
+                    <label for="act_article_description" string="Description" />
+                    <field name="act_article_description" />
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--Law Erp Act Article Search view -->
+    <record id="sh_law_erp_act_article_tree_search" model="ir.ui.view">
+        <field name="name">sh.law.erp.act.article.search</field>
+        <field name="model">sh.law.erp.act.article</field>
+        <field name="arch" type="xml">
+            <search string="Search Act Article">
+                <field name="act_article_name" filter_domain="['|','|', ('act_article_name', 'ilike', self), ('act_article_no', 'ilike', self), ('act_article_type', 'ilike', self)]" />
+                <field name="act_article_no" filter_domain="[('act_article_no', 'ilike', self)]" />
+                <field name="act_article_type" filter_domain="[('act_article_type', 'ilike', self)]" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Erp Act Article action -->
+    <record id="sh_law_erp_act_article_action" model="ir.actions.act_window">
+        <field name="name">Acts/Articles</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.act.article</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="sh_law_erp_act_article_menu" action="sh_law_erp_act_article_action" name="Acts/Articles" parent="sh_law_erp_config_manu" />
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Favor Tree view -->
+    <record id="sh_law_erp_favor_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.favor.tree</field>
+        <field name="model">sh.law.erp.favor</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Erp favor action -->
+    <record id="sh_law_erp_favor_action" model="ir.actions.act_window">
+        <field name="name">Favors</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.favor</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="sh_law_erp_favor_menu" action="sh_law_erp_favor_action" name="Favor" parent="sh_law_erp_config_manu" />
+</odoo>

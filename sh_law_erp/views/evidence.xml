@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Evidence Tree view -->
+    <record id="sh_law_erp_evidence_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.evidence.tree</field>
+        <field name="model">sh.law.erp.evidence</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="favor" />
+                <field name="client" />
+                <field name="matter_id" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Erp Evidence Form view -->
+    <record id="sh_law_erp_evidence_form_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.evidence.form</field>
+        <field name="model">sh.law.erp.evidence</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="favor" />
+                            <field name="client" />
+                        </group>
+                        <group>
+                            <field name="matter_id" />
+                            <field name="attach_file" widget="many2many_binary" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="evidence_detail" string="Description">
+                            <tree>
+                                <field name="description" placeholder="Description..." />
+                            </tree>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Law Evidence Search view -->
+    <record id="sh_law_Evidence_search_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.evidence.search</field>
+        <field name="model">sh.law.erp.evidence</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|','|',('name', 'ilike', self),('favor', 'ilike', self),('client', 'ilike', self)]" />
+                <field name="favor" filter_domain="[('favor', 'ilike', self)]" />
+                <field name="client" filter_domain="[('client', 'ilike', self)]" />
+                <group expand="0" string="Group By">
+                    <filter string="Matter" name="matter_id" context="{'group_by':'matter_id'}" />
+                </group>
+                <group expand="0" string="Group By">
+                    <filter string="In Favor" name="favor" context="{'group_by':'favor'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Erp Evidence action -->
+    <record id="sh_law_erp_evidence_action" model="ir.actions.act_window">
+        <field name="name">Evidence</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.evidence</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="sh_law_erp_evidence_menu" action="sh_law_erp_evidence_action" parent="sh_law_client_request_main_menu" name="Documents" />
+</odoo>

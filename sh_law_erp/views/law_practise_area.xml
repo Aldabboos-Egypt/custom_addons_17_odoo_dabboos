@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Practise Area Tree view -->
+    <record id="sh_law_erp_practise_area_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.practise.area.tree</field>
+        <field name="model">sh.law.practise.area</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Practise Area Action -->
+    <record id="sh_law_erp_practise_area_action" model="ir.actions.act_window">
+        <field name="name">Practise Area</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.practise.area</field>
+        <field name="view_mode">tree</field>
+    </record>
+</odoo>

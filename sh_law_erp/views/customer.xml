@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Partner form view -->
+    <record id="sh_law_erp_inherit_res_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="matter_btn" class="oe_stat_button" type="object" icon="fa-bars">
+                    <field name="matter_count" string="Matter" widget="statinfo"/>
+                </button>
+                <button name="client_btn" class="oe_stat_button" type="object" icon="fa-list-alt">
+                    <field name="client_count" string="Client Request" widget="statinfo"/>
+                </button>
+                <button name="evidence_btn" class="oe_stat_button" type="object" icon="fa-bars">
+                    <field name="evidence_count" string="Documents" widget="statinfo"/>
+                </button>
+                <button name="trial_btn" class="oe_stat_button" type="object" icon="fa-list-ul">
+                    <field name="trial_count" string="Trial" widget="statinfo"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="capt"/>
+                <field name="trm"/>
+                <field name="ei"/>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="bn"/>
+                <field name="ca"/>
+                <field name="b_n"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

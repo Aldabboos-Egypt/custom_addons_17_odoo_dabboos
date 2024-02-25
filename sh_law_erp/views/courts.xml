@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Court Tree view -->
+    <record id="sh_law_erp_court_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.court.tree</field>
+        <field name="model">sh.law.erp.courts</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Erp Court action -->
+    <record id="sh_law_erp_court_action" model="ir.actions.act_window">
+        <field name="name">Courts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.courts</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="sh_law_erp_court_menu" action="sh_law_erp_court_action" name="Courts" parent="sh_law_erp_config_manu" />
+</odoo>

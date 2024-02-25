@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hr Employee form view -->
+    <record id="sh_law_erp_hr_employee_form" model="ir.ui.view">
+        <field name="name">sh.hr.employee.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='hr_settings']" position="after">
+                <page string="Lawyer" name="sh_hr_lawyer" groups="sh_law_erp.group_sh_law_erp_user,sh_law_erp.group_sh_law_erp_manager">
+                    <sheet>
+                        <form>
+                            <group>
+                                <group>
+                                    <field name="is_lawyer" />
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Wages">
+                                    <field name="wage_per_trial" widget="monetary" options="{'wage_per_trial': 'currency_id'}" />
+                                    <field name="wage_per_case" widget="monetary" options="{'wage_per_case': 'currency_id'}" />
+                                    <field name="wage_per_hour" widget="monetary" options="{'wage_per_hour': 'currency_id'}" />
+                                    <field name="currency_id" invisible="True" />
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Practise Area">
+                                    <field name="practise_area" widget="many2many_tags" />
+                                </group>
+                            </group>
+                        </form>
+                    </sheet>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

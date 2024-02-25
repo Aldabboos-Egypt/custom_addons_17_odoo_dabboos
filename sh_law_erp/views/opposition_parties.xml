@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Opposition Parties Tree view -->
+    <record id="sh_law_erp_opposition_parties_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.opposition.parties.tree</field>
+        <field name="model">sh.law.erp.opposition.parties</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="party_id" />
+                <field name="contact" />
+            </tree>
+        </field>
+    </record>
+
+    <!--Law Erp Opposition Parties Search view -->
+    <record id="sh_law_erp_opposition_parties_tree_search" model="ir.ui.view">
+        <field name="name">sh.law.erp.opposition.parties.search</field>
+        <field name="model">sh.law.erp.opposition.parties</field>
+        <field name="arch" type="xml">
+            <search string="Search Opposition Parties">
+                <field name="party_id" filter_domain="['|', ('party_id', 'ilike', self), ('contact', 'ilike', self)]" />
+                <field name="contact" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Erp Opposition Parties action -->
+    <record id="sh_law_erp_opposition_parties_action" model="ir.actions.act_window">
+        <field name="name">Parties</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.opposition.parties</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="sh_law_erp_opposition_parties_menu" action="sh_law_erp_opposition_parties_action" name="Parties" parent="sh_law_erp_opposition_menu" sequence="101" />
+</odoo>

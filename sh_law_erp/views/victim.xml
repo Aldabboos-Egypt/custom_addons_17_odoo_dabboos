@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Erp Victim Tree view -->
+    <record id="sh_law_erp_victim_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.erp.victim.tree</field>
+        <field name="model">sh.law.erp.victim</field>
+        <field name="arch" type="xml">
+            <tree editable="top">
+                <field name="name" />
+                <field name="contact" />
+            </tree>
+        </field>
+    </record>
+
+    <!--Law Erp Victim Search view -->
+    <record id="sh_law_erp_victim_tree_search" model="ir.ui.view">
+        <field name="name">sh.law.erp.victim.search</field>
+        <field name="model">sh.law.erp.victim</field>
+        <field name="arch" type="xml">
+            <search string="Search Victim">
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('contact', 'ilike', self)]" />
+                <field name="contact" />
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Erp Victim action -->
+    <record id="sh_law_erp_victim_action" model="ir.actions.act_window">
+        <field name="name">Victims</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.erp.victim</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="sh_law_erp_victim_menu" action="sh_law_erp_victim_action" name="Victims" parent="sh_law_erp_config_manu" />
+</odoo>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Client Request Tree view -->
+    <record id="sh_law_client_request_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.client.request.tree</field>
+        <field name="model">sh.law.client.request</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="phone" optional="show" />
+                <field name="email" optional="show" />
+                <field name="city" optional="hide" />
+                <field name="state_id" optional="hide" />
+                <field name="country_id" optional="hide" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Client Request Form view -->
+    <record id="sh_law_client_request_form_viewhr_employee_public_view_search" model="ir.ui.view">
+        <field name="name">sh.law.client.request.form</field>
+        <field name="model">sh.law.client.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" />
+                    <button name="action_approve" string="Approve" type="object" class="btn-primary" attrs="{'invisible': [('state', '=', 'approve')]}"></button>
+                    <button name="%(sh_law_erp.sh_law_client_request_reject_wizard_action)d" string="Reject" type="action" class="btn-primary" attrs="{'invisible': [('state', '=', 'reject')]}"></button>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="phone" widget="phone" />
+                            <field name="mobile" widget="phone" />
+                            <br />
+                            <field name="email" widget="email" />
+                            <field name="website" widget="website" />
+                            <field name="identity" widget="identity" />
+                            <field name="reject_reason" attrs="{'invisible': [('reject_reason', '=', False)]}" />
+                        </group>
+                        <group>
+                            <label for="street" string="Address" />
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street..." class="o_address_street" />
+                                <field name="street2" placeholder="Street 2..." class="o_address_street" />
+                                <field name="city" placeholder="City" class="o_address_city" />
+                                <field name="state_id" class="o_address_state" placeholder="State" />
+                                <field name="zip" placeholder="ZIP" class="o_address_zip" />
+                                <field name="country_id" placeholder="Country" class="o_address_country" />
+                            </div>
+                            <field name="related_partner_id" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="client_matter_detail" string="Client Matter Details">
+                            <group>
+                                <field name="matter_id" editable="top" />
+                                <field name="discription_matter" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Law Client Request Search view -->
+    <record id="sh_law_client_request_search_view" model="ir.ui.view">
+        <field name="name">sh.law.client.request.search</field>
+        <field name="model">sh.law.client.request</field>
+        <field name="arch" type="xml">
+            <search string="Search Partner">
+                <field name="name" filter_domain="['|','|','|',('name', 'ilike', self),('email', 'ilike', self),('phone', 'ilike', self),('mobile', 'ilike', self)]" />
+                <field name="email" filter_domain="[('email', 'ilike', self)]" />
+                <field name="phone" filter_domain="['|', ('phone', 'ilike', self), ('mobile', '=', self)]" />
+                <field name="city" />
+                <field name="state_id" />
+                <field name="country_id" />
+                <group expand="0" string="Group By">
+                    <filter string="City" name="city" context="{'group_by':'city'}" />
+                </group>
+                <group expand="0" string="Group By">
+                    <filter string="State" name="state_id" context="{'group_by':'state_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Client Request Action -->
+    <record id="sh_law_client_request_action" model="ir.actions.act_window">
+        <field name="name">Client Request</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.client.request</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Lawyer kanban view -->
+
+    <record id="sh_law_erp_open_view_employee_list" model="ir.actions.act_window">
+        <field name="name">Lawyers</field>
+        <field name="res_model">hr.employee.public</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('is_lawyer','=',True)]</field>
+
+        <field name="context">{}</field>
+        <field name="view_id" eval="False" />
+        <field name="search_view_id" ref="hr.hr_employee_public_view_search" />
+
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new lawyer
+            </p>
+            <p>
+                With just a quick glance on the  lawyer screen, you can easily find all the information you need for each person; contact data, job position, availability, etc.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="sh_law_erp_main_manu" action="sh_law_client_request_action" name="Law Firm" />
+    <menuitem id="sh_law_erp_config_manu" parent="sh_law_erp_main_manu" name="Configuration" groups="sh_law_erp.group_sh_law_erp_manager" />
+    <menuitem id="sh_law_erp_practise_manu" action="sh_law_erp_practise_area_action" parent="sh_law_erp_config_manu" name="Law Practise Area" />
+
+    <menuitem id="sh_law_client_request_main_menu" action="sh_law_client_request_action" sequence="1" parent="sh_law_erp_main_manu" name="Law Firm Management" />
+    <menuitem id="sh_law_client_request_sub_menu" action="sh_law_client_request_action" parent="sh_law_client_request_main_menu" name="Client Request" />
+    <menuitem id="sh_law_client_request_customer_menu" action="base.action_partner_customer_form" parent="sh_law_client_request_main_menu" name="Customers" />
+
+    <menuitem id="sh_law_client_request_lawyer_menu" action="sh_law_erp_open_view_employee_list" parent="sh_law_client_request_main_menu" name="Lawyers" />
+</odoo>

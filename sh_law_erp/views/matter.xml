@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Law Matter Form view -->
+    <record id="sh_law_matter_form_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.form</field>
+        <field name="model">sh.law.matter</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" />
+                    <button name="won_btn" string="Won" type="object" class="btn-primary" attrs="{'invisible': ['|','|',('state','=', 'draft'),('state','=', 'approve'),('state','=', 'done')]}" />
+                    <button name="in_progress_btn" string="In Progress" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('state','=', 'draft'),('state','=', 'progress'),('state','=', 'done'),('state','=', 'lost')]}" />
+                    <button name="apprpved_btn" string="Approved" type="object" class="btn-primary" attrs="{'invisible': ['|','|','|',('state','=', 'progress'),('state','=', 'approve'),('state','=', 'done'),('state','=', 'lost')]}" />
+                    <button name="%(sh_law_erp.sh_law_matter_mark_lost_reason_wizard_action)d" string="Mark as Lost" type="action" class="btn-primary" attrs="{'invisible': ['|',('state','=', 'draft'),('state','=', 'approve')]}" />
+                    <button name="add_evidence_btn" string="Add Evidence" type="object" class="btn-primary" />
+                    <button name="add_trial_btn" string="Add Trial" type="object" class="btn-primary" />
+                    <button name="%(sh_law_erp.sh_law_matter_invoice_wizard_action)d" string="Create Invoice" type="action" class="btn-primary" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="evidence_btn" class="oe_stat_button" type="object" icon="fa-search-plus">
+                            <field name="evidence_count" string="Evidence" widget="statinfo" />
+                        </button>
+
+                        <button name="trial_btn" class="oe_stat_button" type="object" icon="fa-gavel">
+                            <field name="trial_count" string="Trial" widget="statinfo" />
+                        </button>
+
+                        
+                        <button name="invoice_btn" class="oe_stat_button" type="object" icon="fa-pencil-square-o">
+                            <field name="invoice_count" string="Invoice" widget="statinfo" />
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name" />
+                            <field name="client_id" />
+                            <field name="judge_id" />
+                            <field name="corp_id" />
+                            <field name="open_date" />
+                            <field name="close_date" />
+                            <field name="payment_by" />
+                            <field name="mark_lost" attrs="{'invisible': [('mark_lost', '=', False)]}" />
+                        </group>
+                        <group>
+                            <field name="lawyer" domain="[('is_lawyer','=',True)]" />
+                            <field name="matter_type_id" />
+                            <field name="matter_category_id" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="matter_description" string="Description">
+                            <group>
+                                <field name="discription" />
+                            </group>
+                        </page>
+                        <page name="opposition" string="Opposition">
+                            <field name="oposition_line">
+                                <tree editable="bottom">
+                                    <field name="party_name_id" required="True" />
+                                    <field name="party_contact" />
+                                    <field name="Lawyer_name_id" />
+                                    <field name="lawyer_contact" />
+                                    <field name="matter_id" invisible="True" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page name="act_article" string="Act and Articles">
+                            <field name="act_article" />
+                        </page>
+                        <page name="victim" string="Victim">
+                            <field name="victim" />
+                        </page>
+                        <page name="evidence" string="Evidence">
+                            <field name="evidence_line" context="{'default_client':client_id,'default_matter_id':active_id}">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="favor" />
+                                    <field name="client" />
+                                    <field name="matter_id" invisible="True" />
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="name" />
+                                                <field name="favor" />
+                                                <field name="client" />
+                                            </group>
+                                            <group>
+                                                <field name="attach_file" widget="many2many_binary" />
+                                            </group>
+                                        </group>
+                                        <notebook>
+                                            <page name="evidence_detail" string="Description">
+                                                <tree>
+                                                    <field name="description" placeholder="Description..." />
+                                                </tree>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page name="trial" string="Trials">
+                            <field name="trial_line" context="{'default_partner_id':client_id,'default_matter':active_id,'default_judge_id':judge_id}">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="partner_id" />
+                                    <field name="trial_date" />
+                                    <field name="judge_id" />
+                                    <field name="matter" invisible="True" />
+                                    <field name="court_name_id" />
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <div class="oe_button_box" name="button_box">
+                                            <button name="action_view_invoices" class="oe_stat_button" type="object" icon="fa-pencil-square-o">
+                                                <field name="invoice_count" string="Invoice" widget="statinfo" />
+                                            </button>
+                                        </div>
+                                        <group>
+                                            <group>
+                                                <field name="name" />
+                                                <field name="partner_id" />
+                                                <field name="trial_date" />
+
+                                                <field name="close_date" attrs="{'invisible': [('close_date', '=', False)]}" />
+                                                <field name="judge_id" />
+                                            </group>
+                                            <group>
+                                                <field name="court_name_id" />
+                                                <field name="invoice_id" domain="[('partner_id','=',partner_id)]" invisible="True" />
+                                            </group>
+                                        </group>
+                                        <notebook>
+                                            <page name="trial_detail" string="Description">
+                                                <field name="description" placeholder="Description..." />
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="activity_ids" widget="mail_activity" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Law Matter Tree view -->
+    <record id="sh_law_Matter_tree_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.tree</field>
+        <field name="model">sh.law.matter</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="client_id" />
+                <field name="lawyer" />
+                <field name="matter_type_id" />
+                <field name="matter_category_id" />
+                <field name="open_date" />
+                <field name="close_date" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Law Matter Search view -->
+    <record id="sh_law_Matter_search_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.search</field>
+        <field name="model">sh.law.matter</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|','|','|','|',('name', 'ilike', self),('client_id', 'ilike', self),('lawyer', 'ilike', self),('matter_type_id', 'ilike', self),('matter_category_id', 'ilike', self)]" />
+                <field name="client_id" filter_domain="[('client_id', 'ilike', self)]" />
+                <field name="lawyer" filter_domain="[('lawyer', 'ilike', self)]" />
+                <field name="matter_type_id" filter_domain="[('matter_type_id', 'ilike', self)]" />
+                <field name="matter_category_id" filter_domain="[('matter_category_id', 'ilike', self)]" />
+                <group expand="0" string="Group By">
+                    <filter string="Matters" name="name" context="{'group_by':'name'}" />
+                </group>
+                <group expand="0" string="Group By">
+                    <filter string="Lawyers" name="lawyer" context="{'group_by':'lawyer'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Law Matter Pivot View -->
+    <record id="sh_law_Matter_pivot_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.pivot</field>
+        <field name="model">sh.law.matter</field>
+        <field name="arch" type="xml">
+            <pivot>
+                <field name="state" widget="statusbar" type="col" />
+                <field name="name" type="row" />
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Law Matter Graph View -->
+    <record id="sh_law_Matter_graph_view" model="ir.ui.view">
+        <field name="name">sh.law.matter.graph</field>
+        <field name="model">sh.law.matter</field>
+        <field name="arch" type="xml">
+            <graph>
+                <field name="client_id" />
+            </graph>
+        </field>
+    </record>
+
+    <!-- Law Matter Action -->
+    <record id="sh_law_erp_matter_action" model="ir.actions.act_window">
+        <field name="name">Matter</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.matter</field>
+        <field name="view_mode">tree,form,pivot,graph</field>
+    </record>
+
+    <menuitem id="sh_law_erp_matter_menu" action="sh_law_erp_matter_action" parent="sh_law_client_request_main_menu" name="Matters" />
+</odoo>

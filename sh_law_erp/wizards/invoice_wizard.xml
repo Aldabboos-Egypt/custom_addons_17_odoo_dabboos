@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Invoice Wizard From View -->
+    <record id="sh_law_matter_invoice_wizard" model="ir.ui.view">
+        <field name="name">sh.law.matter.invoice.wizard.wizard</field>
+        <field name="model">sh.law.matter.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Invoice">
+                <group>
+                    <group>
+                        <field name="client_id" />
+                        <field name="matter_id" />
+                        <field name="lawyer_id" />
+                        <field name="invoice_date" />
+                        <field name="payment_term_id" widget="selection" />
+                    </group>
+                    <group>
+                        <field name="payment_by" />
+                        <field name="hours" attrs="{'invisible' : [('payment_by','!=','hour')]}" />
+                        <field name="invoice_amt" widget="monetary" />
+                        <field name="total_invoice_amount" widget="monetary" readonly="1" />
+                        <field name="currency_id" invisible="True" />
+                    </group>
+
+                    <label string="Trials" for="trials_ids" attrs="{'invisible' : [('payment_by','!=','trial')]}" />
+                    <field name="trials_ids" attrs="{'invisible' : [('payment_by','!=','trial')]}" domain="[('matter','=', matter_id )]" options="{'no_create': True}" />
+                </group>
+                <footer>
+                    <button name="create_invoice" string="Create Invoice" type="object" class="btn-primary" />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Invoice Wizard Action -->
+    <record id="sh_law_matter_invoice_wizard_action" model="ir.actions.act_window">
+        <field name="name">Create Invoice</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sh.law.matter.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sh_law_matter_invoice_wizard" />
+        <field name="target">new</field>
+    </record>
+</odoo>
