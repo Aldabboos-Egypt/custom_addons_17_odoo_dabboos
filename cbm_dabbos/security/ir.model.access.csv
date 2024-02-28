@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cpn_dabbos_cpn_dabbos,cpn_dabbos.cpn_dabbos,model_cpn_dabbos_cpn_dabbos,base.group_user,1,1,1,1
