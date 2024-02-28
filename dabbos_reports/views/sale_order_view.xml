@@ -18,24 +18,41 @@
                 <field name="gift"/>
                 <field name="notes"/>
             </xpath>
+   <xpath expr="//field[@name='note']" position="replace">
+                   <field name="note" placeholder="Payment Notes" colspan="2" nolabel="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='tax_totals']" position="replace">
 
 
-            <xpath expr="//field[@name='tax_totals']" position="before">
-                <field name="total_before_discount"/>
-                <field name="all_discounts"/>
+
+<!--                        <field name="total_before_discount" style="align:ltr"/>-->
+                     <field name="total_before_discount" style="color: green; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+                     <field name="all_discounts" style="color: #e67e22; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+                     <field name="amount_total" style="color: green; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+
+
+
+                <!--                <field name="tax_totals"/>-->
             </xpath>
 
             <xpath expr="//field[@name='note']" position="after">
 
-                <field name="driver_id"/>
-                <field name="invoice_notes"/>
-                <field name="general_notes"/>
-                <field name="total_product"/>
-                <field name="total_quantity"/>
-                <field name="total_quantity_packet"/>
-                <field name="total_quantity_carton"/>
+                <field name="driver_id" domain="[('is_have_user', '=', True)]"/>
+                       <field name="total_product" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+                     <field name="total_quantity" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+                     <field name="total_quantity_packet" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+                     <field name="total_quantity_carton" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
+
+
+
+                <!--                <field name="invoice_notes"/>-->
+<!--                                <field name="general_notes"/>-->
+
 
             </xpath>
+
+
 
 
         </field>
