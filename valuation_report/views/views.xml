@@ -1,0 +1,100 @@
+<odoo>
+  <data>
+      <record id="trading_valuation_from_view" model="ir.ui.view">
+         <field name="name">trading.valuation</field>
+         <field name="model">trading.valuation</field>
+          <field name="arch" type="xml">
+            <form string="Trading Valuation">
+
+        <header>
+                    <button name="clear" type="object" string="Clear"/>
+                    <button name="compute" type="object" string="Compute"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+
+                        <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+
+                        </group>
+
+
+                    </group>
+                  <field name="line_ids"  >
+           <tree   decoration-warning="display_type=='line_section'"    editable="bottom" >
+               <field name="sequence" widget='handle'/>
+                      <field name="name"  />
+                       <field name="credit"  />
+                    <field name="debit" />
+                    <field name="balance"   force_save="1"/>
+               <field name="display_type"  optional="show" />
+               <field name="hide_from_report" optional="show" />
+                      </tree>
+
+                  </field>
+     
+
+ 
+                </sheet>
+            </form>
+             
+         </field>
+     </record>
+    
+   <record id="trading_valuation_view_tree" model="ir.ui.view">
+       <field name="name">trading valuation</field>
+       <field name="model">trading.valuation</field>
+       <field name="arch" type="xml">
+           <tree string="trading valuation tree">
+               <field name="name"/>
+           </tree>
+       </field>
+   </record>
+    
+    <record id="trading_valuation_action" model="ir.actions.act_window">
+        <field name="name">Profit And Loss</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">trading.valuation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+ <menuitem id="trading_valuation_menuitem_id" name="Profit And Loss With Inventory" parent="account.account_reports_legal_statements_menu" action="trading_valuation_action" sequence="1"/>
+
+
+
+      <!-- Inherit Form View to Modify it -->
+<!--      <record id="view_account_form_type_open" model="ir.ui.view">-->
+<!--          <field name="name">account.account</field>-->
+<!--          <field name="model">account.account</field>-->
+<!--          <field name="inherit_id" ref="account.view_account_form"/>-->
+<!--          <field name="arch" type="xml">-->
+
+<!--              <xpath expr="//field[@name='user_type_id']" position="replace">-->
+<!--                             <field name="user_type_id"  />-->
+
+<!--              </xpath>-->
+
+<!--          </field>-->
+<!--      </record>-->
+
+
+<!--       <record id="view_account_type_form_internal_group" model="ir.ui.view">-->
+<!--          <field name="name">account.account.type</field>-->
+<!--          <field name="model">account.account.type</field>-->
+<!--          <field name="inherit_id" ref="account.view_account_type_form"/>-->
+<!--          <field name="arch" type="xml">-->
+
+<!--              <xpath expr="//field[@name='type']" position="after">-->
+<!--                             <field name="internal_group"/>              </xpath>-->
+
+<!--          </field>-->
+<!--      </record>-->
+
+
+
+
+  </data>
+</odoo>

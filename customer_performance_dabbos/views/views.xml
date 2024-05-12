@@ -1,0 +1,41 @@
+<odoo>
+  <data>
+
+    <record id="view_partner_form_inherited1" model="ir.ui.view">
+        <field name="name">res.partner</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                   <page name="customer_performance" string="Customer Performance">
+                           <group>
+                               <field name="payment_method"/>
+                               <field name="customer_extent"/>
+                               <field name="Customer_discount"/>
+                               <field name="receiving_time_goods"/>
+                               <field name="administrator_time"/>
+                               <field name="nature_region_inhabitants"/>
+                               <field name="shop_location_on_gps"/>
+                               <field name="product_returns"/>
+                               <field name="customer_desires_products"/>
+                               <field name="products_customer_not_work"/>
+                               <field name="information_shop_owner"/>
+                               <field name="general_notes"/>
+                               <field name="pictures"/>
+                               <field name="opining_store_date"/>
+                               <field name="powerful_companies_deal"/>
+                               <field name="best_selling_products"/>
+                               <field name="proportion_our_goods_shop"/>
+                               <field name="opinion_extent_his_satisfaction"/>
+                               <field name="opinion_extent_strength_market"/>
+
+
+                           </group>
+                        </page>
+            </xpath>
+
+        </field>
+    </record>
+  </data>
+</odoo>

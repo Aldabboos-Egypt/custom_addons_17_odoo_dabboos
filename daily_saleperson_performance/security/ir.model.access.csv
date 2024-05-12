@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+sales_dues_id,sales_dues,model_sales_dues,,1,1,1,1
+sales_dues_line_id,sales_dues_line,model_sales_dues_line,,1,1,1,1

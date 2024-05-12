@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sales_partner_form" model="ir.ui.view">
+        <field name="name">sales.partner</field>
+        <field name="model">sales.partner</field>
+        <field name="arch" type="xml">
+            <form string="Sales Person  Report (Dabbos)">
+                <header>
+                    <button name="clear" type="object" string="Clear"/>
+                    <button name="compute" type="object" string="Compute"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_view_report_lines" string="View"
+                                invisible="not sales_partner_line_ids"
+                                 class="oe_stat_button" icon="fa-book"
+                                >
+                            <field name="sales_partner_line_ids" invisible="1"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group  >
+                        <group>
+                             <field name="category_ids" widget="many2many_tags"/>
+                             <field name="partner_ids" widget="many2many_tags"   />
+                          </group>
+                        <group>
+                             <field name="date_to"  />
+
+                        </group>
+                    </group>
+
+
+                    <field name="sales_partner_line_ids">
+                        <tree editable="false">
+                            <field name="sequence"  />
+                            <field name="partner_id"  />
+<!--                            <field name="debit"  />-->
+<!--                            <field name="credit"  />-->
+                            <field name="balance" sum="Balance" />
+                            <field name="last_invoice_amount"  optional="hide"/>
+                            <field name="last_invoice_date" optional="hide" />
+                            <field name="last_payment_amount" optional="hide" />
+                            <field name="last_payment_date" optional="hide" />
+                                <field name="notes" optional="hide"/>
+                            <field name="phone"  optional="hide"/>
+                            <field name="address"  optional="hide"/>
+                             <field name="tags"   string="Tags" optional="hide" />
+
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sales_partner_line_ids_view_form" model="ir.ui.view">
+        <field name="name">sales_partner_line_ids_view_form</field>
+        <field name="model">sales.partner.line</field>
+        <field name="arch" type="xml">
+            <tree string="Sales Person  Report (Dabbos)" create="false" editable="top">
+                 <field name="sequence" readonly="True" force_save="1"/>
+                            <field name="partner_id" readonly="True" force_save="1"/>
+<!--                            <field name="debit" readonly="True" force_save="1"/>-->
+<!--                            <field name="credit" readonly="True" force_save="1"/>-->
+                            <field name="balance" readonly="True" force_save="1" sum="Balance"/>
+                            <field name="last_invoice_amount" readonly="True" force_save="1" optional="hide"/>
+                            <field name="last_invoice_date" readonly="True" force_save="1" optional="hide"/>
+                            <field name="last_payment_amount" readonly="True" force_save="1" optional="hide"/>
+                            <field name="last_payment_date" readonly="True" force_save="1" optional="hide"/>
+                           <field name="notes" optional="hide"/>
+                            <field name="phone" readonly="True" force_save="1" optional="hide"/>
+                            <field name="address" readonly="True" force_save="1" optional="hide"/>
+                             <field name="tags" readonly="True" force_save="1" optional="hide"/>
+
+             </tree>
+        </field>
+    </record>
+
+
+    <record id="action_sales_partner" model="ir.actions.act_window">
+        <field name="name">Sales Person  Report (Dabbos) </field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sales.partner</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_sales_partner_lines" model="ir.actions.act_window">
+        <field name="name"> Sales Person  Report (Dabbos) </field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sales.partner.line</field>
+        <field name="view_mode">tree</field>
+     </record>
+
+    <menuitem id="menu_sales_partner" name="Sales Person  Report (Dabbos)" action="action_sales_partner" parent="account.account_reports_legal_statements_menu" />
+
+
+
+
+
+</odoo>
