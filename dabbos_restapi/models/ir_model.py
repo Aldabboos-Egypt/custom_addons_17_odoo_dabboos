@@ -68,7 +68,7 @@ class SaleOrder(models.Model):
         required=True, index=True,
         default=lambda self: self.env.user.company_id)
 
-    extra_notes= fields.Char(
+    notes_for_customer= fields.Char(
         string='Notes',
         required=False)
 

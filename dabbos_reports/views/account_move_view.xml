@@ -22,7 +22,7 @@
 
             <xpath expr="//group[@colspan='8']" position="replace">
                 <group colspan="8">
-                    <field name="narration" placeholder="Payment Notes" colspan="2" nolabel="1"/>
+                    <field name="narration" placeholder="Notes For Us" colspan="2" nolabel="1"/>
                 </group>
             </xpath>
 
@@ -40,7 +40,8 @@
             <xpath expr="//field[@name='narration']" position="after">
                 <group>
                     <field name="driver_id" domain="[('is_have_user', '=', True)]"/>
-                    <field name="general_notes"/>
+                    <field name="notes_for_customer" placeholder="Notes For Customer" string="Notes For Customer"/>
+
                  <field name="total_product"/>
                 <field name="total_quantity"/>
                 <field name="total_quantity_packet"/>

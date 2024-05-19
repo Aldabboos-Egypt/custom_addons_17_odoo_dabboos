@@ -21,7 +21,7 @@ class AccountMove(models.Model):
     driver_id = fields.Many2one(comodel_name='res.partner', string='Driver')
     # narration = fields.Text(string='ملاحظة دفع الفاتورة')
     invoice_notes = fields.Char(string='Payment Notes')
-    general_notes = fields.Char(string='Notes')
+    notes_for_customer = fields.Char(string='Notes')
     total_product = fields.Integer(string='Total Product:',compute='_total_product',help="total Products")
     total_quantity = fields.Integer(string='Total Quantity:',compute='_total_quantity',help="total Quantity")
     total_quantity_packet = fields.Integer(string='Total Quantity Packet:',compute='_total_quantity',help="total Quantity Packet")

@@ -457,7 +457,7 @@
 
                                                 </td>
                                                 <td style="border: 1px solid ;padding:3px">
-                                                    <span style="margin-right:3px" t-field="doc.general_notes"/>
+                                                    <span style="margin-right:3px" t-field="doc.notes_for_customer"/>
 
                                                 </td>
 

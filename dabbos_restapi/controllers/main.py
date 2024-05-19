@@ -223,6 +223,12 @@ class APIController(http.Controller):
     @validate_token
     @http.route("/salesperson/product_price", methods=["GET"], type="http", auth="none", csrf=False)
     def get_product_price(self):
+
+        image_url = "http://lenovo-legion:8017/web/image?model=product.product&id=2123&field=image_1920"
+
+        return image_url
+
+
         pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
         user_id = int(request.httprequest.headers.get("user_id"))
 
@@ -683,7 +689,7 @@ class APIController(http.Controller):
                     'user_id': data.get('user_id'),
 
                     'date_order': data.get('date_order'),
-                    'note': data.get('extra_notes'),
+                    'note': data.get('notes_for_customer'),
                     'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
                     'order_line': order_lines,
 
