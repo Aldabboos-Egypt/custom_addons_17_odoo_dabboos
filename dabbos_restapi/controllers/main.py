@@ -224,9 +224,9 @@ class APIController(http.Controller):
     @http.route("/salesperson/product_price", methods=["GET"], type="http", auth="none", csrf=False)
     def get_product_price(self):
 
-        image_url = "http://lenovo-legion:8017/web/image?model=product.product&id=2123&field=image_1920"
-
-        return image_url
+        # image_url = "http://lenovo-legion:8017/web/image?model=product.product&id=2123&field=image_1920"
+        #
+        # return image_url
 
 
         pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
