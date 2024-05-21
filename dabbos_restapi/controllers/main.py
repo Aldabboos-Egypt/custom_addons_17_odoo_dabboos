@@ -272,7 +272,7 @@ class APIController(http.Controller):
 
         location_ids = request.env['res.users'].browse(user_id).allowed_locations
 
-        print(location_ids)
+        # print(location_ids)
 
         quants = request.env['stock.quant'].search([
             ('location_id', 'in', location_ids.ids), ('product_id', '=', product_ids.ids)
@@ -289,12 +289,12 @@ class APIController(http.Controller):
             else:
                 quantities[quant.product_id.id] += quant.available_quantity
 
-        print(all_product_list)
-        print(quantities)
+        # print(all_product_list)
+        # print(quantities)
         for item in all_product_list:
             item['QTY_1'] = quantities.get(item.get('ID_1'), 0)
 
-        print(all_product_list)
+        # print(all_product_list)
         d2 = all_product_list
 
         model = 'product.product'
@@ -317,7 +317,7 @@ class APIController(http.Controller):
                 item_d1.update(item_d2)  # Merge the dictionaries
                 merged_data.append(item_d1)
 
-        print(merged_data)
+        # print(merged_data)
 
         return valid_response(data=merged_data)
 
