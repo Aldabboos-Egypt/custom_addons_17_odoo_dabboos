@@ -272,7 +272,6 @@ class APIController(http.Controller):
 
         location_ids = request.env['res.users'].browse(user_id).allowed_locations
 
-        # print(location_ids)
 
         quants = request.env['stock.quant'].search([
             ('location_id', 'in', location_ids.ids), ('product_id', '=', product_ids.ids)
@@ -283,18 +282,14 @@ class APIController(http.Controller):
 
         # Iterate through quants and update the quantities dictionary
         for quant in quants:
-            print(quant)
             if quant.product_id.id not in quantities:
                 quantities[quant.product_id.id] = quant.available_quantity
             else:
                 quantities[quant.product_id.id] += quant.available_quantity
 
-        # print(all_product_list)
-        # print(quantities)
         for item in all_product_list:
             item['QTY_1'] = quantities.get(item.get('ID_1'), 0)
 
-        # print(all_product_list)
         d2 = all_product_list
 
         model = 'product.product'
@@ -317,7 +312,6 @@ class APIController(http.Controller):
                 item_d1.update(item_d2)  # Merge the dictionaries
                 merged_data.append(item_d1)
 
-        # print(merged_data)
 
         return valid_response(data=merged_data)
 
@@ -687,9 +681,9 @@ class APIController(http.Controller):
                 sale_order = request.env['sale.order'].create_order({
                     'partner_id': data.get('partner_id'),
                     'user_id': data.get('user_id'),
-
                     'date_order': data.get('date_order'),
-                    'note': data.get('notes_for_customer'),
+                    'notes_for_customer': data.get('notes_for_customer'),
+                    'note': data.get('note'),
                     'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
                     'order_line': order_lines,
 
