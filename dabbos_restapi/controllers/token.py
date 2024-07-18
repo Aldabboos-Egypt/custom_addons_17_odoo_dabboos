@@ -29,26 +29,85 @@ class AccessToken(http.Controller):
         return record.user_id
 
     # @http.route("/salesperson/login", methods=["GET"], type="http", auth="none", csrf=False)
-    @http.route('/salesperson/login', methods=["GET"], type="http", auth="none", csrf=False)
-    def login(self, **post):
+    # @http.route('/salesperson/login', methods=["GET"], type="http", auth="none", csrf=False)
+    # def login(self, **post):
+    #
+    #     print('ssssssssssssssssssssssssssddddddddddddddd')
+    #
+    #     _token = request.env["api.access_token"]
+    #     params = ["db", "login", "password"]
+    #     params = {key: post.get(key) for key in params if post.get(key)}
+    #     db, username, password = (
+    #         params.get("db"),
+    #         post.get("login"),
+    #         post.get("password"),
+    #     )
+    #     _credentials_includes_in_body = all([db, username, password])
+    #     if not _credentials_includes_in_body:
+    #         # The request post body is empty the credetials maybe passed via the headers.
+    #         headers = request.httprequest.headers
+    #         db = headers.get("db")
+    #         username = headers.get("login")
+    #         password = headers.get("password")
+    #         _credentials_includes_in_headers = all([db, username, password])
+    #         if not _credentials_includes_in_headers:
+    #             # Empty 'db' or 'username' or 'password:
+    #             return invalid_response(
+    #                 "missing error", "either of the following are missing [db, username,password]", 403,
+    #             )
+    #     # Login in odoo database:
+    #     try:
+    #         request.session.authenticate(db, username, password)
+    #     except AccessError as aee:
+    #         return invalid_response("Access error", "Error: %s" % aee.name)
+    #     except AccessDenied as ade:
+    #         return invalid_response("Access denied", "Login, password or db invalid")
+    #     except Exception as e:
+    #         # Invalid database:
+    #         info = "The database name is not valid {}".format((e))
+    #         error = "invalid_database"
+    #         _logger.error(info)
+    #         return invalid_response("wrong database name", error, 403)
+    #
+    #     uid = request.session.uid
+    #     # odoo login failed:
+    #     if not uid:
+    #         info = "authentication failed"
+    #         error = "authentication failed"
+    #         _logger.error(info)
+    #         return invalid_response(401, error, info)
+    #
+    #     # Generate tokens
+    #
+    #
+    #     access_token = _token.find_one_or_create_token(user_id=uid, create=True)
+    #     # Successful response:
+    #     return werkzeug.wrappers.Response(
+    #         status=200,
+    #         content_type="application/json; charset=utf-8",
+    #         headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+    #         response=json.dumps(
+    #             {
+    #                 "token": access_token,
+    #                 "username": username,
+    #                 "id": uid,
+    #                 "name": request.env.user.partner_id.name,
+    #                 "admin": request.env.user.is_admin,
+    #
+    #             }
+    #         ),
+    #     )
 
-        print('ssssssssssssssssssssssssssddddddddddddddd')
+    @http.route("/salesperson/login", methods=["GET"], type='http', auth="none", csrf=False)
+    def api_login(self, **post):
 
-        _token = request.env["api.access_token"]
-        params = ["db", "login", "password"]
-        params = {key: post.get(key) for key in params if post.get(key)}
-        db, username, password = (
-            params.get("db"),
-            post.get("login"),
-            post.get("password"),
-        )
+        db = post.get("db")
+        username = post.get("login")
+        password = post.get("password")
+
         _credentials_includes_in_body = all([db, username, password])
         if not _credentials_includes_in_body:
-            # The request post body is empty the credetials maybe passed via the headers.
-            headers = request.httprequest.headers
-            db = headers.get("db")
-            username = headers.get("login")
-            password = headers.get("password")
+
             _credentials_includes_in_headers = all([db, username, password])
             if not _credentials_includes_in_headers:
                 # Empty 'db' or 'username' or 'password:
@@ -78,26 +137,23 @@ class AccessToken(http.Controller):
             return invalid_response(401, error, info)
 
         # Generate tokens
-
-
-        access_token = _token.find_one_or_create_token(user_id=uid, create=True)
+        access_token = request.env["api.access_token"].find_one_or_create_token(user_id=uid, create=True)
         # Successful response:
+
+
         return werkzeug.wrappers.Response(
             status=200,
             content_type="application/json; charset=utf-8",
             headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
             response=json.dumps(
                 {
-                    "token": access_token,
-                    "username": username,
-                    "id": uid,
-                    "name": request.env.user.partner_id.name,
-                    "admin": request.env.user.is_admin,
+                    "message": "Valid",
+                    "access_token": access_token,
+
 
                 }
             ),
         )
-
 
     @http.route("/salesperson/checktoken", methods=["GET"], type="http", auth="none", csrf=False)
     def token(self, **post):

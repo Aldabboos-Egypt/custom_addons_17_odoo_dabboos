@@ -15,30 +15,19 @@ _logger = logging.getLogger(__name__)
 
 
 def validate_token(func):
-    """."""
-
-
     @functools.wraps(func)
     def wrap(self, *args, **kwargs):
-        """."""
-        access_token = request.httprequest.headers.get("access_token")
+        access_token = kwargs.get("access_token")
         if not access_token:
-            return invalid_response("access_token_not_found", "missing access token in request header", 401)
-        access_token_data = (
-            request.env["api.access_token"].sudo().search([("token", "=", access_token)], order="id DESC", limit=1)
-        )
-
+            return invalid_response("access_token_not_found", "missing access token in request params", 401)
+        access_token_data = request.env["api.access_token"].sudo().search([("token", "=", access_token)],
+                                                                          order="id DESC", limit=1)
         if access_token_data.find_one_or_create_token(user_id=access_token_data.user_id.id) != access_token:
             return invalid_response("access_token", "token seems to have expired or invalid", 401)
 
-        # request.session.uid = access_token_data.user_id.id
-        request.session.update({
-            'uid': access_token_data.user_id.id,
-        })
-
-        uid = int(access_token_data.user_id.id)  # 0 is a default value if 'id' is not present
-        request.update_env(uid)
+        request.session.uid = access_token_data.user_id.id
         # request.uid = access_token_data.user_id.id
+        request.update_env(user=access_token_data.user_id.id)
         return func(self, *args, **kwargs)
 
     return wrap
@@ -62,9 +51,9 @@ class APIController(http.Controller):
 
     @validate_token
     @http.route("/general", methods=["GET"], type="http", auth="none", csrf=False)
-    def get(self,):
-        model = request.httprequest.headers.get("model")
-        domain_fields_dict = request.httprequest.headers.get("domain")
+    def get(self,**kwargs):
+        model = kwargs.get("model")
+        domain_fields_dict = kwargs.get("domain")
         fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1)
 
         if not fetch_id:
@@ -112,10 +101,12 @@ class APIController(http.Controller):
 
     @validate_token
     @http.route("/salesperson/get_products_categories", methods=["GET"], type="http", auth="none", csrf=False)
-    def get_products_categories(self):
-        category_id = int(request.httprequest.headers.get("category_id"))
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
-        user_id = int(request.httprequest.headers.get("user_id"))
+    def get_products_categories(self,**kwargs):
+        category_id = int(kwargs.get("category_id"))
+        pricelist_id = int(kwargs.get("pricelist_id"))
+        user_id = int(kwargs.get("user_id"))
+
+        print(category_id,pricelist_id,user_id)
 
         data_input = all([category_id, pricelist_id, user_id])
         if not data_input:
@@ -138,7 +129,6 @@ class APIController(http.Controller):
         else:
             domain = [('categ_id', '=', int(category_id))]
 
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
         pricelist = request.env['product.pricelist'].browse(pricelist_id)
         if not pricelist:
             return invalid_response(
@@ -171,8 +161,6 @@ class APIController(http.Controller):
 
         location_ids = request.env['res.users'].browse(user_id).allowed_locations
 
-        print(len(all_product_list))
-
         quants = request.env['stock.quant'].search([
             ('location_id', 'in', location_ids.ids), ('product_id', '=', product_ids.ids)
         ])
@@ -182,18 +170,14 @@ class APIController(http.Controller):
 
         # Iterate through quants and update the quantities dictionary
         for quant in quants:
-            print(quant)
             if quant.product_id.id not in quantities:
                 quantities[quant.product_id.id] = quant.available_quantity
             else:
                 quantities[quant.product_id.id] += quant.available_quantity
 
-        print(all_product_list)
-        print(quantities)
         for item in all_product_list:
             item['QTY_1'] = quantities.get(item.get('ID_1'), 0)
 
-        print(all_product_list)
         d2 = all_product_list
 
         model = 'product.product'
@@ -216,21 +200,20 @@ class APIController(http.Controller):
                 item_d1.update(item_d2)  # Merge the dictionaries
                 merged_data.append(item_d1)
 
-        print(merged_data)
 
         return valid_response(data=merged_data)
 
     @validate_token
     @http.route("/salesperson/product_price", methods=["GET"], type="http", auth="none", csrf=False)
-    def get_product_price(self):
+    def get_product_price(self,**kwargs):
 
         # image_url = "http://lenovo-legion:8017/web/image?model=product.product&id=2123&field=image_1920"
         #
         # return image_url
 
 
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
-        user_id = int(request.httprequest.headers.get("user_id"))
+        pricelist_id = int(kwargs.get("pricelist_id"))
+        user_id = int(kwargs.get("user_id"))
 
         data_input = all([pricelist_id, user_id])
         if not data_input:
@@ -239,7 +222,6 @@ class APIController(http.Controller):
                 "missing error", "either of the following are missing [category_id, pricelist_id,user_id]", 403,
             )
 
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
         pricelist = request.env['product.pricelist'].browse(pricelist_id)
         if not pricelist:
             return invalid_response(
@@ -317,8 +299,9 @@ class APIController(http.Controller):
 
     @validate_token
     @http.route("/salesperson/get_product_uoms", methods=["GET"], type="http", auth="none", csrf=False)
-    def get_product_uoms(self  ):
-        product_id = int(request.httprequest.headers.get("product_id"))
+    def get_product_uoms(self,**kwargs  ):
+
+        product_id = int(kwargs.get("product_id"))
 
         if not product_id:
             return invalid_response(
@@ -327,7 +310,6 @@ class APIController(http.Controller):
 
 
         product_id=request.env['product.product'].browse(product_id)
-        print(product_id)
         if not product_id:
             return invalid_response(
                 "  Product Id Not Found.",
@@ -346,9 +328,9 @@ class APIController(http.Controller):
 
     @validate_token
     @http.route("/salesperson/partner_ledger", methods=["GET"], type="http", auth="none", csrf=False)
-    def get_partner_ledger(self):
-        partner_id = request.httprequest.headers.get("partner_id")
+    def get_partner_ledger(self, **kwargs):
 
+        partner_id = int(kwargs.get("partner_id"))
         if not partner_id:
             return invalid_response(
                 "Missing Partner  Id.",
@@ -422,6 +404,7 @@ class APIController(http.Controller):
                 'partner_longitude': partner_longitude,
                 'date_localization': date_obj,
                 "user_id": int(user_id),
+                "customer_rank": 1,
                 "sales_persons_ids":  [(4,int(user_id))],
 
 
@@ -473,10 +456,8 @@ class APIController(http.Controller):
 
         date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
 
-        print(customer_id)
 
         partner = request.env['res.partner'].sudo().browse(int(customer_id))
-        print(partner)
         if partner:
             # Define the fields that can be updated
             allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization",
@@ -502,67 +483,60 @@ class APIController(http.Controller):
 
     @validate_token
     @http.route('/salesperson/confirm_quotation', methods=["post"], type="http", auth="none", csrf=False)
-    def confirm_quotation(self, **post):
+    def confirm_quotation(self, **kwargs):
 
-        quotation_id = request.httprequest.headers.get("quotation_id")
+        quotation_id = kwargs.get("quotation_id")
+
+
         if not quotation_id:
             return invalid_response(
                 "Missing quotation  Id.",
             )
 
         quotation_obj=request.env['sale.order'].browse(int(quotation_id))
-
-        try:
-            quotation_obj.action_confirm()
-        except:
-            return invalid_response()
-
-
-
-
-
-        return werkzeug.wrappers.Response(
-            status=200,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-            response=json.dumps(
-                {
-                    "status": True,
+        if quotation_obj.state=='sale' :
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        "status": "Already Confirmed",
 
 
-                }
-            ),
-        )
+                    }
+                ),
+            )
+        quotation_obj.action_confirm()
+        if quotation_obj.state=='sale' :
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        "status": True,
+
+
+                    }
+                ),
+            )
+        return invalid_response("Not Confirmed")
 
 
     @validate_token
-    @http.route('/salesperson/register_payment', methods=["post"], type="json", auth="none", csrf=False)
-    def register_payment(self, **post):
-        data = json.loads(request.httprequest.data)
-        payment_details = data.get('data')
-        invoice_id = payment_details.get("invoice_id")
-        journal = int(payment_details.get("journal"))
-        memo = payment_details.get("memo")
-        amount = payment_details.get("amount")
+    @http.route('/salesperson/register_payment', methods=["post"], type="http", auth="none", csrf=False)
+    def register_payment(self, **kwargs):
+        invoice_id = int(kwargs.get("invoice_id"))
+        journal = int(kwargs.get("journal"))
+        amount = float(kwargs.get("amount"))
+        memo =  kwargs.get("memo")
 
-        # print(max(ssssssssssssss))
         if not (invoice_id or journal):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
         invoice_obj=request.env['account.move'].browse(int(invoice_id))
-        # print("fddddddddddddddd")
-        #
-        # if float(amount) >invoice_obj.amount_residual:
-        #     return invalid_response(
-        #         "Amount Is Greater Than Invoice Amount Residual  .",
-        #     )
-        # print("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs")
-
-        # payment_journal =request.env['account.journal'].search([('api_payment','=',True)],limit=1)
-        # payment_method =request.env['account.payment.method'].search([('api_payment','=',True)],limit=1)
-
-        # try:
         payment = request.env['account.payment'].create({
             'currency_id': invoice_obj.currency_id.id,
             'amount': amount,
@@ -570,49 +544,42 @@ class APIController(http.Controller):
             'partner_id': invoice_obj.commercial_partner_id.id,
             'partner_type': 'customer',
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
-            # 'payment_method_id': 1,
             'journal_id': journal
         })
-
-        print(payment)
-
 
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
-        return   {
-                    "status": True,
-                    "invoice_sate": invoice_obj.payment_state,
-
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps(
+                {"status": True,
+                    "invoice_state": invoice_obj.payment_state,
 
                 }
-
-        # except:
-        #     return invalid_response(
-        #         "No Payment Done", 404,
-        #     )
+            ),
+        )
 
 
     @validate_token
-    @http.route('/salesperson/register_payment_customer', methods=["post"], type="json", auth="none", csrf=False)
-    def register_payment_customer(self, **post):
-        data = json.loads(request.httprequest.data)
-        payment_details = data.get('data')
-        journal = payment_details.get("journal")
-        payment_type = payment_details.get("payment_type")
-        amount = payment_details.get("amount")
-        partner = payment_details.get("partner")
-        memo = payment_details.get("memo")
-        partner_type = payment_details.get("partner_type")
-        confirm_payment = payment_details.get("confirm_payment")
+    @http.route('/salesperson/register_payment_customer', methods=["post"], type="http", auth="none", csrf=False)
+    def register_payment_customer(self, **kwargs):
+        journal = kwargs.get("journal")
+        amount = kwargs.get("amount")
+        memo = kwargs.get("memo")
+        payment_type = kwargs.get("payment_type")
+        partner = kwargs.get("partner")
+        partner_type = kwargs.get("partner_type")
+        confirm_payment = kwargs.get("confirm_payment")
+
 
         if not all([journal, payment_type, amount,partner ,partner_type]):
             # Empty 'db' or 'username' or 'password:
             return invalid_response(
                 "missing error", "either of the following are missing [journal, payment_type, amount,partner ,partner_type]", 403,
             )
-
-
         try:
             payment=request.env['account.payment'].create({
                 'amount': float(amount),
@@ -622,139 +589,12 @@ class APIController(http.Controller):
                 'journal_id': int(journal),
                 'ref':memo,
 
-            })
+                })
+
+
 
             if int(confirm_payment)==1:
                 payment.action_post()
-
-            return  {
-                        "status": True,
-
-
-                    }
-
-        except:
-            return invalid_response(
-                "No Payment Done", 404,
-            )
-
-
-    @validate_token
-    @http.route('/salesperson/create_order', methods=["post"], type="json", auth="none", csrf=False)
-    def create_sale_order(self, **kwargs):
-            try:
-                # Extract the list of dictionaries from the request body
-                data = json.loads(request.httprequest.data)
-
-
-                # Ensure that the data is in the correct format
-                # if not isinstance(sale_order_lines, list):
-                #     return {'error': 'Invalid input format. Expected a list of dictionaries.'}
-
-                # Create the sale order and sale order lines
-
-                lines=data.get('sale_order_lines')
-                order_lines=[]
-                for line in lines:
-                    order_lines.append(
-                        (0, 0, {
-                            'product_id': line.get('product_id'),
-                            'product_uom_qty': line.get('product_uom_qty'),
-                            'discount': line.get('discount'),
-                            'fixed_discount': line.get('fixed_discount'),
-                            'sale_order_note': line.get('sale_order_note'),
-                            'product_uom': line.get('product_uom'),
-
-                            # Add other relevant fields
-                        })
-                    )
-                global_discount=data.get('global_discount')
-                if global_discount:
-                        order_lines.append(
-                            (0, 0, {
-                                'product_id': global_discount.get('product_id'),
-                                'product_uom_qty': 1,
-                                'price_unit': - global_discount.get('price_unit'),
-
-                            })
-                        )
-                sale_order = request.env['sale.order'].create_order({
-                    'partner_id': data.get('partner_id'),
-                    'user_id': data.get('user_id'),
-                    'date_order': data.get('date_order'),
-                    'notes_for_customer': data.get('notes_for_customer'),
-                    'note': data.get('note'),
-                    'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
-                    'order_line': order_lines,
-
-                    # Add other relevant fields
-                })
-
-
-
-
-
-
-                return { 'id': sale_order.id , 'name':sale_order.get_name()}
-
-            except Exception as e:
-                return {'error': str(e)}
-
-    @validate_token
-    @http.route('/salesperson/create_invoice', methods=["post"], type="json", auth="none", csrf=False)
-    def create_invoice(self, **kwargs):
-
-            print("eeeeeeeeeeee")
-            try:
-                # Extract the list of dictionaries from the request body
-                invoice_lines = json.loads(request.httprequest.data)
-
-
-                data=invoice_lines.get('invoice_lines')
-                lines=[]
-                for line in data:
-                    lines.append(
-                        (0, 0, {
-                            'product_id': line.get('product_id'),
-                            'quantity': line.get('quantity'),
-                            'price_unit': line.get('price_unit'),
-                            # Add other relevant fields
-                        })
-                    )
-
-                invoice = request.env['account.move'].create_invoice({
-                    'partner_id': invoice_lines.get('partner_id'),
-                    'invoice_date': invoice_lines.get('date'),
-                    'move_type': "out_invoice",
-                    'invoice_line_ids': lines,
-                    # Add other relevant fields
-                })
-
-
-
-
-
-                return {'success': True, 'invoice_id': invoice.id}
-
-            except Exception as e:
-                return {'error': str(e)}
-
-
-    @validate_token
-    @http.route('/salesperson/create_order_invoice', methods=["post"], type="http", auth="none", csrf=False)
-
-    def create_order_invoice(self, **kwargs):
-
-        order_id = request.httprequest.headers.get("order_id")
-        if not order_id:
-            return invalid_response(
-                "Missing Order Id.",
-            )
-
-        try:
-
-            order = request.env['sale.order'].browse(int(order_id))
-            order._create_invoices()
 
             return werkzeug.wrappers.Response(
                 status=200,
@@ -764,124 +604,143 @@ class APIController(http.Controller):
                     {
                         "status": True,
 
+
+                     }
+                ),
+            )
+        except:
+            return invalid_response("Not Created")
+
+
+
+    @validate_token
+    @http.route('/salesperson/create_order', methods=["post"], type="http", auth="none", csrf=False)
+    def create_sale_order(self):
+
+            data = json.loads(request.httprequest.data)
+            lines=data.get('sale_order_lines')
+            order_lines=[]
+            for line in lines:
+                order_lines.append(
+                    (0, 0, {
+                        'product_id': int(line.get('product_id')),
+                        'product_uom_qty': line.get('product_uom_qty'),
+                        'discount': line.get('discount'),
+                        'fixed_discount': line.get('fixed_discount'),
+                        'sale_order_note': line.get('sale_order_note'),
+                        'product_uom': line.get('product_uom'),
+
+                        # Add other relevant fields
+                    })
+                )
+            global_discount=data.get('global_discount')
+            gift=data.get('gift')
+            if global_discount:
+                    order_lines.append(
+                        (0, 0, {
+                            'product_id': int(global_discount.get('product_id')),
+                            'product_uom_qty': 1,
+                            'price_unit': - float(global_discount.get('price_unit')),
+
+                        })
+                    )
+            if gift:
+                order_lines.append(
+                    (0, 0, {
+                        'product_id': int(gift.get('product_id')),
+                        'sale_order_note': gift.get('gift_note'),
+                         'product_uom_qty': 1,
+                        'price_unit': 0.0,
+
+                    })
+                )
+
+            sale_order = request.env['sale.order'].create_order({
+                'partner_id': data.get('partner_id'),
+                'user_id': data.get('user_id'),
+                'date_order': data.get('date_order'),
+                'notes_for_customer': data.get('notes_for_customer'),
+                'note': data.get('note'),
+                'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
+                'order_line': order_lines,
+
+                # Add other relevant fields
+            })
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        'id': sale_order.id, 'name': sale_order.get_name()
+
                     }
                 ),
             )
 
-        except :
-            return invalid_response(
-                "Invoice Not Created", 404,
-            )
-
 
     @validate_token
-    @http.route(_routes, type="http", auth="none", methods=["POST"], csrf=False)
-    def post(self, model=None, id=None, **payload):
-
-        payload = request.httprequest.data.decode()
-        fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1)
-        print(fetch_id)
-        if not fetch_id:
-            return invalid_response(
-                "invalid object model", "The model %s is not available in the registry." % model,
-            )
-
-        # user = request.env['res.users'].sudo().create_partner({
-        #     'name': name,
-        #     'login': login,
-        #     'phone': mobile,
-        #     'password': password,
-        #     'state_id': governerateid,
-        #     'city_id': cityid,
-        # })
-
-
-        object = request.env[model].sudo().create(payload)
-
-        print(object)
-
-        data = object.read(fields=object)
-        if object:
-            return valid_response(object)
-        else:
-            return valid_response(data)
-
-    @validate_token
-    @http.route(_routes, type="http", auth="none", methods=["PUT"], csrf=False)
-    def put(self, model=None, id=None, **payload):
-        """."""
-        values = {}
-        payload = request.httprequest.data.decode()
-        payload = json.loads(payload)
-        try:
-            _id = int(id)
-        except Exception as e:
-            return invalid_response("invalid object id", "invalid literal %s for id with base " % id)
-        _model = request.env[self._model].sudo().search([("model", "=", model)], limit=1)
-        if not _model:
-            return invalid_response(
-                "invalid object model", "The model %s is not available in the registry." % model, 404,
-            )
-        try:
-            record = request.env[_model.model].sudo().browse(_id)
-            for k, v in payload.items():
-                if "__api__" in k:
-                    values[k[7:]] = ast.literal_eval(v)
-                else:
-                    values[k] = v
-            record.write(values)
-        except Exception as e:
-            request.env.cr.rollback()
-            return invalid_response("exception", e)
-        else:
-            return valid_response(record.read())
-
-    @validate_token
-    @http.route(_routes, type="http", auth="none", methods=["DELETE"], csrf=False)
-    def delete(self, model=None, id=None, **payload):
-        """."""
-        try:
-            _id = int(id)
-        except Exception as e:
-            return invalid_response("invalid object id", "invalid literal %s for id with base " % id)
-        try:
-            record = request.env[model].sudo().search([("id", "=", _id)])
-            if record:
-                record.unlink()
-            else:
-                return invalid_response("missing_record", "record object with id %s could not be found" % _id, 404,)
-        except Exception as e:
-            request.env.cr.rollback()
-            return invalid_response("exception", e.name, 503)
-        else:
-            return valid_response("record %s has been successfully deleted" % record.id)
-
-    @validate_token
-    @http.route(_routes, type="http", auth="none", methods=["PATCH"], csrf=False)
-    def patch(self, model=None, id=None, action=None, **payload):
-        """."""
-        args = []
-
-        payload = request.httprequest.data.decode()
-        args = ast.literal_eval(payload)
-        try:
-            _id = int(id)
-        except Exception as e:
-            return invalid_response("invalid object id", "invalid literal %s for id with base" % id)
-        try:
-            record = request.env[model].sudo().search([("id", "=", _id)], limit=1)
-            _callable = action in [method for method in dir(record) if callable(getattr(record, method))]
-            if record and _callable:
-                # action is a dynamic variable.
-                res = getattr(record, action)(*args) if args else getattr(record, action)()
-            else:
-                return invalid_response(
-                    "invalid object or method",
-                    "The given action '%s ' cannot be performed on record with id '%s' because '%s' has no such method"
-                    % (action, _id, model),
-                    404,
+    @http.route('/salesperson/create_invoice', methods=["post"], type="http", auth="none", csrf=False)
+    def create_invoice(self):
+            invoice_lines = json.loads(request.httprequest.data)
+            data=invoice_lines.get('invoice_lines')
+            lines=[]
+            for line in data:
+                lines.append(
+                    (0, 0, {
+                        'product_id': line.get('product_id'),
+                        'quantity': line.get('quantity'),
+                        'price_unit': line.get('price_unit'),
+                        # Add other relevant fields
+                    })
                 )
-        except Exception as e:
-            return invalid_response("exception", e, 503)
-        else:
-            return valid_response(res)
+
+            invoice = request.env['account.move'].create_invoice({
+                'partner_id': invoice_lines.get('partner_id'),
+                'invoice_date': invoice_lines.get('date'),
+                'move_type': "out_invoice",
+                'invoice_line_ids': lines,
+                # Add other relevant fields
+            })
+
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        'success': True, 'invoice_id': invoice.id
+
+                    }
+                ),
+            )
+
+
+    @validate_token
+    @http.route('/salesperson/create_order_invoice', methods=["post"], type="http", auth="none", csrf=False)
+    def create_order_invoice(self, **kwargs):
+        order_id = kwargs.get("order_id")
+
+        if not order_id:
+            return invalid_response(
+                "Missing Order Id.",
+            )
+
+        order = request.env['sale.order'].browse(int(order_id))
+        order._create_invoices()
+
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps(
+                {
+                    "status": True,
+
+                }
+            ),
+        )
+
+
