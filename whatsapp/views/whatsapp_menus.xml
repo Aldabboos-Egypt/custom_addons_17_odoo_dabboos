@@ -28,4 +28,14 @@
         action="whatsapp_template_action"
         groups="whatsapp.group_whatsapp_admin"/>
 
+           <menuitem id="menu_whatsapp_campaign" name="Campaigns" parent="whatsapp.whatsapp_menu_main"   sequence="15"/>
+
+
+        <menuitem id="menu_whatsapp_template_campaign" name="Campaign Templates" action="whatsapp_template_campain_action" sequence="1"
+                  parent="menu_whatsapp_campaign"/>
+
+    <menuitem id="menu_whatsapp_message_campaign" name="Campaign" action="action_whatsapp_campaign" sequence="2"
+                  parent="menu_whatsapp_campaign"/>
+
+
 </odoo>

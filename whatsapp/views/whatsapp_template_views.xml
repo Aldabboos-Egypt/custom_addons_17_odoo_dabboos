@@ -9,28 +9,14 @@
                     <field name="has_action" invisible="1"/>
                     <button name="button_reset_to_draft"
                         string="Reset to draft" type="object"
-                        invisible="status not in ['rejected', 'approved']"
+                        invisible="status not in [ 'approved']"
                         groups="whatsapp.group_whatsapp_admin"/>
                     <button name="button_submit_template" string="Submit for Approval"
                         class="btn btn-primary" type="object"
-                        invisible="not wa_account_id or status != 'draft'"
+   invisible="status not in [ 'draft']"
                         groups="whatsapp.group_whatsapp_admin"/>
-                    <button name="button_create_action" string="Allow Multi"
-                        class="btn btn-primary" type="object"
-                        invisible="has_action"
-                        groups="whatsapp.group_whatsapp_admin"/>
-                    <button name="button_delete_action" string="Disallow Multi"
-                        type="object" invisible="not has_action"
-                        groups="whatsapp.group_whatsapp_admin"
-                        confirm="There might be other templates that still need the Multi"/>
-                    <button name="button_sync_template" string="Sync Template"
-                        type="object"
-                        invisible="not wa_template_uid"
-                        groups="whatsapp.group_whatsapp_admin"/>
-                    <button name="%(whatsapp_preview_action_from_template)d" string="Preview"
-                        type="action" target="new"
-                        context="{'active_id': id, 'dialog_size': 'medium'}"/>
-                    <field name="status" widget="statusbar" statusbar_visible="draft,pending,approved"/>
+
+                    <field name="status" widget="statusbar" statusbar_visible="draft,approved"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -39,25 +25,25 @@
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
-                    <label for="name"/>
-                    <h1>
-                        <field name="name" required="1"/>
-                    </h1>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" required="1"/></h1>
+                    </div>
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
-                            <field name="model" invisible="1"/>
                             <field name="wa_account_id"
                                 groups="whatsapp.group_whatsapp_admin"
                                 readonly="status != 'draft'"/>
-                            <field name="model_id" required="1"/>
+                            <field name="model" invisible="1"/>
+                            <field name="model_id"/>
                             <field name="phone_field"
                                 widget="DynamicModelFieldSelectorChar"
-                                options="{'model': 'model' or 'res.partner'}"/>
+                                options="{'model': 'model'}"/>
                             <field name="template_type" readonly="status != 'draft'"/>
-                            <field name="allowed_user_ids"
-                                widget="many2many_tags_avatar"
-                                placeholder="Users who can use this template.If empty then public."/>
+<!--                            <field name="allowed_user_ids"-->
+<!--                                widget="many2many_tags_avatar"-->
+<!--                                placeholder="Users who can use this template.If empty then public."/>-->
                         </group>
                         <group>
                             <field name="template_name"
@@ -65,15 +51,29 @@
                             <field name="lang_code"
                                 readonly="status != 'draft'"/>
                             <field name="header_type"
-                                readonly="status != 'draft'" required="1"/>
+                                readonly="status != 'draft'"   />
                             <field name="header_text"
                                 invisible="header_type != 'text'" required="header_type == 'text'" readonly="status != 'draft'"
                                 placeholder="e.g. Invitation for {{1}}"/>
                             <field name="header_attachment_ids"
                                 widget="many2many_binary"
-                                invisible="header_type not in ['image', 'video', 'document']"/>
+                                options="{'accepted_file_extensions': 'image/jpeg, image/png', 'number_of_files': 1}"
+                                invisible="header_type != 'image'"/>
+                            <field name="header_attachment_ids"
+                                widget="many2many_binary"
+                                options="{
+                                    'accepted_file_extensions': 'text/plain, application/pdf, application/vnd.ms-powerpoint, application/msword, application/vnd.ms-excel,
+                                    application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation,
+                                    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    'number_of_files': 1
+                                }"
+                                invisible="header_type != 'document' or report_id != False"/>
+                            <field name="header_attachment_ids"
+                                widget="many2many_binary"
+                                options="{'accepted_file_extensions': 'video/mp4', 'number_of_files': 1}"
+                                invisible="header_type != 'video'"/>
                             <field name="report_id"
-                                invisible="header_type != 'document'"/>
+                                invisible="header_type != 'document' or header_attachment_ids != []"/>
                             <field name="footer_text"
                                 readonly="status != 'draft'"/>
                             <field name="quality" widget="priority"
@@ -137,6 +137,9 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="model_id"/>
+                <field name="wa_account_id"
+                       groups="whatsapp.group_whatsapp_admin"
+                       optional="hidden"/>
                 <field name="template_name" optional="hidden"/>
                 <field name="header_type" optional="hidden"/>
                 <field name="create_uid" widget="many2one_avatar"/>
@@ -144,7 +147,7 @@
                 <field name="quality" widget="priority" optional="hidden" readonly="1"/>
                 <field name="status"
                        decoration-success="status == 'approved'"
-                       decoration-danger="status == 'rejected'"
+
                        widget="badge"/>
             </tree>
         </field>
@@ -173,7 +176,7 @@
                                     <strong>
                                         <field name="status"
                                                widget="label_selection"
-                                               options="{'classes': {'approved': 'success', 'rejected': 'danger'}}"/>
+                                               options="{'classes': {'approved': 'success'  }}"/>
                                     </strong>
                                 </div>
                                 <div class="o_kanban_record_bottom" t-if="!selection_mode">
@@ -204,6 +207,7 @@
                 <search string="Templates">
                     <field name="name"/>
                     <field name="model_id"/>
+                    <field name="model" invisible="1"/>
                     <separator/>
                     <filter string="My Templates" name="my" domain="[('create_uid', '=', uid)]"/>
                     <separator/>
@@ -211,6 +215,7 @@
                     <group expand="0" string="Group By">
                         <filter string="Model" name="model_id" domain="[]" context="{'group_by': 'model_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by': 'status'}"/>
+                        <filter string="Account" name="groupby_wa_account_id" domain="[]" context="{'group_by': 'wa_account_id'}"/>
                     </group>
                 </search>
             </field>
@@ -225,11 +230,7 @@
             <p class="o_view_nocontent_empty_folder">
                 Create or sync WhatsApp Templates.
             </p>
-            <p>
-                You can retrieve templates from Facebook by clicking <strong>Sync Templates</strong> on the <a name="%(whatsapp.whatsapp_account_action)d" type="action" class="oe_link">WhatsApp Business Account</a>.
-                Or create templates here and send them for approval.
-                Please refer the <a href="https://developers.facebook.com/docs/whatsapp/message-templates/guidelines" target="_blank">Template Guidelines</a>
-            </p>
+
         </field>
     </record>
 </odoo>

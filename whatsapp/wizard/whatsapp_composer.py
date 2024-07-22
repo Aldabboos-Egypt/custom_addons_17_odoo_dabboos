@@ -5,9 +5,19 @@ import logging
 
 from ast import literal_eval
 
+import requests
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError, RedirectWarning, UserError
+from odoo.addons.whatsapp.tools import phone_validation as wa_phone_validation
+import re
+import logging
+
+from ast import literal_eval
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, RedirectWarning
 from odoo.addons.phone_validation.tools import phone_validation
+
 
 _logger = logging.getLogger(__name__)
 
@@ -15,6 +25,17 @@ _logger = logging.getLogger(__name__)
 class WhatsAppComposer(models.TransientModel):
     _name = 'whatsapp.composer'
     _description = 'Send WhatsApp Wizard'
+
+
+    @api.model
+    def _get_default_wa_account_id(self):
+        first_account = self.env['whatsapp.account'].search([
+            ('allowed_company_ids', 'in', self.env.companies.ids)], limit=1)
+        return first_account.id if first_account else False
+
+
+    wa_account_id = fields.Many2one(comodel_name='whatsapp.account', string="Account", default=_get_default_wa_account_id,required=True)
+
 
     @api.model
     def default_get(self, fields):
@@ -27,10 +48,14 @@ class WhatsAppComposer(models.TransientModel):
                 result['wa_template_id'] = wa_template_id.id
             elif not wa_template_id and not result.get('wa_template_id'):
                 if self.env.user.has_group('whatsapp.group_whatsapp_admin'):
-                    action = self.env.ref('whatsapp.whatsapp_template_action')
-                    raise RedirectWarning(_("No template available for this model"), action.id, _("View Templates"))
+                    raise RedirectWarning(
+                        _("No approved WhatsApp Templates are available for this model."),
+                        self.env.ref('whatsapp.whatsapp_template_action').id,
+                        _("Configure Templates"),
+                        {'search_default_model': result['res_model']}
+                    )
                 else:
-                    raise ValidationError(_("No template available for this model"))
+                    raise ValidationError(_("No approved WhatsApp Templates are available for this model."))
         if context.get('active_ids') or context.get('active_id'):
             result['res_ids'] = context.get('active_ids') or [context.get('active_id')]
         if context.get('active_ids') and len(context['active_ids']) > 1:
@@ -46,7 +71,7 @@ class WhatsAppComposer(models.TransientModel):
     # content
     phone = fields.Char(string="Phone", compute="_compute_number", readonly=False, store=True)
     invalid_phone_number_count = fields.Integer(compute="_compute_invalid_phone_number_count")
-    wa_template_id = fields.Many2one(comodel_name="whatsapp.template", string="Template")
+    wa_template_id = fields.Many2one(comodel_name="whatsapp.template", string="Template",required=True)
     preview_whatsapp = fields.Html(compute="_compute_preview_whatsapp", string="Message Preview")
 
     #free texts
@@ -73,50 +98,59 @@ class WhatsAppComposer(models.TransientModel):
     # ------------------------------------------------------------
 
     @api.depends('wa_template_id')
+    @api.depends_context('default_phone')
     def _compute_number(self):
+        """ In single mode, 'phone' is the number to contact (can be set through
+        context, for example when forced through UI). In multi mode it is more
+        an informational field, holding the first record found numbers. """
         for composer in self:
-            phone = None
-            if not self.env.context.get('default_phone'):
-                records = self.env[composer.res_model].browse(literal_eval(composer.res_ids))
-                numbers = []
-                numbers_count = len(records)
-                for rec in records[:12]:
-                    if composer.wa_template_id.phone_field:
-                        try:
-                            numbers.append(rec.mapped(composer.wa_template_id.phone_field)[0])
-                        except ValidationError as e:
-                            error_msg = _("There is wrong configration in template %s \n %s", composer.wa_template_id.name, e.args[0])
-                            raise ValidationError(error_msg)
-                if not composer.batch_mode:
-                    phone = numbers[0]
-                elif numbers and composer.batch_mode:
-                    numbers_list = [self._extract_digits(num) for num in numbers if num]
-                    numbers_count = len([num for num in numbers_list if num])
-                    phone = ', '.join(numbers_list)
-                    if numbers_count:
-                        phone += _(", ... (%s Others)", numbers_count)
+            records = self.env[composer.res_model].browse(literal_eval(composer.res_ids))
+            numbers = []
+            for record in records[:12]:
+                if composer.wa_template_id.phone_field:
+                    try:
+                        numbers.append(record._find_value_from_field_path(composer.wa_template_id.phone_field))
+                    except UserError as err:
+                        error_msg = _("Template %(template_name)s holds a wrong configuration for 'phone field'\n%(error_msg)s",
+                                      template_name=composer.wa_template_id.name,
+                                      error_msg=err.args[0]
+                                     )
+                        raise ValidationError(error_msg) from err
+            if not composer.batch_mode:
+                phone = self.env.context.get('default_phone')
+                if not phone:
+                    phone = numbers[0] if numbers and numbers[0] else composer.phone
+            elif not numbers:
+                phone = False
+            else:
+                other_count = len(records) - len(numbers)
+                phone = ', '.join(self._extract_digits(num) for num in numbers if num)
+                if other_count:
+                    phone += _(", ... (%s Others)", other_count)
             composer.phone = phone
 
     @api.depends('phone', 'batch_mode')
     def _compute_invalid_phone_number_count(self):
         for composer in self:
-            invalid_phone_number_count = 0
             records = self._get_active_records()
-            company_country_id = self.env.company.country_id
             if composer.batch_mode:
+                invalid_phone_number_count = 0
                 for rec in records:
-                    mobile_number = rec[composer.wa_template_id.phone_field]
-                    country_id = company_country_id
-                    if mobile_number:
-                        mobile_number = phone_validation.phone_format(mobile_number or '', country_id.code, country_id.phone_code) or mobile_number
+                    mobile_number = rec._find_value_from_field_path(composer.wa_template_id.phone_field)
+                    mobile_number = wa_phone_validation.wa_phone_format(
+                        rec, number=mobile_number or '',
+                        raise_exception=False,
+                    ) if mobile_number else False
                     if not mobile_number:
                         invalid_phone_number_count += 1
             elif composer.phone:
-                sanitize_number = phone_validation.phone_format(composer.phone, company_country_id.code, company_country_id.phone_code)
-                if not sanitize_number:
-                    invalid_phone_number_count += 1
+                sanitize_number = wa_phone_validation.wa_phone_format(
+                    records, number=composer.phone,
+                    raise_exception=False,
+                )
+                invalid_phone_number_count = 1 if not sanitize_number else 0
             else:
-                invalid_phone_number_count += 1
+                invalid_phone_number_count = 1
             composer.invalid_phone_number_count = invalid_phone_number_count
 
     @api.depends(lambda self: self._get_free_text_fields())
@@ -208,6 +242,7 @@ class WhatsAppComposer(models.TransientModel):
         self.ensure_one()
         return self._send_whatsapp_template()
 
+
     def _send_whatsapp_template(self, force_send_by_cron=False):
         records = self._get_active_records()
 
@@ -244,11 +279,56 @@ class WhatsAppComposer(models.TransientModel):
                 'mobile_number': mobile_number,
                 'free_text_json': free_text_json,
                 'wa_template_id': self.wa_template_id.id,
+                'state': 'sent',
                 'wa_account_id': self.wa_template_id.wa_account_id.id,
             })
         if message_vals:
+            def extract_text_from_html(html):
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(html, 'html.parser')
+                text = soup.get_text(separator="\n").strip()
+                return text
+                # Extract text from HTML snippet
+            formatted_text = extract_text_from_html(body)
+            final_message = f"{formatted_text}\n\n{self.wa_template_id.footer_text}"
+            self.send_ws_msg(message=final_message, number=mobile_number)
             message = self.env['whatsapp.message'].create(message_vals)
-            message._send(force_send_by_cron=force_send_by_cron)
+
+
+            # message._send(force_send_by_cron=force_send_by_cron)
+
+
+    def send_ws_msg(self,message,number  ):
+        #
+        # instance = "instance71676"
+        # token = "grlv10mh1tc04319"
+        instance = self.wa_account_id.account_uid
+        token = self.wa_account_id.token
+
+        chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
+
+        data = {
+            "token": token,
+            "body": message,
+            "to": number,
+            "filename": 'payment.pdf',
+        }
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        chat_response = requests.request("POST", chat_url, data=data, headers=headers)
+        chat_res = chat_response.json()
+        print('chat_res', chat_res)
+        if "error" in chat_res:
+            raise UserError(str(chat_res["error"]))
+
+        # if self.attachment_ids.ids:
+        #     pdf_url = self.attachment_ids[0].datas
+        #     # pdf_url = report_url + '/report/pdf/' + 'roya_reports.sale_order_template_id/' + str(self.id)
+        #     data.update({"document": pdf_url, })
+        #     doc_response = requests.request("POST", doc_url, data=data, headers=headers)
+        #     doc_res = doc_response.json()
+        #     print('doc_res', doc_res)
+        #     res_dict.update({'doc_res': doc_res})
+        # return self.attachment_ids
 
     def _get_text_free_json(self):
         """This method is used to prepare free text json using values set in free text field of composer."""
