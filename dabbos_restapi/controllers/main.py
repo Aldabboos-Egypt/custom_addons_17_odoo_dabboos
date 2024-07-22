@@ -54,7 +54,7 @@ class APIController(http.Controller):
     def get(self,**kwargs):
         model = kwargs.get("model")
         domain_fields_dict = kwargs.get("domain")
-        fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1)
+        fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
 
         if not fetch_id:
             return invalid_response(
@@ -79,12 +79,12 @@ class APIController(http.Controller):
 
         try:
             ioc_name = model
-            model = request.env[self._model].search([("model", "=", model)], limit=1, order='id desc')
+            model = request.env[self._model].sudo().search([("model", "=", model)], limit=1, order='id desc')
             if model:
                 print(domain)
 
                 # domain, fields, offset, limit, order = extract_arguments(**payload)
-                data = request.env[model.model].search_read(
+                data = request.env[model.model].sudo().search_read(
                     domain=domain, fields=self.get_allowed_fields(fetch_id), order='id desc'
                 )
 
@@ -121,7 +121,7 @@ class APIController(http.Controller):
                 child_ids += get_all_child_ids(child_category)
             return child_ids
 
-        category_id_object = request.env['product.category'].browse(int(category_id))
+        category_id_object = request.env['product.category'].sudo().browse(int(category_id))
 
         if category_id_object.child_id:
             all_child_ids = get_all_child_ids(category_id_object)
@@ -129,12 +129,12 @@ class APIController(http.Controller):
         else:
             domain = [('categ_id', '=', int(category_id))]
 
-        pricelist = request.env['product.pricelist'].browse(pricelist_id)
+        pricelist = request.env['product.pricelist'].sudo().browse(pricelist_id)
         if not pricelist:
             return invalid_response(
                 "Pricelist Not Found", 403,
             )
-        product_ids = request.env['product.product'].search(domain)
+        product_ids = request.env['product.product'].sudo().search(domain)
         all_product_list = []
         for product in product_ids:
             line = pricelist.item_ids.filtered(lambda line: line.product_tmpl_id.product_variant_id.id == product.id)
@@ -159,9 +159,9 @@ class APIController(http.Controller):
                     }
                 )
 
-        location_ids = request.env['res.users'].browse(user_id).allowed_locations
+        location_ids = request.env['res.users'].sudo().browse(user_id).allowed_locations
 
-        quants = request.env['stock.quant'].search([
+        quants = request.env['stock.quant'].sudo().search([
             ('location_id', 'in', location_ids.ids), ('product_id', '=', product_ids.ids)
         ])
 
@@ -181,13 +181,13 @@ class APIController(http.Controller):
         d2 = all_product_list
 
         model = 'product.product'
-        fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1)
+        fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
         if not fetch_id:
             return invalid_response(
                 "invalid object model", "The model %s is not available in the registry." % model,
             )
         field_names = [rec.name for rec in fetch_id.field_ids]
-        d1 = request.env['product.product'].search_read(domain=[('id', 'in', product_ids.ids)], fields=field_names, )
+        d1 = request.env['product.product'].sudo().search_read(domain=[('id', 'in', product_ids.ids)], fields=field_names, )
 
         d1_dict = {item['id']: item for item in d1}
 
@@ -222,12 +222,12 @@ class APIController(http.Controller):
                 "missing error", "either of the following are missing [category_id, pricelist_id,user_id]", 403,
             )
 
-        pricelist = request.env['product.pricelist'].browse(pricelist_id)
+        pricelist = request.env['product.pricelist'].sudo().browse(pricelist_id)
         if not pricelist:
             return invalid_response(
                 "Pricelist Not Found", 403,
             )
-        product_ids = request.env['product.product'].search([])
+        product_ids = request.env['product.product'].sudo().search([])
         all_product_list = []
         for product in product_ids:
             line = pricelist.item_ids.filtered(lambda line: line.product_tmpl_id.product_variant_id.id == product.id)
@@ -252,10 +252,10 @@ class APIController(http.Controller):
                     }
                 )
 
-        location_ids = request.env['res.users'].browse(user_id).allowed_locations
+        location_ids = request.env['res.users'].sudo().browse(user_id).allowed_locations
 
 
-        quants = request.env['stock.quant'].search([
+        quants = request.env['stock.quant'].sudo().search([
             ('location_id', 'in', location_ids.ids), ('product_id', '=', product_ids.ids)
         ])
 
@@ -275,13 +275,13 @@ class APIController(http.Controller):
         d2 = all_product_list
 
         model = 'product.product'
-        fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1)
+        fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
         if not fetch_id:
             return invalid_response(
                 "invalid object model", "The model %s is not available in the registry." % model,
             )
         field_names = [rec.name for rec in fetch_id.field_ids]
-        d1 = request.env['product.product'].search_read(domain=[('id', 'in', product_ids.ids)], fields=field_names, )
+        d1 = request.env['product.product'].sudo().search_read(domain=[('id', 'in', product_ids.ids)], fields=field_names, )
 
         d1_dict = {item['id']: item for item in d1}
 
@@ -309,13 +309,13 @@ class APIController(http.Controller):
             )
 
 
-        product_id=request.env['product.product'].browse(product_id)
+        product_id=request.env['product.product'].sudo().browse(product_id)
         if not product_id:
             return invalid_response(
                 "  Product Id Not Found.",
             )
         domain = [('category_id', '=', product_id.uom_id.category_id.id)]
-        uom_ids=request.env['uom.uom'].search(domain)
+        uom_ids=request.env['uom.uom'].sudo().search(domain)
 
         uom_data=[]
         for uom_id in uom_ids:
@@ -338,7 +338,7 @@ class APIController(http.Controller):
 
         model = 'account.move.line'
 
-        fetch_id = request.env['fetch.data'].search([("model_id.model", "=", model)], limit=1,order='id desc')
+        fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1,order='id desc')
 
         if not fetch_id:
             return invalid_response(
@@ -351,9 +351,9 @@ class APIController(http.Controller):
 
         print(fields)
         try:
-            model = request.env[self._model].search([("model", "=", model)], limit=1,order='id desc')
+            model = request.env[self._model].sudo().search([("model", "=", model)], limit=1,order='id desc')
             if model:
-                data = request.env[model.model].search_read(
+                data = request.env[model.model].sudo().search_read(
                     domain=domain, fields=self.get_allowed_fields(fetch_id),order="id ASC",
                 )
                 return valid_response(data=data)
@@ -493,7 +493,7 @@ class APIController(http.Controller):
                 "Missing quotation  Id.",
             )
 
-        quotation_obj=request.env['sale.order'].browse(int(quotation_id))
+        quotation_obj=request.env['sale.order'].sudo().browse(int(quotation_id))
         if quotation_obj.state=='sale' :
             return werkzeug.wrappers.Response(
                 status=200,
@@ -536,8 +536,8 @@ class APIController(http.Controller):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
-        invoice_obj=request.env['account.move'].browse(int(invoice_id))
-        payment = request.env['account.payment'].create({
+        invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
+        payment = request.env['account.payment'].sudo().create({
             'currency_id': invoice_obj.currency_id.id,
             'amount': amount,
             'payment_type': 'inbound',
@@ -581,7 +581,7 @@ class APIController(http.Controller):
                 "missing error", "either of the following are missing [journal, payment_type, amount,partner ,partner_type]", 403,
             )
         try:
-            payment=request.env['account.payment'].create({
+            payment=request.env['account.payment'].sudo().create({
                 'amount': float(amount),
                 'payment_type': payment_type,
                 'partner_id': int(partner),
@@ -634,7 +634,7 @@ class APIController(http.Controller):
                     })
                 )
             global_discount=data.get('global_discount')
-            gift=data.get('gift')
+            gifts=data.get('gifts')
             if global_discount:
                     order_lines.append(
                         (0, 0, {
@@ -644,16 +644,17 @@ class APIController(http.Controller):
 
                         })
                     )
-            if gift:
-                order_lines.append(
-                    (0, 0, {
-                        'product_id': int(gift.get('product_id')),
-                        'sale_order_note': gift.get('gift_note'),
-                         'product_uom_qty': 1,
-                        'price_unit': 0.0,
+            if gifts:
+                for gift in gifts:
+                    order_lines.append(
+                        (0, 0, {
+                            'product_id': int(gift.get('product_id')),
+                            'sale_order_note': gift.get('note'),
+                             'product_uom_qty': 1,
+                            'price_unit': 0.0,
 
-                    })
-                )
+                        })
+                    )
 
             sale_order = request.env['sale.order'].create_order({
                 'partner_id': data.get('partner_id'),
@@ -661,7 +662,7 @@ class APIController(http.Controller):
                 'date_order': data.get('date_order'),
                 'notes_for_customer': data.get('notes_for_customer'),
                 'note': data.get('note'),
-                'company_id': request.env['res.users'].browse(data.get('user_id')).company_id.id,
+                'company_id': request.env['res.users'].sudo().browse(data.get('user_id')).company_id.id,
                 'order_line': order_lines,
 
                 # Add other relevant fields
@@ -728,8 +729,8 @@ class APIController(http.Controller):
                 "Missing Order Id.",
             )
 
-        order = request.env['sale.order'].browse(int(order_id))
-        order._create_invoices()
+        order = request.env['sale.order'].sudo().browse(int(order_id))
+        order.sudo()._create_invoices()
 
         return werkzeug.wrappers.Response(
             status=200,
