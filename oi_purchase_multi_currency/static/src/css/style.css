@@ -1,0 +1,6 @@
+.oe_no_after:after {
+	content: "" !important;
+}
+.o_td_label_no_width > tbody > tr > td.o_td_label {
+	min-width : unset !important;
+}
