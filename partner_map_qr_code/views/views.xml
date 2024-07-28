@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="qr_res_partner_form_view" model="ir.ui.view">
+        <field name="name"> res.partner.form.qr</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <field name="category_id" position="after">
+                <field name="map_url" widget="url" />
+                <field name="map_qr" widget="image" class="oe_avatar" style="float:left;" />
+            </field>
+        </field>
+    </record>
+</odoo>

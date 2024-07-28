@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_res_partner">
+        <t t-call="web.html_container">
+            <t t-call="partner_map_qr_code.report_res_partner_document" />
+        </t>
+    </template>
+    <template id="report_res_partner_document">
+        <t t-call="web.external_layout">
+            <div class="page mt16">
+                <!-- <style>
+                .table.qr-table>tbody>tr>td {
+                    padding-top: 20px;
+                    padding-bottom: 20px;
+                }
+
+                .table.qr-table>thead>tr>th {
+                    border-top: none;
+                }
+                </style> -->
+                <div class="col-xs-12">
+                    <div class="row">
+                        <div class="col-8"><strong>Address</strong></div>
+                        <div class="col-4"><strong>QR-Code</strong></div>
+                    </div>
+                    <t t-foreach="docs" t-as="partner">
+                        <div class="row">
+                            <div class="col-8 mt-5">
+                                <span t-field="partner.name" /><br />
+                                <span t-field="partner.street" /><br />
+                                <span t-field="partner.city" /><br />
+                                <span t-field="partner.zip" /><br />
+                                <span t-field="partner.country_id" />
+                            </div>
+                            <div class="col-4 mt-5">
+                                <img t-attf-src="/web/image/res.partner/#{partner.id}/map_qr" alt="Qr-Code" style="max-height: 150px; max-width: 150px; border: none; align: center;" />
+                            </div>
+                        </div>
+                    </t>
+                </div>
+                <div class="clearfix" />
+            </div>
+        </t>
+    </template>
+</odoo>
