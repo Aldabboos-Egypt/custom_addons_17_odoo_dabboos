@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_contacts" model="ir.actions.report">
+        <field name="name">Address / QR report</field>
+        <field name="model">res.partner</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">partner_map_qr_code.report_res_partner</field>
+        <field name="report_file">partner_map_qr_code.report_res_partner</field>
+        <field name="print_report_name">'Contact-INFO'</field>
+        <field name="binding_model_id" ref="base.model_res_partner" />
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
