@@ -7,13 +7,13 @@
             <form string="Send WhatsApp">
                 <field name="invalid_phone_number_count" invisible="1"/>
                 <t invisible="invalid_phone_number_count == 0">
-                    <div colspan="2" class="alert alert-danger text-center mb-0" role="alert" invisible="batch_mode">
+                    <div class="alert alert-danger text-center" role="alert" invisible="batch_mode">
                         <p class="my-0">
                             <strong>Invalid number: </strong>
                             <span>make sure to set a country on the Contact or to specify the country code.</span>
                         </p>
                     </div>
-                    <div colspan="2" class="alert alert-info text-center mb-0" role="alert" invisible="not batch_mode">
+                    <div class="alert alert-info text-center" role="alert" invisible="not batch_mode">
                         <p class="my-0">
                             <field class="oe_inline fw-bold" name="invalid_phone_number_count"/> recipients have an invalid phone number and will be skipped.
                         </p>
@@ -25,13 +25,16 @@
                         <field name="res_model" invisible="1"/>
                         <field name="number_of_free_text" invisible="1"/>
                         <field name="number_of_free_text_button" invisible="1"/>
-                         <field name="is_header_free_text" invisible="1"/>
+                        <field name="is_header_free_text" invisible="1"/>
                         <field name="is_button_dynamic" invisible="1"/>
                         <field name="batch_mode" invisible="1"/>
+                        <field name="wa_account_id"
+                            options="{'no_create_edit': True, 'no_create': True, 'no_open': True}"
+                          />
                         <field name="wa_template_id"
                             options="{'no_create_edit': True, 'no_create': True, 'no_open': True}"
-                            domain="[('model', '=', res_model), ('status', '=', 'approved')]"/>
-                        <field name="phone" readonly="batch_mode" required="1"/>
+                            domain="[('model', '=', res_model) ]"/>
+                        <field name="phone" invisible="batch_mode" required="not batch_mode"/>
                         <field name="header_text_1" invisible="not is_header_free_text" required="is_header_free_text" readonly="0"/>
                         <field name="free_text_1" invisible="number_of_free_text &lt; 1" required="number_of_free_text &gt;= 1" readonly="0"/>
                         <field name="free_text_2" invisible="number_of_free_text &lt; 2" required="number_of_free_text &gt;= 2" readonly="0"/>

@@ -1,5 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+import json
 import logging
 import mimetypes
 import secrets
@@ -24,10 +24,10 @@ class WhatsAppAccount(models.Model):
     name = fields.Char(string="Name", tracking=1)
     active = fields.Boolean(default=True, tracking=6)
 
-    app_uid = fields.Char(string="App ID", required=True, tracking=2)
-    app_secret = fields.Char(string="App Secret", groups='whatsapp.group_whatsapp_admin', required=True)
+    app_uid = fields.Char(string="App ID",  )
+    app_secret = fields.Char(string="App Secret", )
     account_uid = fields.Char(string="Account ID", required=True, tracking=3)
-    phone_uid = fields.Char(string="Phone Number ID", required=True, tracking=4)
+    phone_uid = fields.Char(string="Phone Number ID",  )
     token = fields.Char(string="Access Token", required=True, groups='whatsapp.group_whatsapp_admin')
     webhook_verify_token = fields.Char(string="Webhook Verify Token", compute='_compute_verify_token',
                                        groups='whatsapp.group_whatsapp_admin', store=True)
@@ -73,13 +73,13 @@ class WhatsAppAccount(models.Model):
             It will create new templates and update existing templates.
         """
         self.ensure_one()
-        wa_api = WhatsAppApi(self)
-        WhatsappTemplate = self.env['whatsapp.template']
         try:
-            response = wa_api._get_all_template()
-        except WhatsAppError as e:
-            raise ValidationError(str(e))
-        existing_tmpls = WhatsappTemplate.search([('wa_account_id', '=', self.id)])
+            response = WhatsAppApi(self)._get_all_template()
+        except WhatsAppError as err:
+            raise ValidationError(str(err)) from err
+
+        WhatsappTemplate = self.env['whatsapp.template']
+        existing_tmpls = WhatsappTemplate.with_context(active_test=False).search([('wa_account_id', '=', self.id)])
         existing_tmpl_by_id = {t.wa_template_uid: t for t in existing_tmpls}
         template_update_count = 0
         template_create_count = 0
@@ -104,18 +104,31 @@ class WhatsAppAccount(models.Model):
                     Template Created count %d
                     Template Updated count %d
                     """, template_create_count, template_update_count),
+                'next': {'type': 'ir.actions.act_window_close'},
             }
         }
 
     def button_test_connection(self):
-        """ Test connection of the WhatsApp Business Account. with the given credentials.
-        """
+        import requests
+
+        url = f"https://api.ultramsg.com/{self.account_uid}/instance/status"
+
+        querystring = {
+            "token": self.token
+        }
+
+        headers = {'content-type': 'application/x-www-form-urlencoded'}
+
+        response = requests.request("GET", url, headers=headers, params=querystring)
+
+
+        data = json.loads(response.content)
+        if "error" in data:
+            raise UserError(str(data["error"]))
+
+
         self.ensure_one()
-        wa_api = WhatsAppApi(self)
-        try:
-            wa_api._test_connection()
-        except WhatsAppError as e:
-            raise UserError(str(e))
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -139,12 +152,14 @@ class WhatsAppAccount(models.Model):
 
     def _find_active_channel(self, sender_mobile_formatted, sender_name=False, create_if_not_found=False):
         """This method will find the active channel for the given sender mobile number."""
+        self.ensure_one()
         allowed_old_msg_date = fields.Datetime.now() - timedelta(
             days=self.env['whatsapp.message']._ACTIVE_THRESHOLD_DAYS)
         whatsapp_message = self.env['whatsapp.message'].sudo().search(
             [
                 ('mobile_number_formatted', '=', sender_mobile_formatted),
                 ('create_date', '>', allowed_old_msg_date),
+                ('wa_account_id', '=', self.id),
                 ('wa_template_id', '!=', False),
                 ('state', 'not in', ['outgoing', 'error', 'cancel']),
             ], limit=1, order='id desc')
@@ -180,8 +195,8 @@ class WhatsAppAccount(models.Model):
             sender_name = value.get('contacts', [{}])[0].get('profile', {}).get('name')
             sender_mobile = messages['from']
             message_type = messages['type']
-            if 'context' in messages:
-                parent_whatsapp_message = self.env['whatsapp.message'].sudo().search([('msg_uid', '=', messages['context'].get('id'))])
+            if 'context' in messages and messages['context'].get('id'):
+                parent_whatsapp_message = self.env['whatsapp.message'].sudo().search([('msg_uid', '=', messages['context']['id'])])
                 if parent_whatsapp_message:
                     parent_id = parent_whatsapp_message.mail_message_id
                 if parent_id:

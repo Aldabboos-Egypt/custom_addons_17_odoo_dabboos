@@ -9,6 +9,7 @@ from datetime import timedelta
 
 from odoo import models, fields, api, _, Command
 from odoo.addons.phone_validation.tools import phone_validation
+from odoo.addons.whatsapp.tools import phone_validation as wa_phone_validation
 from odoo.addons.whatsapp.tools.retryable_codes import WHATSAPP_RETRYABLE_ERROR_CODES
 from odoo.addons.whatsapp.tools.whatsapp_api import WhatsAppApi
 from odoo.addons.whatsapp.tools.whatsapp_exception import WhatsAppError
@@ -23,6 +24,8 @@ class WhatsAppMessage(models.Model):
     _order = 'id desc'
     _rec_name = 'mobile_number'
 
+    # Refer to https://developers.facebook.com/docs/whatsapp/cloud-api/reference/media/#supported-media-types
+    # for more details about supported media types
     _SUPPORTED_ATTACHMENT_TYPE = {
         'audio': ('audio/aac', 'audio/mp4', 'audio/mpeg', 'audio/amr', 'audio/ogg'),
         'document': (
@@ -32,14 +35,16 @@ class WhatsAppMessage(models.Model):
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ),
         'image': ('image/jpeg', 'image/png'),
-        'video': ('video/mp4', 'video/3gp'),
+        'video': ('video/mp4',),
     }
     # amount of days during which a message is considered active
     # used for GC and for finding an active document channel using a recent whatsapp template message
     _ACTIVE_THRESHOLD_DAYS = 15
 
     mobile_number = fields.Char(string="Sent To")
-    mobile_number_formatted = fields.Char(compute="_compute_mobile_number_formatted", store=True)
+    mobile_number_formatted = fields.Char(
+        string="Mobile Number Formatted",
+        compute="_compute_mobile_number_formatted", readonly=False, store=True)
     message_type = fields.Selection([
         ('outbound', 'Outbound'),
         ('inbound', 'Inbound')], string="Message Type", default='outbound')
@@ -56,7 +61,7 @@ class WhatsAppMessage(models.Model):
         ('blacklisted', 'Phone is blacklisted'),
         ('network', 'Invalid query or unreachable endpoint'),
         ('phone_invalid', 'Phone number in the wrong format'),
-        ('template', 'Template cannot be used'),
+        ('template', 'Template quality rating too low'),
         ('unknown', 'Unidentified error'),
         ('whatsapp_recoverable', 'Fixable Whatsapp error'),
         ('whatsapp_unrecoverable', 'Unfixable Whatsapp error')
@@ -79,8 +84,14 @@ class WhatsAppMessage(models.Model):
         for message in self:
             recipient_partner = message.mail_message_id.partner_ids[0] if message.mail_message_id.partner_ids else self.env['res.partner']
             country = recipient_partner.country_id if recipient_partner.country_id else self.env.company.country_id
-            sanitized_number = message._phone_format(number=message.mobile_number, country=country)
-            message.mobile_number_formatted = '' if not sanitized_number else self._get_formatted_number(sanitized_number, country.code)
+            formatted = wa_phone_validation.wa_phone_format(
+                country,  # could take mail.message record as context but seems overkill
+                number=message.mobile_number,
+                country=country,
+                force_format="WHATSAPP",
+                raise_exception=False,
+            )
+            message.mobile_number_formatted = formatted or ''
 
     # ------------------------------------------------------------
     # CRUD
@@ -92,14 +103,27 @@ class WhatsAppMessage(models.Model):
         messages = super().create(vals)
         for message in messages:
             body = html2plaintext(message.body)
-            if message.message_type == 'inbound':
-                number = '+' + message['mobile_number']
-                message = re.findall('([a-zA-Z]+)', body)
-                message_string = "".join(i.lower() for i in message)
-                if message_string in self._get_opt_out_message():
-                    self.env['phone.blacklist'].sudo().add(number=number, message=_("User has been opt out of receiving WhatsApp messages"))
-                else:
-                    self.env['phone.blacklist'].sudo().remove(number=number, message=_("User has opted in to receiving WhatsApp messages"))
+            if message.message_type == 'inbound' and message.mobile_number_formatted:
+                body_message = re.findall('([a-zA-Z]+)', body)
+                message_string = "".join(i.lower() for i in body_message)
+                try:
+                    if message_string in self._get_opt_out_message():
+                        self.env['phone.blacklist'].sudo().add(
+                            number=f'+{message.mobile_number_formatted}',  # from WA to E164 format
+                            message=_("User has been opt out of receiving WhatsApp messages"),
+                        )
+                    else:
+                        self.env['phone.blacklist'].sudo().remove(
+                            number=f'+{message.mobile_number_formatted}',  # from WA to E164 format
+                            message=_("User has opted in to receiving WhatsApp messages"),
+                        )
+                except UserError:
+                    # there was something wrong with number formatting that cannot be
+                    # accepted by the blacklist -> simply skip, better be defensive
+                    _logger.warning(
+                        'Whatsapp: impossible to change opt-in status of %s (formatted as %s) as it is not a valid number (whatsapp.message-%s)',
+                        message.mobile_number, message.mobile_number_formatted, message.id
+                    )
         return messages
 
     @api.autovacuum
@@ -134,6 +158,8 @@ class WhatsAppMessage(models.Model):
         :examples:
         '+919999912345' -> '919999912345'
         :return: formatted mobile number
+
+        TDE FIXME: remove in master
         """
         mobile_number_parse = phone_validation.phone_parse(sanitized_number, country_code)
         return f'{mobile_number_parse.country_code}{mobile_number_parse.national_number}'
@@ -216,7 +242,10 @@ class WhatsAppMessage(models.Model):
 
         for whatsapp_message in self:
             wa_api = message_to_api[whatsapp_message]
-            whatsapp_message = whatsapp_message.with_user(whatsapp_message.create_uid)
+            # try to make changes with current user (notably due to ACLs), but limit
+            # to internal users to avoid crash - rewrite me in master please
+            if whatsapp_message.create_uid._is_internal():
+                whatsapp_message = whatsapp_message.with_user(whatsapp_message.create_uid)
             if whatsapp_message.state != 'outgoing':
                 _logger.info("Message state in %s state so it will not sent.", whatsapp_message.state)
                 continue
@@ -230,11 +259,13 @@ class WhatsAppMessage(models.Model):
                 number = whatsapp_message.mobile_number_formatted
                 if not number:
                     raise WhatsAppError(failure_type='phone_invalid')
-                if self.env['phone.blacklist'].sudo().search([('number', 'ilike', number)]):
+                if self.env['phone.blacklist'].sudo().search([('number', 'ilike', number), ('active', '=', True)]):
                     raise WhatsAppError(failure_type='blacklisted')
+
+                # based on template
                 if whatsapp_message.wa_template_id:
                     message_type = 'template'
-                    if whatsapp_message.wa_template_id.status != 'approved' or whatsapp_message.wa_template_id.quality in ('red', 'yellow'):
+                    if whatsapp_message.wa_template_id.status != 'approved' or whatsapp_message.wa_template_id.quality == 'red':
                         raise WhatsAppError(failure_type='template')
                     whatsapp_message.message_type = 'outbound'
                     if whatsapp_message.mail_message_id.model != whatsapp_message.wa_template_id.model:
@@ -242,15 +273,21 @@ class WhatsAppMessage(models.Model):
 
                     RecordModel = self.env[whatsapp_message.mail_message_id.model].with_user(whatsapp_message.create_uid)
                     from_record = RecordModel.browse(whatsapp_message.mail_message_id.res_id)
+
+                    # if retrying message then we need to unlink previous attachment
+                    # in case of header with report in order to generate it again
+                    if whatsapp_message.wa_template_id.report_id and whatsapp_message.wa_template_id.header_type == 'document' and whatsapp_message.mail_message_id.attachment_ids:
+                        whatsapp_message.mail_message_id.attachment_ids.unlink()
+
+                    # generate sending values, components and attachments
                     send_vals, attachment = whatsapp_message.wa_template_id._get_send_template_vals(
-                        record=from_record, free_text_json=whatsapp_message.free_text_json,
-                        attachment=whatsapp_message.mail_message_id.attachment_ids)
-                    if attachment:
-                        # If retrying message then we need to remove previous attachment and add new attachment.
-                        if whatsapp_message.mail_message_id.attachment_ids and whatsapp_message.wa_template_id.header_type == 'document' and whatsapp_message.wa_template_id.report_id:
-                            whatsapp_message.mail_message_id.attachment_ids.unlink()
-                        if attachment not in whatsapp_message.mail_message_id.attachment_ids:
-                            whatsapp_message.mail_message_id.attachment_ids = [Command.link(attachment.id)]
+                        record=from_record,
+                        free_text_json=whatsapp_message.free_text_json,
+                        attachment=whatsapp_message.mail_message_id.attachment_ids,
+                    )
+                    if attachment and attachment not in whatsapp_message.mail_message_id.attachment_ids:
+                        whatsapp_message.mail_message_id.attachment_ids = [(4, attachment.id)]
+                # no template
                 elif whatsapp_message.mail_message_id.attachment_ids:
                     attachment_vals = whatsapp_message._prepare_attachment_vals(whatsapp_message.mail_message_id.attachment_ids[0], wa_account_id=whatsapp_message.wa_account_id)
                     message_type = attachment_vals.get('type')
@@ -311,17 +348,29 @@ class WhatsAppMessage(models.Model):
         channel = self.wa_account_id._find_active_channel(self.mobile_number_formatted)
         if not channel:
             return
-        model_name = self.env[self.mail_message_id.model].display_name
-        info = _("Template %(template_name)s was sent from another model", template_name=self.wa_template_id.name)
+
+        model_name = False
+        if self.mail_message_id.model:
+            model_name = self.env['ir.model']._get(self.mail_message_id.model).display_name
         if model_name:
             info = _("Template %(template_name)s was sent from %(model_name)s",
                      template_name=self.wa_template_id.name, model_name=model_name)
-        url = Markup("{base_url}/web#model={model}&id={res_id}").format(
-            base_url=self.get_base_url(), model=self.mail_message_id.model, res_id=self.mail_message_id.res_id)
+        else:
+            info = _("Template %(template_name)s was sent from another model",
+                     template_name=self.wa_template_id.name)
+
+        record_name = self.mail_message_id.record_name
+        if not record_name and self.mail_message_id.res_id:
+            record_name = self.env[self.mail_message_id.model].browse(self.mail_message_id.res_id).display_name
+
+        url = f"{self.get_base_url()}/web#model={self.mail_message_id.model}&id={self.mail_message_id.res_id}"
         channel.sudo().message_post(
             message_type='notification',
-            body=Markup('<p>{info}<a target="_blank" href="{url}">{record_name}</a></p>').format(
-                info=info, url=url, record_name=self.mail_message_id.record_name)
+            body=Markup('<p>{info} <a target="_blank" href="{url}">{record_name}</a></p>').format(
+                info=info,
+                url=url,
+                record_name=record_name,
+            ),
         )
 
     @api.model
@@ -389,6 +438,7 @@ class WhatsAppMessage(models.Model):
         if notification_type:
             self.env['bus.bus']._sendone(channel, notification_type, {
                 'channel_id': channel.id,
+                'id': channel_member.id,
                 'last_message_id': self.mail_message_id.id,
                 'partner_id': channel.whatsapp_partner_id.id,
             })
