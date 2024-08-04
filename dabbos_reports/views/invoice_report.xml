@@ -91,6 +91,8 @@
                         <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)"
                              style="height:135px;width:216px;" alt="Logo"/>
                         <br/>
+                              <img t-if="doc.partner_id.map_qr" t-att-src="image_data_uri(doc.partner_id.map_qr)"
+                             style="height:130px;width:150px;margin-left:30px"  />
                     </div>
 
 
