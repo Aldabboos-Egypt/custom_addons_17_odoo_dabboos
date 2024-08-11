@@ -13,7 +13,7 @@
     'category': 'reports',
     'version': '17.0',
 
-    'depends': ['base','account','sale','nati_arabic_font'],
+    'depends': ['base','account','sale','nati_arabic_font','partner_map_qr_code'],
 
     'data': [
 
