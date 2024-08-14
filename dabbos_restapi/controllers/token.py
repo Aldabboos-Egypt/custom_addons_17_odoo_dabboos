@@ -140,6 +140,9 @@ class AccessToken(http.Controller):
         access_token = request.env["api.access_token"].find_one_or_create_token(user_id=uid, create=True)
         # Successful response:
 
+        user_id=request.env['res.users'].browse(uid)
+
+
 
         return werkzeug.wrappers.Response(
             status=200,
@@ -149,6 +152,7 @@ class AccessToken(http.Controller):
                 {
                     "message": "Valid",
                     "access_token": access_token,
+                    'image': str(user_id.image_1920),
 
 
                 }

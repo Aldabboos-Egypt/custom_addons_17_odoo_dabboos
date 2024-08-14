@@ -1,6 +1,6 @@
 {
     "name": "Dabbos Rest API",
-    "version": "17.0",
+    "version": "17.2",
     "category": "API",
     "summary": "Dabbos Rest API",
 

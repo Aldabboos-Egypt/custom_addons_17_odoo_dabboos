@@ -19,6 +19,10 @@
                           <group>
                           <field name="allowed_locations" options="{'no_create': True}"  widget="many2many_tags"/>
                        <field name="is_admin"/>
+
+                                    <field name="allow_edit_customer_location"/>
+                    <field name="allow_order_outof_location"/>
+                    <field name="show_qty"/>
                           </group>
 
                       </page>

@@ -125,7 +125,25 @@ class ResUsers(models.Model):
 
     allowed_locations = fields.Many2many(
         comodel_name='stock.location',
-        string='Allowed Locations')
+        string='Allowed Locations',
+        default=lambda self: self.env['stock.location'].search([('usage', '=', 'internal')])
+    )
+
+
+    allow_edit_customer_location = fields.Boolean(
+        string="Allow to Edit Customer Location",
+        help="Enable this option to allow the user to edit the customer location."
+    )
+    allow_order_outof_location = fields.Boolean(
+        string="Allow to Make Order Out of Customer Location",
+        help="Enable this option to allow the user to create orders outside of the customer's location."
+    )
+    show_qty = fields.Boolean(
+        string="Show Quantity",
+        help="Enable this option to allow the user to view product quantities."
+    )
+
+
 
     def _get_qty(self):
         with self.pool.cursor() as cr:
