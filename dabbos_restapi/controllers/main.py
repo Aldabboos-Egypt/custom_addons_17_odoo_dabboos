@@ -680,6 +680,48 @@ class APIController(http.Controller):
                 ),
             )
 
+    @validate_token
+    @http.route('/salesperson/create_visit', methods=["POST"], type="http", auth="none", csrf=False)
+    def create_visit(self, **kwargs):
+        partner_id = int(kwargs.get("partner_id"))
+        user_id = int(kwargs.get("user_id"))
+        from_time = kwargs.get("from_time").strip('"')
+        to_time = kwargs.get("to_time").strip('"')
+        notes = kwargs.get("notes", "")
+
+        # Validate required parameters
+        if not (partner_id and user_id and from_time and to_time):
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Missing required parameters."}),
+            )
+
+        # Create the sales.visit record
+        try:
+            visit = request.env['sales.visit'].sudo().create({
+                 'partner_id': partner_id,
+                'user_id': user_id,
+                'from_time': from_time,
+                'to_time': to_time,
+                'notes': notes,
+            })
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": True, "visit_id": visit.id}),
+            )
+
+        except Exception as e:
+            return werkzeug.wrappers.Response(
+                status=500,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": str(e)}),
+            )
 
     @validate_token
     @http.route('/salesperson/create_invoice', methods=["post"], type="http", auth="none", csrf=False)

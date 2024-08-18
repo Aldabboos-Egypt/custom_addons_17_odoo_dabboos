@@ -3,7 +3,7 @@ import json
 
 from odoo import api, models, fields,SUPERUSER_ID
 
-from odoo import api, fields, models
+from odoo import api, fields, models,_
 
 
 class IrModel(models.Model):
@@ -30,6 +30,27 @@ class FetchData(models.Model):
 
 class Partner(models.Model):
     _inherit = "res.partner"
+
+    visit_count = fields.Integer(string='Visits', compute='_compute_visit_count')
+
+
+
+
+    def _compute_visit_count(self):
+        for partner in self:
+            partner.visit_count = self.env['sales.visit'].search_count([('partner_id', '=', partner.id)])
+
+    def action_view_visits(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Visits',
+            'view_mode': 'tree,form',
+            'res_model': 'sales.visit',
+            'domain': [('partner_id', '=', self.id)],
+            'context': dict(self._context, create=False),
+        }
+
 
     area = fields.Char(string='Area')
     state = fields.Char(string='State')
@@ -172,3 +193,31 @@ class SaleOrderLineInherit(models.Model):
     _inherit = 'sale.order.line'
 
     sale_order_note = fields.Char("Notes")
+
+
+class SalesVisit(models.Model):
+    _name = 'sales.visit'
+    _description = 'Sales Visit'
+
+    @api.model
+    def create(self, vals):
+        if not vals.get('name') or vals['name'] == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('visit.seq') or _('New')
+        return super(SalesVisit, self).create(vals)
+
+    name = fields.Char(string='Name' )
+    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
+    user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
+    from_time = fields.Datetime(string='From Time', required=True)
+    to_time = fields.Datetime(string='To Time', required=True)
+    duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
+    notes = fields.Char(string='Notes')
+
+    @api.depends('from_time', 'to_time')
+    def _compute_duration(self):
+        for visit in self:
+            if visit.from_time and visit.to_time:
+                delta = visit.to_time - visit.from_time
+                visit.duration = delta.total_seconds() / 3600.0 if delta.total_seconds() >= 0 else 0.0
+            else:
+                visit.duration = 0.0
