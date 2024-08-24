@@ -6,6 +6,7 @@ import base64
 from reportlab.graphics.barcode import createBarcodeDrawing
 
 from odoo import api, fields, models
+from urllib.parse import urlparse, parse_qs
 
 
 class ResPartner(models.Model):
@@ -33,6 +34,15 @@ class ResPartner(models.Model):
     @api.onchange('map_url')
     def _onchange_map_url(self):
         self.map_qr = self.get_image(self.map_url, code='QR', width=200, height=200, hr=True) if self.map_url else False
+
+
+        if self.map_qr:
+            parsed_url = urlparse(self.map_url)
+            # The last part of the path contains the coordinates
+            coordinates = parsed_url.path.split('/')[-1]
+            # Split the coordinates to get latitude and longitude
+            self.partner_latitude,self.partner_longitude = coordinates.split(',')
+
 
 
     @api.onchange('partner_latitude','partner_longitude')
