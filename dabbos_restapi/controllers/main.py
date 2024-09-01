@@ -368,10 +368,10 @@ class APIController(http.Controller):
     @http.route('/salesperson/new_customer', methods=["post"], type="http", auth="none", csrf=False)
     def create_customer(self, **post):
 
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization", "user_id"]
+        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization", "user_id"]
 
         params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, partner_latitude, partner_longitude, date_localization, user_id = (
+        name, mobile, phone, city, state_id, street, comment, partner_latitude,map_url, partner_longitude, date_localization, user_id = (
             params.get("name"),
             params.get("mobile"),
             params.get("phone"),
@@ -380,6 +380,7 @@ class APIController(http.Controller):
             params.get("street"),
             params.get("comment"),
             params.get("partner_latitude"),
+            params.get("map_url"),
             params.get("partner_longitude"),
             params.get("date_localization"),
             params.get("user_id")
@@ -401,6 +402,7 @@ class APIController(http.Controller):
                 'street': street,
                 'comment': comment,
                 'partner_latitude': partner_latitude,
+                'map_url': map_url,
                 'partner_longitude': partner_longitude,
                 'date_localization': date_obj,
                 "user_id": int(user_id),
@@ -435,11 +437,11 @@ class APIController(http.Controller):
                 "missing error", "At least one non-empty field is missing", 403,
             )
 
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization", "user_id",
+        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization", "user_id",
                   "customer_id"]
 
         params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, partner_latitude, partner_longitude, date_localization, user_id, customer_id = (
+        name, mobile, phone, city, state_id, street, comment, partner_latitude,map_url, partner_longitude, date_localization, user_id, customer_id = (
             params.get("name"),
             params.get("mobile"),
             params.get("phone"),
@@ -448,6 +450,7 @@ class APIController(http.Controller):
             params.get("street"),
             params.get("comment"),
             params.get("partner_latitude"),
+            params.get("map_url"),
             params.get("partner_longitude"),
             params.get("date_localization"),
             params.get("user_id"),
@@ -460,7 +463,7 @@ class APIController(http.Controller):
         partner = request.env['res.partner'].sudo().browse(int(customer_id))
         if partner:
             # Define the fields that can be updated
-            allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude", "partner_longitude", "date_localization",
+            allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization",
                               "user_id"]
 
             # Filter the allowed fields based on the provided parameters
