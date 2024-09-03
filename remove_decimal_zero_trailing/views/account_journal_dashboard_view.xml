@@ -5,6 +5,7 @@
         <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view" />
         <field name="arch" type="xml">
 
+         <!-- <xpath expr='//div[@id="dashboard_bank_cash_misc_total"]' position='replace'> -->
 
         <xpath expr='//div[@id="dashboard_bank_cash_right"]' position='replace'>
                  <div id="dashboard_bank_cash_right" class="col-12 col-sm-7 o_kanban_primary_right">
@@ -12,11 +13,9 @@
                                 <div id="dashboard_bank_cash_balance" class="col overflow-hidden text-start">
                                     <span>Balance</span>
                                 </div>
-                                <!-- <div id="dashboard_bank_cash_balance" class="col overflow-hidden text-start">
-                                 <a type="object" name="account_reports.action_open_bank_balance_in_gl" title="Last Statement balance + Transactions since statement">Balance</a>
-                                  </div> -->
+                              
                                 <div class="col-auto text-end">
-                                    <span class="o_kanban_monetary"><t t-out="dashboard.currency_symbol + '' + dashboard.account_balance"/></span>
+                                    <span class="o_kanban_monetary"><t t-out="dashboard.account_balance"/></span>
                                 </div>
                             </div>
                             <t t-if="dashboard.has_at_least_one_statement and dashboard.account_balance != dashboard.last_balance">
@@ -37,17 +36,20 @@
                                     <span><t t-out="dashboard.outstanding_pay_account_balance"/></span>
                                 </div>
                             </div>
+                            <t t-if="dashboard.misc_operations_balance != dashboard.last_balance">
                             <div class="row" t-if="dashboard.nb_misc_operations > 0">
                                 <div id="dashboard_bank_cash_misc_total" class="col text-start">
                                     <a type="object" name="open_bank_difference_action" t-att-class="dashboard.misc_class">Misc. Operations</a>
                                 </div>
+                               
                                 <div class="col-auto text-end">
-                                    <span><t t-out="dashboard.currency_symbol + '' + dashboard.misc_operations_balance"/></span>
+                                    <span><t t-out="dashboard.misc_operations_balance"/></span>
                                 </div>
                             </div>
+                            </t>
                         </div>
                 </xpath>
-                 <xpath expr="//t[@id='account.JournalBodySalePurchase']" position="replace">
+                 <!-- <xpath expr="//t[@id='account.JournalBodySalePurchase']" position="replace">
                 <t t-name="JournalBodySalePurchase" id="account.JournalBodySalePurchase">
                         <div class="col-12 col-sm-5 mb-3 mb-sm-0 o_kanban_primary_left">
                             <t t-if="journal_type == 'sale'">
@@ -122,7 +124,10 @@
                             </t>
                         </div>
                     </t>
-                    </xpath>
+                    </xpath> -->
+
+
+
 
                     <!-- <xpath expr="//t[@t-component='JournalMiscelaneous']" position="replace">
                   <t t-name="JournalMiscelaneous">
