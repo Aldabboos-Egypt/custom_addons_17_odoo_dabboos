@@ -1,4 +1,5 @@
 import ast
+import base64
 import functools
 import json
 import logging
@@ -10,7 +11,7 @@ from odoo import http
 from odoo.addons.dabbos_restapi.common import extract_arguments, invalid_response, valid_response
 from odoo.exceptions import AccessError
 from odoo.http import request
-
+from werkzeug.utils import secure_filename
 _logger = logging.getLogger(__name__)
 
 
@@ -505,6 +506,15 @@ class APIController(http.Controller):
                 response=json.dumps(
                     {
                         "status": "Already Confirmed",
+<<<<<<< Updated upstream
+
+
+                    }
+                ),
+            )
+        quotation_obj.action_confirm()
+        if quotation_obj.state=='sale' :
+=======
 
 
                     }
@@ -553,6 +563,18 @@ class APIController(http.Controller):
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
+
+        model = 'account.payment'
+        fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
+        if not fetch_id:
+            return invalid_response(
+                "invalid object model", "The model %s is not available in the registry." % model,
+            )
+        field_names = [rec.name for rec in fetch_id.field_ids]
+        data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
+                                                     fields=field_names, )
+
+
         return werkzeug.wrappers.Response(
             status=200,
             content_type="application/json; charset=utf-8",
@@ -560,12 +582,432 @@ class APIController(http.Controller):
             response=json.dumps(
                 {"status": True,
                     "invoice_state": invoice_obj.payment_state,
+                 "data": data,
+
+                 }
+            ),
+        )
+
+
+    @validate_token
+    @http.route('/salesperson/register_payment_customer', methods=["post"], type="http", auth="none", csrf=False)
+    def register_payment_customer(self, **kwargs):
+        journal = kwargs.get("journal")
+        amount = kwargs.get("amount")
+        memo = kwargs.get("memo")
+        payment_type = kwargs.get("payment_type")
+        partner = kwargs.get("partner")
+        partner_type = kwargs.get("partner_type")
+        confirm_payment = kwargs.get("confirm_payment")
+
+
+        if not all([journal, payment_type, amount,partner ,partner_type]):
+            # Empty 'db' or 'username' or 'password:
+            return invalid_response(
+                "missing error", "either of the following are missing [journal, payment_type, amount,partner ,partner_type]", 403,
+            )
+        try:
+            payment=request.env['account.payment'].sudo().create({
+                'amount': float(amount),
+                'payment_type': payment_type,
+                'partner_id': int(partner),
+                'partner_type': partner_type,
+                'journal_id': int(journal),
+                'ref':memo,
+
+                })
+
+
+
+            if int(confirm_payment)==1:
+                payment.action_post()
+
+            model = 'account.payment'
+            fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
+            if not fetch_id:
+                return invalid_response(
+                    "invalid object model", "The model %s is not available in the registry." % model,
+                )
+            field_names = [rec.name for rec in fetch_id.field_ids]
+            data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
+                                                                   fields=field_names, )
+
+
+
+            print(data)
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        "status": True,
+                        'data':data
+
+
+                     }
+                ),
+            )
+        except:
+            return invalid_response("Not Created")
+
+
+
+    @validate_token
+    @http.route('/salesperson/create_order', methods=["post"], type="http", auth="none", csrf=False)
+    def create_sale_order(self):
+
+            data = json.loads(request.httprequest.data)
+            lines=data.get('sale_order_lines')
+            order_lines=[]
+            for line in lines:
+                order_lines.append(
+                    (0, 0, {
+                        'product_id': int(line.get('product_id')),
+                        'product_uom_qty': line.get('product_uom_qty'),
+                        'discount': line.get('discount'),
+                        'fixed_discount': line.get('fixed_discount'),
+                        'sale_order_note': line.get('sale_order_note'),
+                        'product_uom': line.get('product_uom'),
+
+                        # Add other relevant fields
+                    })
+                )
+            global_discount=data.get('global_discount')
+            gifts=data.get('gifts')
+            if global_discount:
+                    order_lines.append(
+                        (0, 0, {
+                            'product_id': int(global_discount.get('product_id')),
+                            'product_uom_qty': 1,
+                            'price_unit': - float(global_discount.get('price_unit')),
+
+                        })
+                    )
+            if gifts:
+                for gift in gifts:
+                    order_lines.append(
+                        (0, 0, {
+                            'product_id': int(gift.get('product_id')),
+                            'sale_order_note': gift.get('note'),
+                             'product_uom_qty': 1,
+                            'price_unit': 0.0,
+
+                        })
+                    )
+
+            sale_order = request.env['sale.order'].create_order({
+                'partner_id': data.get('partner_id'),
+                'user_id': data.get('user_id'),
+                'date_order': data.get('date_order'),
+                'notes_for_customer': data.get('notes_for_customer'),
+                'note': data.get('note'),
+                'company_id': request.env['res.users'].sudo().browse(data.get('user_id')).company_id.id,
+                'order_line': order_lines,
+
+                # Add other relevant fields
+            })
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+                        'id': sale_order.id, 'name': sale_order.get_name()
+
+                    }
+                ),
+            )
+
+    @validate_token
+    @http.route('/salesperson/apply_program', methods=["POST"], type="http", auth="none", csrf=False)
+    def apply_program(self, **kwargs):
+        sale_id = int(kwargs.get("sale_id"))
+
+        # Validate required parameter
+        if not sale_id:
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Missing required parameters: sale_id."}),
+            )
+
+        # Find the sale.order record
+        sale_order = request.env['sale.order'].sudo().browse(sale_id)
+        if not sale_order.exists():
+            return werkzeug.wrappers.Response(
+                status=404,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Sale order not found."}),
+            )
+
+        # Apply the program reward logic
+        try:
+            sale_order.ensure_one()  # Ensures that we are working with a single sale order record
+
+            # Update programs and rewards
+            sale_order._update_programs_and_rewards()
+
+            # Get claimable rewards
+            claimable_rewards = sale_order._get_claimable_rewards()
+
+            coupon = next(iter(claimable_rewards ))
+
+            print(coupon)
+
+
+            # Apply the reward if exactly one coupon and one reward is found
+            if coupon:
+                sale_order._apply_program_reward(claimable_rewards[coupon], coupon)
+
+                return werkzeug.wrappers.Response(
+                        status=200,
+                        content_type="application/json; charset=utf-8",
+                        headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                        response=json.dumps(
+                            {"status": True, "message": "Program reward applied successfully.", "sale_id": sale_id}),
+                    )
+
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "No valid rewards  ."}),
+            )
+
+        except Exception as e:
+            return werkzeug.wrappers.Response(
+                status=500,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": str(e)}),
+            )
+
+    @validate_token
+    @http.route('/salesperson/create_visit', methods=["POST"], type="http", auth="none", csrf=False)
+    def create_visit(self, **kwargs):
+        # Extract parameters from query
+        partner_id = int(kwargs.get("partner_id"))
+        user_id = int(kwargs.get("user_id"))
+        from_time = kwargs.get("from_time").strip('"')
+        to_time = kwargs.get("to_time").strip('"')
+        notes = kwargs.get("notes", "")
+
+        # Validate required parameters
+        if not (partner_id and user_id and from_time and to_time):
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Missing required parameters."}),
+            )
+
+        try:
+            # Create the sales.visit record
+            visit = request.env['sales.visit'].sudo().create({
+                'partner_id': partner_id,
+                'user_id': user_id,
+                'from_time': from_time,
+                'to_time': to_time,
+                'notes': notes,
+            })
+
+            # Handling image files from the body
+            data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
+            if data_files:
+                for file in data_files:
+                    filename = secure_filename(file.filename)
+                    attachment = request.env['ir.attachment'].sudo().create({
+                        'name': filename,
+                        'res_model': 'sales.visit',
+                        'res_id': visit.id,
+                        'type': 'binary',
+                        'datas': base64.b64encode(file.read()),  # Encode the image in base64
+                        'mimetype': file.content_type,
+                    })
+
+                    visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": True, "visit_id": visit.id}),
+            )
+
+        except Exception as e:
+            return werkzeug.wrappers.Response(
+                status=500,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": str(e)}),
+            )
+    @validate_token
+    @http.route('/salesperson/update_visit', methods=["POST"], type="http", auth="none", csrf=False)
+    def update_visit(self, **kwargs):
+        visit_id = int(kwargs.get("visit_id"))
+        partner_id = int(kwargs.get("partner_id"))
+        user_id = int(kwargs.get("user_id"))
+        from_time = kwargs.get("from_time").strip('"')
+        to_time = kwargs.get("to_time").strip('"')
+        notes = kwargs.get("notes", "")
+
+        # Validate required parameters
+        if not (visit_id and partner_id and user_id and from_time and to_time):
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Missing required parameters."}),
+            )
+
+        # Find the existing sales.visit record
+        visit = request.env['sales.visit'].sudo().browse(visit_id)
+        if not visit:
+            return werkzeug.wrappers.Response(
+                status=404,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Visit not found."}),
+            )
+
+        # Update the sales.visit record
+        try:
+            visit.write({
+                'partner_id': partner_id,
+                'user_id': user_id,
+                'from_time': from_time,
+                'to_time': to_time,
+                'notes': notes,
+            })
+
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": True, "visit_id": visit.id}),
+            )
+
+        except Exception as e:
+            return werkzeug.wrappers.Response(
+                status=500,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": str(e)}),
+            )
+
+    @validate_token
+    @http.route('/salesperson/create_invoice', methods=["post"], type="http", auth="none", csrf=False)
+    def create_invoice(self):
+            invoice_lines = json.loads(request.httprequest.data)
+            data=invoice_lines.get('invoice_lines')
+            lines=[]
+            for line in data:
+                lines.append(
+                    (0, 0, {
+                        'product_id': line.get('product_id'),
+                        'quantity': line.get('quantity'),
+                        'price_unit': line.get('price_unit'),
+                        # Add other relevant fields
+                    })
+                )
+
+            invoice = request.env['account.move'].create_invoice({
+                'partner_id': invoice_lines.get('partner_id'),
+                'invoice_date': invoice_lines.get('date'),
+                'move_type': "out_invoice",
+                'invoice_line_ids': lines,
+                # Add other relevant fields
+            })
+
+
+>>>>>>> Stashed changes
+            return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps(
+                    {
+<<<<<<< Updated upstream
+                        "status": True,
+
+
+                    }
+                ),
+            )
+        return invalid_response("Not Confirmed")
+=======
+                        'success': True, 'invoice_id': invoice.id
+
+                    }
+                ),
+            )
+
+
+    @validate_token
+    @http.route('/salesperson/create_order_invoice', methods=["post"], type="http", auth="none", csrf=False)
+    def create_order_invoice(self, **kwargs):
+        order_id = kwargs.get("order_id")
+
+        if not order_id:
+            return invalid_response(
+                "Missing Order Id.",
+            )
+
+        order = request.env['sale.order'].sudo().browse(int(order_id))
+        order.sudo()._create_invoices()
+>>>>>>> Stashed changes
+
+
+    @validate_token
+    @http.route('/salesperson/register_payment', methods=["post"], type="http", auth="none", csrf=False)
+    def register_payment(self, **kwargs):
+        invoice_id = int(kwargs.get("invoice_id"))
+        journal = int(kwargs.get("journal"))
+        amount = float(kwargs.get("amount"))
+        memo =  kwargs.get("memo")
+
+        if not (invoice_id or journal):
+            return invalid_response(
+                "Missing invoice | Journal Id.",
+            )
+        invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
+        payment = request.env['account.payment'].sudo().create({
+            'currency_id': invoice_obj.currency_id.id,
+            'amount': amount,
+            'payment_type': 'inbound',
+            'partner_id': invoice_obj.commercial_partner_id.id,
+            'partner_type': 'customer',
+            'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
+            'journal_id': journal
+        })
+
+        payment.action_post()
+        line_id = payment.line_ids.filtered(lambda l: l.credit)
+        invoice_obj.js_assign_outstanding_line(line_id.id)
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps(
+<<<<<<< Updated upstream
+                {"status": True,
+                    "invoice_state": invoice_obj.payment_state,
+=======
+                {
+                    "status": True,
+>>>>>>> Stashed changes
 
                 }
             ),
         )
 
 
+<<<<<<< Updated upstream
     @validate_token
     @http.route('/salesperson/register_payment_customer', methods=["post"], type="http", auth="none", csrf=False)
     def register_payment_customer(self, **kwargs):
@@ -790,3 +1232,5 @@ class APIController(http.Controller):
         )
 
 
+=======
+>>>>>>> Stashed changes

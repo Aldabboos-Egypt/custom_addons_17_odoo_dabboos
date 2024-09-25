@@ -100,6 +100,14 @@
                             <field name="notes"/>
                         </group>
                     </sheet>
+<<<<<<< Updated upstream
+=======
+                          <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+>>>>>>> Stashed changes
                 </form>
             </field>
         </record>
