@@ -205,10 +205,7 @@ class SaleOrderLineInherit(models.Model):
 class SalesVisit(models.Model):
     _name = 'sales.visit'
     _description = 'Sales Visit'
-<<<<<<< Updated upstream
-=======
     _inherit = [ 'mail.thread', 'mail.activity.mixin' ]
->>>>>>> Stashed changes
 
     @api.model
     def create(self, vals):
@@ -220,11 +217,7 @@ class SalesVisit(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
     user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
     from_time = fields.Datetime(string='From Time', required=True)
-<<<<<<< Updated upstream
-    to_time = fields.Datetime(string='To Time', required=True)
-=======
     to_time = fields.Datetime(string='To Time',)
->>>>>>> Stashed changes
     duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
     notes = fields.Char(string='Notes')
 
