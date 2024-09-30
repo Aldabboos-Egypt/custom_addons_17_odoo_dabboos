@@ -3,6 +3,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
 from odoo import api, fields, models
+import qrcode
+import base64
+from io import BytesIO
 
 
 
@@ -34,6 +37,28 @@ class AccountMove(models.Model):
     all_discounts = fields.Monetary("Discount ", compute='total_discount')
     partner_balance_before = fields.Monetary("  Balance Before", compute='total_discount')
     partner_balance_after = fields.Monetary("  Balance After", compute='total_discount')
+
+    map_qr_image = fields.Binary("Map QRCode", compute='_generate_map_qrcode', store=True)
+
+
+    @api.depends('partner_id')
+    def _generate_map_qrcode(self):
+        for record in self:
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(record.partner_id.map_url)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill='black', back_color='white')
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            map_qr_image = base64.b64encode(buffer.getvalue())
+            record.map_qr_image = map_qr_image
 
     # Count the total discount
     @api.depends('invoice_line_ids.quantity', 'invoice_line_ids.price_unit', 'invoice_line_ids.discount')
