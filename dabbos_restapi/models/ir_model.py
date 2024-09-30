@@ -98,6 +98,8 @@ class SaleOrder(models.Model):
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).create(vals)
             return res
 
+
+
     def update_order(self, vals):
         with self.pool.cursor() as cr:
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).write(vals)
@@ -108,7 +110,12 @@ class SaleOrder(models.Model):
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).name
             return res
 
+    def get_claimable_rewards_api(self):
+        with self.pool.cursor() as cr:
+            res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID))._get_claimable_rewards()
 
+
+            return res
 
     total_product_api = fields.Integer(string='Total Product Api :',compute='_total_product',help="total Products",store=True,readonly=True)
     total_quantity_api = fields.Integer(string='Total Quantity Api :',compute='_total_quantity',help="total Quantity",store=True,readonly=True)
@@ -198,6 +205,7 @@ class SaleOrderLineInherit(models.Model):
 class SalesVisit(models.Model):
     _name = 'sales.visit'
     _description = 'Sales Visit'
+    _inherit = [ 'mail.thread', 'mail.activity.mixin' ]
 
     @api.model
     def create(self, vals):
@@ -209,7 +217,7 @@ class SalesVisit(models.Model):
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
     user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
     from_time = fields.Datetime(string='From Time', required=True)
-    to_time = fields.Datetime(string='To Time', required=True)
+    to_time = fields.Datetime(string='To Time',)
     duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
     notes = fields.Char(string='Notes')
 
