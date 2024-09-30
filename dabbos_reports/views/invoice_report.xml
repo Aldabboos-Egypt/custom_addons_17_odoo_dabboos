@@ -172,7 +172,7 @@
 
                             <div class="row">
                                 <strong>
-                                    ﺷﺮﻛﺔ اﻟﺪﺑﻮس ﻟﻠﺘﺠﺎرة اﻟﻌﺎﻣﺔ اﻟﻤﺤﺪودة / ﺑﺒﻐﺪاد ﺟﻤﻴﻠﺔ
+                                   <span t-esc="doc.company_id.company_description_ar"/>
                                 </strong>
 
                             </div>
@@ -182,11 +182,7 @@
 
 
                                     <p>
-                                        أزهر : 07728860006 - مهند : 07835000307 - محمود : 07825080333
-                                        -
-                                        انمار
-                                        :
-                                        07825080444
+                                <span t-esc="doc.company_id.contact_information"/>
 
 
                                     </p>

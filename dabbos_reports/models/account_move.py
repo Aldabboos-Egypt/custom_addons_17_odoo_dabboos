@@ -139,6 +139,8 @@ class ProductProduct(models.Model):
 class ResCompany(models.Model):
     _inherit = 'res.company'
     qrcode=  fields.Binary(string="",  )
+    company_description_ar = fields.Text(string='Company Description AR' ,default=' ﺷﺮﻛﺔ اﻟﺪﺑﻮس ﻟﻠﺘﺠﺎرة اﻟﻌﺎﻣﺔ اﻟﻤﺤﺪودة / ﺑﺒﻐﺪاد ﺟﻤﻴﻠﺔ')
+    contact_information = fields.Text(string='Contact Information' ,default="""أزهر : 07728860006 - مهند :  07835000307 -  محمود : 07825080333  - انمار : 07825080444""")
 
 
 class ResPartner(models.Model):
