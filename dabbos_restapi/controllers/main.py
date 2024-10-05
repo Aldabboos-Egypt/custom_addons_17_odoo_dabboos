@@ -389,7 +389,7 @@ class APIController(http.Controller):
         )
         if not all([name]):
             return invalid_response(
-                "missing error", "Name   are missing  ", 403,
+                "missing error", "Name are missing  ", 403,
             )
 
         date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
@@ -690,6 +690,7 @@ class APIController(http.Controller):
 
             sale_order = request.env['sale.order'].create_order({
                 'partner_id': data.get('partner_id'),
+                'pricelist_id': data.get('pricelist_id'),
                 'user_id': data.get('user_id'),
                 'date_order': data.get('date_order'),
                 'notes_for_customer': data.get('notes_for_customer'),
@@ -875,6 +876,26 @@ class APIController(http.Controller):
                 'to_time': to_time,
                 'notes': notes,
             })
+
+
+            # Handling image files from the body
+            data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
+            if data_files:
+                for file in data_files:
+                    filename = secure_filename(file.filename)
+                    attachment = request.env['ir.attachment'].sudo().create({
+                        'name': filename,
+                        'res_model': 'sales.visit',
+                        'res_id': visit.id,
+                        'type': 'binary',
+                        'datas': base64.b64encode(file.read()),  # Encode the image in base64
+                        'mimetype': file.content_type,
+                    })
+
+                    visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+
+
+
 
             return werkzeug.wrappers.Response(
                 status=200,
