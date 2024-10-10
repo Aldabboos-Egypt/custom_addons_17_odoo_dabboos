@@ -113,9 +113,19 @@ class APIController(http.Controller):
     @validate_token
     @http.route("/salesperson/get_products_categories", methods=["GET"], type="http", auth="none", csrf=False)
     def get_products_categories(self):
-        category_id = int(request.httprequest.headers.get("category_id"))
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
-        user_id = int(request.httprequest.headers.get("user_id"))
+     
+
+
+        pricelist_id=request.httprequest.headers.get("pricelist_id")
+        if pricelist_id:
+            pricelist_id = int(pricelist_id.strip('"'))
+        user_id=request.httprequest.headers.get("user_id")
+        if user_id:
+            user_id = int(user_id.strip('"'))
+        category_id=request.httprequest.headers.get("category_id")
+        if category_id:
+            category_id = int(category_id.strip('"'))
+        
 
         data_input = all([category_id, pricelist_id, user_id])
         if not data_input:
@@ -228,10 +238,12 @@ class APIController(http.Controller):
         #
         # return image_url
 
-
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id").strip('"'))
-        user_id = int(request.httprequest.headers.get("user_id").strip('"'))
- 
+        pricelist_id=request.httprequest.headers.get("pricelist_id")
+        if pricelist_id:
+            pricelist_id = int(pricelist_id.strip('"'))
+        user_id=request.httprequest.headers.get("user_id")
+        if user_id:
+            user_id = int(user_id.strip('"'))
 
 
         data_input = all([pricelist_id, user_id])
