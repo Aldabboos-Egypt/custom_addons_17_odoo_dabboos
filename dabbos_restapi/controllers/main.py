@@ -229,8 +229,10 @@ class APIController(http.Controller):
         # return image_url
 
 
-        pricelist_id = int(request.httprequest.headers.get("pricelist_id"))
-        user_id = int(request.httprequest.headers.get("user_id"))
+        pricelist_id = int(request.httprequest.headers.get("pricelist_id").strip('"'))
+        user_id = int(request.httprequest.headers.get("user_id").strip('"'))
+ 
+
 
         data_input = all([pricelist_id, user_id])
         if not data_input:
