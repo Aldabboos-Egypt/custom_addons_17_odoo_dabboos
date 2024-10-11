@@ -542,9 +542,7 @@ class APIController(http.Controller):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
-         
-        _logger.info("REgister Payment 1")
-        _logger.info(journal,type(journal))
+ 
          
         invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
         payment = request.env['account.payment'].sudo().create({
@@ -556,9 +554,7 @@ class APIController(http.Controller):
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
             'journal_id': journal
         })
-          
-        _logger.warning("Payment1")
-
+           
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
