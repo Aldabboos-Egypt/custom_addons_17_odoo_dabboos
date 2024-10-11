@@ -536,10 +536,14 @@ class APIController(http.Controller):
         amount = float(kwargs.get("amount"))
         memo =  kwargs.get("memo")
 
+        
+
         if not (invoice_id or journal):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
+        print("REgister Payment 1" )
+        print("journal",journal,type(journal))    
         invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
         payment = request.env['account.payment'].sudo().create({
             'currency_id': invoice_obj.currency_id.id,
@@ -550,10 +554,13 @@ class APIController(http.Controller):
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
             'journal_id': journal
         })
+        print("REgister Payment 2 " )
+        print("journal",journal,type(journal))
 
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
+        print("REgister Payment 3 " )
 
         model = 'account.payment'
         fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
@@ -564,6 +571,10 @@ class APIController(http.Controller):
         field_names = [rec.name for rec in fetch_id.field_ids]
         data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
                                                      fields=field_names, )
+
+
+        print("REgister Payment 4" )
+
 
 
         return werkzeug.wrappers.Response(
