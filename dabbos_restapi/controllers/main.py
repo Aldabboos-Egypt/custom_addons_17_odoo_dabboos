@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from datetime import datetime
-
+import logging
 import werkzeug
 from odoo import http
 from odoo.addons.dabbos_restapi.common import extract_arguments, invalid_response, valid_response
@@ -542,8 +542,10 @@ class APIController(http.Controller):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
-        print("REgister Payment 1" )
-        print("journal",journal,type(journal))    
+         
+        _logger.info("REgister Payment 1")
+        _logger.info(journal,type(journal))
+         
         invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
         payment = request.env['account.payment'].sudo().create({
             'currency_id': invoice_obj.currency_id.id,
@@ -554,8 +556,8 @@ class APIController(http.Controller):
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
             'journal_id': journal
         })
-        print("REgister Payment 2 " )
-        print("journal",journal,type(journal))
+         _logger.info("REgister Payment 1")
+        _logger.info(journal,type(journal))
 
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
@@ -573,8 +575,8 @@ class APIController(http.Controller):
                                                      fields=field_names, )
 
 
-        print("REgister Payment 4" )
-
+         _logger.info("REgister Payment33")
+ 
 
 
         return werkzeug.wrappers.Response(
