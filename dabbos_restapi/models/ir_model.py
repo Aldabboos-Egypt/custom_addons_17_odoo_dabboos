@@ -3,7 +3,7 @@ import json
 
 from odoo import api, models, fields,SUPERUSER_ID
 
-from odoo import api, fields, models
+from odoo import api, fields, models,_
 
 
 class IrModel(models.Model):
@@ -30,6 +30,27 @@ class FetchData(models.Model):
 
 class Partner(models.Model):
     _inherit = "res.partner"
+
+    visit_count = fields.Integer(string='Visits', compute='_compute_visit_count')
+
+
+
+
+    def _compute_visit_count(self):
+        for partner in self:
+            partner.visit_count = self.env['sales.visit'].search_count([('partner_id', '=', partner.id)])
+
+    def action_view_visits(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Visits',
+            'view_mode': 'tree,form',
+            'res_model': 'sales.visit',
+            'domain': [('partner_id', '=', self.id)],
+            'context': dict(self._context, create=False),
+        }
+
 
     area = fields.Char(string='Area')
     state = fields.Char(string='State')
@@ -77,6 +98,8 @@ class SaleOrder(models.Model):
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).create(vals)
             return res
 
+
+
     def update_order(self, vals):
         with self.pool.cursor() as cr:
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).write(vals)
@@ -87,7 +110,12 @@ class SaleOrder(models.Model):
             res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID)).name
             return res
 
+    def get_claimable_rewards_api(self):
+        with self.pool.cursor() as cr:
+            res = self.with_env(self.env(cr=cr, user=SUPERUSER_ID))._get_claimable_rewards()
 
+
+            return res
 
     total_product_api = fields.Integer(string='Total Product Api :',compute='_total_product',help="total Products",store=True,readonly=True)
     total_quantity_api = fields.Integer(string='Total Quantity Api :',compute='_total_quantity',help="total Quantity",store=True,readonly=True)
@@ -125,7 +153,25 @@ class ResUsers(models.Model):
 
     allowed_locations = fields.Many2many(
         comodel_name='stock.location',
-        string='Allowed Locations')
+        string='Allowed Locations',
+        default=lambda self: self.env['stock.location'].search([('usage', '=', 'internal')])
+    )
+
+
+    allow_edit_customer_location = fields.Boolean(
+        string="Allow to Edit Customer Location",
+        help="Enable this option to allow the user to edit the customer location."
+    )
+    allow_order_outof_location = fields.Boolean(
+        string="Allow to Make Order Out of Customer Location",
+        help="Enable this option to allow the user to create orders outside of the customer's location."
+    )
+    show_qty = fields.Boolean(
+        string="Show Quantity",
+        help="Enable this option to allow the user to view product quantities."
+    )
+
+
 
     def _get_qty(self):
         with self.pool.cursor() as cr:
@@ -154,3 +200,32 @@ class SaleOrderLineInherit(models.Model):
     _inherit = 'sale.order.line'
 
     sale_order_note = fields.Char("Notes")
+
+
+class SalesVisit(models.Model):
+    _name = 'sales.visit'
+    _description = 'Sales Visit'
+    _inherit = [ 'mail.thread', 'mail.activity.mixin' ]
+
+    @api.model
+    def create(self, vals):
+        if not vals.get('name') or vals['name'] == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('visit.seq') or _('New')
+        return super(SalesVisit, self).create(vals)
+
+    name = fields.Char(string='Name' )
+    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
+    user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
+    from_time = fields.Datetime(string='From Time', required=True)
+    to_time = fields.Datetime(string='To Time',)
+    duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
+    notes = fields.Char(string='Notes')
+
+    @api.depends('from_time', 'to_time')
+    def _compute_duration(self):
+        for visit in self:
+            if visit.from_time and visit.to_time:
+                delta = visit.to_time - visit.from_time
+                visit.duration = delta.total_seconds() / 3600.0 if delta.total_seconds() >= 0 else 0.0
+            else:
+                visit.duration = 0.0
