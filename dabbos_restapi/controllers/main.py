@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from datetime import datetime
-import logging
+
 import werkzeug
 from odoo import http
 from odoo.addons.dabbos_restapi.common import extract_arguments, invalid_response, valid_response
@@ -13,7 +13,7 @@ from odoo.exceptions import AccessError
 from odoo.http import request
 from werkzeug.utils import secure_filename
 _logger = logging.getLogger(__name__)
-
+from datetime import datetime, date  # Import date from datetime
 
 def validate_token(func):
     @functools.wraps(func)
@@ -536,14 +536,10 @@ class APIController(http.Controller):
         amount = float(kwargs.get("amount"))
         memo =  kwargs.get("memo")
 
-        
-
         if not (invoice_id or journal):
             return invalid_response(
                 "Missing invoice | Journal Id.",
             )
- 
-         
         invoice_obj=request.env['account.move'].sudo().browse(int(invoice_id))
         payment = request.env['account.payment'].sudo().create({
             'currency_id': invoice_obj.currency_id.id,
@@ -554,11 +550,10 @@ class APIController(http.Controller):
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
             'journal_id': journal
         })
-           
+
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
-        _logger.warning("Payment2")
 
         model = 'account.payment'
         fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
@@ -570,9 +565,13 @@ class APIController(http.Controller):
         data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
                                                      fields=field_names, )
 
-
-          
-         _logger.warning("Payment33")
+        for item in data:
+            # Check if the date is a datetime object
+            if isinstance(item['date'], datetime):
+                item['date'] = item['date'].strftime('%Y-%m-%d')  # Adjust format as needed
+            # Check if the date is a date object
+            elif isinstance(item['date'], date):  # Correctly check for datetime.date objects
+                item['date'] = item['date'].strftime('%Y-%m-%d')
 
 
         return werkzeug.wrappers.Response(
@@ -580,11 +579,12 @@ class APIController(http.Controller):
             content_type="application/json; charset=utf-8",
             headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
             response=json.dumps(
-                {"status": True,
+                {
+                    "status": True,
                     "invoice_state": invoice_obj.payment_state,
-                 "data": data,
+                    "data": data ,
 
-                 }
+                }
             ),
         )
 
@@ -632,9 +632,13 @@ class APIController(http.Controller):
             data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
                                                                    fields=field_names, )
 
-
-
-            print(data)
+            for item in data:
+                # Check if the date is a datetime object
+                if isinstance(item['date'], datetime):
+                    item['date'] = item['date'].strftime('%Y-%m-%d')  # Adjust format as needed
+                # Check if the date is a date object
+                elif isinstance(item['date'], date):  # Correctly check for datetime.date objects
+                    item['date'] = item['date'].strftime('%Y-%m-%d')
 
             return werkzeug.wrappers.Response(
                 status=200,
@@ -643,12 +647,12 @@ class APIController(http.Controller):
                 response=json.dumps(
                     {
                         "status": True,
-                        'data':data
+                         "data": data,
 
-
-                     }
+                    }
                 ),
             )
+
         except:
             return invalid_response("Not Created")
 
