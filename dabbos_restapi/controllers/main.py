@@ -556,13 +556,13 @@ class APIController(http.Controller):
             'ref': memo if memo else invoice_obj.payment_reference or invoice_obj.name,
             'journal_id': journal
         })
-         _logger.info("REgister Payment 1")
-        _logger.info(journal,type(journal))
+          
+        _logger.warning("Payment1")
 
         payment.action_post()
         line_id = payment.line_ids.filtered(lambda l: l.credit)
         invoice_obj.js_assign_outstanding_line(line_id.id)
-        print("REgister Payment 3 " )
+        _logger.warning("Payment2")
 
         model = 'account.payment'
         fetch_id = request.env['fetch.data'].sudo().search([("model_id.model", "=", model)], limit=1)
@@ -575,8 +575,8 @@ class APIController(http.Controller):
                                                      fields=field_names, )
 
 
-         _logger.info("REgister Payment33")
- 
+          
+         _logger.warning("Payment33")
 
 
         return werkzeug.wrappers.Response(
