@@ -532,7 +532,7 @@ class APIController(http.Controller):
     @http.route('/salesperson/register_payment', methods=["post"], type="http", auth="none", csrf=False)
     def register_payment(self, **kwargs):
         invoice_id = int(kwargs.get("invoice_id"))
-        journal = int(kwargs.get("journal"))
+        journal = int(kwargs.get("journal").strip('"'))
         amount = float(kwargs.get("amount"))
         memo =  kwargs.get("memo")
 
