@@ -13,7 +13,7 @@ from odoo.exceptions import AccessError
 from odoo.http import request
 from werkzeug.utils import secure_filename
 _logger = logging.getLogger(__name__)
-
+from datetime import datetime, date  # Import date from datetime
 
 def validate_token(func):
     @functools.wraps(func)
@@ -565,17 +565,26 @@ class APIController(http.Controller):
         data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
                                                      fields=field_names, )
 
+        for item in data:
+            # Check if the date is a datetime object
+            if isinstance(item['date'], datetime):
+                item['date'] = item['date'].strftime('%Y-%m-%d')  # Adjust format as needed
+            # Check if the date is a date object
+            elif isinstance(item['date'], date):  # Correctly check for datetime.date objects
+                item['date'] = item['date'].strftime('%Y-%m-%d')
+
 
         return werkzeug.wrappers.Response(
             status=200,
             content_type="application/json; charset=utf-8",
             headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
             response=json.dumps(
-                {"status": True,
+                {
+                    "status": True,
                     "invoice_state": invoice_obj.payment_state,
-                 "data": data,
+                    "data": data ,
 
-                 }
+                }
             ),
         )
 
@@ -623,9 +632,13 @@ class APIController(http.Controller):
             data = request.env[model].sudo().search_read(domain=[('id', '=', payment.id)],
                                                                    fields=field_names, )
 
-
-
-            print(data)
+            for item in data:
+                # Check if the date is a datetime object
+                if isinstance(item['date'], datetime):
+                    item['date'] = item['date'].strftime('%Y-%m-%d')  # Adjust format as needed
+                # Check if the date is a date object
+                elif isinstance(item['date'], date):  # Correctly check for datetime.date objects
+                    item['date'] = item['date'].strftime('%Y-%m-%d')
 
             return werkzeug.wrappers.Response(
                 status=200,
@@ -634,12 +647,12 @@ class APIController(http.Controller):
                 response=json.dumps(
                     {
                         "status": True,
-                        'data':data
+                         "data": data,
 
-
-                     }
+                    }
                 ),
             )
+
         except:
             return invalid_response("Not Created")
 
