@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record id="purchase_order_form" model="ir.ui.view">
+		<field name="name">purchase.order.form</field>
+		<field name="model">purchase.order</field>
+		<field name="inherit_id" ref="purchase.purchase_order_form" />
+		<field name="arch" type="xml">
+			 <group class="oe_subtotal_footer" position="before">
+				<group class="oe_subtotal_footer oe_right o_td_label_no_width" invisible="not other_currency"  >
+					<label for="amount_untaxed_company" string="" class="oe_no_after" />
+					<field name="amount_untaxed_company" nolabel="1"/>
+					<label for="amount_tax_company" string="" class="oe_no_after" />
+					<field name="amount_tax_company" nolabel="1"/>
+					<div class="oe_subtotal_footer_separator oe_inline">
+						<label for="amount_total_company" string="" class="oe_no_after" />
+					</div>
+					<field name="amount_total_company" nolabel="1" class="oe_subtotal_footer_separator" />
+					<field name="other_currency" invisible="1" />
+					<field name="company_currency_id" invisible="1" />
+				</group>			 
+			 </group>
+		</field>
+	</record>
+	
+</odoo>

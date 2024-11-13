@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+trading_valuation_id,trading_valuation,model_trading_valuation,,1,1,1,1
+trading_valuation_line_id,trading_valuation_line,model_trading_valuation_line,,1,1,1,1

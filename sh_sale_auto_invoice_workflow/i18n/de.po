@@ -1,0 +1,180 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* purchase_auto_invoice_workflow
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-08-09 13:30+0000\n"
+"PO-Revision-Date: 2021-08-09 13:30+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: purchase_auto_invoice_workflow
+#: model_terms:ir.ui.view,arch_db:purchase_auto_invoice_workflow.sh_sale_res_config_settings_view_form
+msgid "Auto Sale Workflow Settings"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.actions.act_window,name:purchase_auto_invoice_workflow.sh_auto_sale_workflow_action
+#: model:ir.ui.menu,name:purchase_auto_invoice_workflow.sh_auto_sale_workflow_menu
+msgid "Auto Sales Workflow"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:res.groups,name:purchase_auto_invoice_workflow.group_auto_sale_workflow
+msgid "Auto sale workflow"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model,name:purchase_auto_invoice_workflow.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model,name:purchase_auto_invoice_workflow.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model,name:purchase_auto_invoice_workflow.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__create_invoice
+msgid "Create Invoice"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_company__workflow_id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_config_settings__workflow_id
+msgid "Default Workflow"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__validate_order
+msgid "Delivery Order"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_company__display_name
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_partner__display_name
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sale_order__display_name
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_company__group_auto_sale_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_config_settings__group_auto_sale_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sale_order__is_boolean
+msgid "Enable Auto Workflow"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__force_transfer
+msgid "Force Transfer"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_company__id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_config_settings__id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_partner__id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sale_order__id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__id
+msgid "ID"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_company____last_update
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_config_settings____last_update
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_partner____last_update
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sale_order____last_update
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__name
+#: model_terms:ir.ui.view,arch_db:purchase_auto_invoice_workflow.sh_auto_sale_workflow_view_form
+msgid "Name"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__payment_journal
+msgid "Payment Journal"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__payment_method
+msgid "Payment Method"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__register_payment
+msgid "Register Payment"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__sale_journal
+msgid "Sale Journal"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_partner__workflow_id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_res_users__workflow_id
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sale_order__workflow_id
+msgid "Sale Workflow"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model,name:purchase_auto_invoice_workflow.model_sale_order
+msgid "Sales Order"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__send_invoice_by_email
+msgid "Send Invoice By Email"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model.fields,field_description:purchase_auto_invoice_workflow.field_sh_auto_sale_workflow__validate_invoice
+msgid "Validate Invoice"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model_terms:ir.ui.view,arch_db:purchase_auto_invoice_workflow.sh_auto_sale_workflow_view_form
+msgid "Workflow Option"
+msgstr ""
+
+#. module: purchase_auto_invoice_workflow
+#: model:ir.model,name:purchase_auto_invoice_workflow.model_sh_auto_sale_workflow
+msgid "sh.auto.sale.workflow"
+msgstr ""

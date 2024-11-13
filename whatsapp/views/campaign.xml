@@ -1,0 +1,284 @@
+<odoo>
+
+
+   <data>
+           <record id="error_view_form" model="ir.ui.view">
+               <field name="name">error_view_form</field>
+               <field name="model">error.send</field>
+               <field name="arch" type="xml">
+                   <form string="_form">
+                       <sheet>
+                           <group>
+                               <field name="partner_id"/>
+                               <field name="number"/>
+                               <field name="cause"/>
+
+                           </group>
+                       </sheet>
+                   </form>
+               </field>
+           </record>
+
+         <record id="error_view_tree" model="ir.ui.view">
+               <field name="name">error_view_form</field>
+               <field name="model">error.send</field>
+               <field name="arch" type="xml">
+                   <tree >
+
+                               <field name="partner_id" />
+                               <field name="number"  />
+                               <field name="cause"  />
+
+                   </tree>
+               </field>
+           </record>
+    </data>
+    <data>
+        <!-- Form View -->
+        <record id="view_whatsapp_message_form" model="ir.ui.view">
+            <field name="name">whatsapp.campaign.form</field>
+            <field name="model">whatsapp.campaign</field>
+            <field name="arch" type="xml">
+                <form string="WhatsApp Message">
+                    <header>
+                        <button string="Send Message" type="object" name="send_whatsapp_message" class="oe_highlight"/>
+                    </header>
+                    <sheet>
+
+                        <div name="button_box" class="oe_button_box">
+
+
+                            <button class="oe_stat_button" type="object"
+                                    name="action_view_error_details" icon="fa-warning"
+
+                                    invisible="errors_count==0"
+                                   >
+
+                                <field name="errors_count"/>
+                                /
+                                <field name="contact_count"/>
+
+                            </button>
+                        </div>
+                        <field name="send_done" invisible="1"/>
+                        <widget
+                                name="web_ribbon"
+                                text="Sent"
+                                bg_color="bg-success"
+                                                                    invisible="not send_done"
+
+                         />
+
+                        <h1>
+                            <field name="name" placeholder="Enter Name"/>
+                        </h1>
+
+          <group>
+
+
+                            <group string="Account Configurations">
+                                <field name="account_id" options="{'no_create': True}" />
+
+
+                                <field name="msg_timer"/>
+
+                            </group>
+                            <group string="Template Configurations">
+                                <field name="template_id" placeholder="Campaign Template" options="{'no_create': True}" />
+
+                                <field name="prefix"/>
+
+                            </group>
+     </group>
+
+                            <group string="Contact Configurations">
+                                <group>
+                                      <field name="title" options="{'no_create': True}" string="Filter By Title "/>
+
+                                <field name="tags" options="{'no_create': True}" widget="many2many_tags"
+                                       string="Filter By Tag "/>
+                                </group>
+
+                                   <group>
+                                <field name="company_id" options="{'no_create': True}"   string="Select Company"/>
+
+                                <field name="partners" options="{'no_create': True}" widget="many2many_tags"
+                                       string="Select Contacts"/>
+
+                            </group>
+                            </group>
+
+
+
+<hr/>
+                        <notebook>
+                            <page string="Msg">
+                                <group>
+                                    <field name="msg"/>
+
+
+                                </group>
+                            </page>
+                            <page string="Attachments">
+
+
+                                <group>
+
+                                    <field name="attachment_ids" widget="many2many_binary" string="Attach a file"
+                                           nolabel="1" colspan="2"/>
+                                </group>
+
+
+                            </page>
+                        </notebook>
+
+
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree View -->
+        <record id="view_whatsapp_message_tree" model="ir.ui.view">
+            <field name="name">whatsapp.campaign.tree</field>
+            <field name="model">whatsapp.campaign</field>
+            <field name="arch" type="xml">
+                <tree string="WhatsApp Messages">
+                    <field name="name"/>
+                    <field name="tags" widget="many2many_tags"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Kanban View -->
+        <record id="view_whatsapp_message_kanban" model="ir.ui.view">
+            <field name="name">whatsapp.campaign.kanban</field>
+            <field name="model">whatsapp.campaign</field>
+            <field name="arch" type="xml">
+                <kanban string="WhatsApp Messages">
+                    <field name="name"/>
+                    <field name="tags" widget="many2many_tags"/>
+
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Menu Action -->
+        <record id="action_whatsapp_campaign" model="ir.actions.act_window">
+            <field name="name">WhatsApp Messages</field>
+            <field name="res_model">whatsapp.campaign</field>
+            <field name="view_mode">tree,form,kanban</field>
+        </record>
+
+        <!-- Menu Item -->
+
+
+
+
+
+        <record model="ir.ui.view" id="whatsapp_template_tree_view">
+            <field name="name">whatsapp.campaign.template.tree.view</field>
+            <field name="model">whatsapp.campaign.template</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="msg"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="whatsapp_template_form_view">
+            <field name="name">whatsapp.campaign.template.form.view</field>
+            <field name="model">whatsapp.campaign.template</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <h1>
+                            <label for="name" string="Template Name"/>
+                            <field name="name"/>
+
+                        </h1>
+                        <h2>
+                            <label for="prefix" string="Prefix"/>
+                            <field name="prefix"/>
+                        </h2>
+
+                        <group>
+
+
+                            <group>
+
+                                <field name="title" options="{'no_create': True}" string="Filter By Title "/>
+                                <field name="tags" options="{'no_create': True}" widget="many2many_tags" string="Filter By Tag "/>
+                            </group>
+
+                            <group>
+
+                                <field name="company_id" options="{'no_create': True}"   string="Select Company"/>
+                                <field name="partners" options="{'no_create': True}" widget="many2many_tags" string="Select Contacts"/>
+
+                            </group>
+
+
+                        </group>
+                        <notebook>
+                            <page string="Msg">
+                                <group>
+                                    <field name="msg"/>
+
+
+                                </group>
+                            </page>
+                            <page string="Attachments">
+                                <group>
+
+                                    <field name="attachment_ids" widget="many2many_binary" string="Attach a file"
+                                           nolabel="1" colspan="2"/>
+                                </group>
+
+
+                            </page>
+                        </notebook>
+
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+<!--        &lt;!&ndash; Inherit Form View to Modify it &ndash;&gt;-->
+<!--        <record id="view_account_payment_form_inherit" model="ir.ui.view">-->
+<!--            <field name="name">account.payment</field>-->
+<!--            <field name="model">account.payment</field>-->
+<!--            <field name="inherit_id" ref="account.view_account_payment_form"/>-->
+<!--            <field name="arch" type="xml">-->
+
+<!--&lt;!&ndash;                <xpath expr="//button[@name='action_post']" position="after">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <button name="send_ws_msg" type="object" string="Send Msg" invisible="state!='posted'"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                </xpath>&ndash;&gt;-->
+
+<!--                <xpath expr="//field[@name='partner_id']" position="after">-->
+<!--                    <field name="attachment_ids" widget="many2many_tags" />-->
+<!--                </xpath>-->
+
+<!--            </field>-->
+<!--        </record>-->
+
+
+        <record model="ir.actions.act_window" id="whatsapp_template_campain_action">
+            <field name="name">WhatsApp Templates</field>
+            <field name="res_model">whatsapp.campaign.template</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+    </data>
+</odoo>

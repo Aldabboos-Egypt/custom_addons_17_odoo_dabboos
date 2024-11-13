@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="whatsapp_account_view_tree" model="ir.ui.view">
+        <field name="name">whatsapp.account.view.tree</field>
+        <field name="model">whatsapp.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+<!--                <field name="phone_uid"/>-->
+                <field name="account_uid"/>
+<!--                <field name="app_uid"/>-->
+<!--                <field name="allowed_company_ids" widget="many2many_tags" groups="base.group_multi_company"/>-->
+            </tree>
+        </field>
+    </record>
+    <record id="whatsapp_account_view_form" model="ir.ui.view">
+        <field name="name">whatsapp.account.view.form</field>
+        <field name="model">whatsapp.account</field>
+        <field name="arch" type="xml">
+            <form string="WhatsApp Business Account">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" name="action_open_templates" class="oe_stat_button" icon="fa-whatsapp">
+                            <field name="templates_count" string="Templates" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title" id='title'>
+                        <label for="name" string="Name"/>
+                        <h1 id="name"><field name="name" required="1" placeholder="e.g. Odoo"/></h1>
+                    </div>
+                     <p>This configuration is for sending the WhatsApp</p>
+                    <field name="active" invisible="1"/>
+                    <div class="row mt16 o_settings_container" id="tosend_msg">
+
+                        <setting>
+                            <field name="account_uid" placeholder="e.g. 123456789012345"/>
+                        </setting>
+                        <setting  >
+                            <field name="token" password="True" placeholder="e.g. EGTRWHRTHETHWRBTEJETHGQEGWRHWR"/>
+                        </setting>
+
+                        <button name="button_test_connection" type="object" string="Test Connection"/>
+
+                    </div>
+
+
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="whatsapp_account_view_search" model="ir.ui.view">
+        <field name="name">whatsapp.account.view.search</field>
+        <field name="model">whatsapp.account</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="phone_uid"/>
+                <field name="account_uid"/>
+                <field name="app_uid"/>
+                <separator/>
+                <filter string="Archived" name="filter_archived" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+    <record id="whatsapp_account_action" model="ir.actions.act_window">
+        <field name="name">WhatsApp Business Account</field>
+        <field name="res_model">whatsapp.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                There is no WhatsApp Business Account configured.
+            </p>
+            <p>
+                If you have credentials for cloud api then setup here and start using WhatsApp.
+                You can register a WhatsApp Business Account through
+                <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/reference/registration" target="_blank">WhatsApp cloud api</a>
+            </p>
+        </field>
+    </record>
+</odoo>
