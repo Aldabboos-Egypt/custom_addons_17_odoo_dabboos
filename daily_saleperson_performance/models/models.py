@@ -36,9 +36,9 @@ class Salesdues(models.Model):
 
     def _get_invoice_ids(self,user ):
         if  self.date_to and self.date_from:
-            invoice_ids=self.env['account.move'].search(['&','&', '&','&',('state', '=','posted'),('invoice_user_id','=',user.id),('move_type','=','out_invoice'),('date','>=',self.date_from),('date','<=',self.date_to)] )
+            invoice_ids=self.env['account.move'].search(['&','&', '&','&',('state', '=','posted'),('partner_id.user_id','=',user.id),('move_type','=','out_invoice'),('date','>=',self.date_from),('date','<=',self.date_to)] )
         else:
-            invoice_ids=self.env['account.move'].search([ '&','&',('state', '=','posted'), ('invoice_user_id','=',user.id),('move_type','=','out_invoice') ] )
+            invoice_ids=self.env['account.move'].search([ '&','&',('state', '=','posted'), ('partner_id.user_id','=',user.id),('move_type','=','out_invoice') ] )
         # print(invoice_ids)
         return invoice_ids
 
@@ -56,10 +56,10 @@ class Salesdues(models.Model):
 
             if self.date_to and self.date_from:
 
-                domain = ['&', '&', '&',  '&', ('move_id.state', '=', 'posted'), ('move_id.invoice_user_id', '=', user.id),
+                domain = ['&', '&', '&',  '&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
                           ('account_id.account_type', '=', 'asset_receivable'), ('date', '>=', self.date_from), ('date', '<=', self.date_to)]
             else:
-                domain = ['&', '&', ('move_id.state', '=', 'posted'), ('move_id.invoice_user_id', '=', user.id),
+                domain = ['&', '&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
                           ('account_id.account_type', '=', 'asset_receivable')]
 
             move_lines =  self.env['account.move.line'].search(domain)
