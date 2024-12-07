@@ -56,10 +56,11 @@ class Salesdues(models.Model):
 
             if self.date_to and self.date_from:
 
-                domain = ['&', '&', '&',  '&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
-                          ('account_id.account_type', '=', 'asset_receivable'), ('date', '>=', self.date_from), ('date', '<=', self.date_to)]
+                domain = ['&', '&', '&',  '&','&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
+                          ('account_id.account_type', '=', 'asset_receivable'),  ('journal_id.type', 'in',('cash','bank')), ('date', '>=', self.date_from), ('date', '<=', self.date_to)]
             else:
-                domain = ['&', '&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
+                domain = ['&', '&','&', ('move_id.state', '=', 'posted'), ('partner_id.user_id', '=', user.id),
+                          ('journal_id.type', 'in', ('cash', 'bank')),
                           ('account_id.account_type', '=', 'asset_receivable')]
 
             move_lines =  self.env['account.move.line'].search(domain)
