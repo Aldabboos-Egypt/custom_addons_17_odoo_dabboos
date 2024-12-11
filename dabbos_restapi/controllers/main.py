@@ -534,7 +534,7 @@ class APIController(http.Controller):
 
         try:
             invoice_obj = request.env['account.move'].sudo().browse(int(invoice_id))
-            if not invoice_obj or invoice_obj.type != 'out_invoice':
+            if not invoice_obj or invoice_obj.move_type != 'out_invoice':
                 return invalid_response("Invalid or non-existent invoice ID.")
 
             if invoice_obj.state == 'posted':
