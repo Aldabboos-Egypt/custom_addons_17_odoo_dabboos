@@ -15,13 +15,30 @@
                 </xpath>
 
                 <xpath expr="//page[1]" position="after">
-                      <page string="Locations Access" name="loaction">
-                          <group>
-                          <field name="allowed_locations" options="{'no_create': True}"  widget="many2many_tags"/>
-                       <field name="is_admin"/>
-                          </group>
+          <page string="API Configuration" name="api_configuration">
+        <group>
 
-                      </page>
+
+        <group string="Location Access Settings">
+            <field name="allowed_locations" options="{'no_create': True}" widget="many2many_tags"/>
+            <field name="is_admin"/>
+        </group>
+
+        <!-- Customer & Order Permissions Group -->
+        <group string="Customer &amp; Order Permissions">
+            <field name="allow_edit_customer_location" string="Allow Editing Customer Location"/>
+            <field name="allow_order_outof_location" string="Allow Orders Outside Assigned Locations"/>
+            <field name="show_qty" string="Display Quantities"/>
+        </group>
+
+        <!-- Sales Permissions Group -->
+        <group string="Sales Permissions">
+            <field name="can_confirm_invoice" string="Can Confirm Invoices"/>
+            <field name="can_create_invoice" string="Can Create Invoices"/>
+            <field name="can_confirm_order" string="Can Confirm Orders"/>
+        </group>
+                </group>
+    </page>
                 </xpath>
             </field>
         </record>
@@ -80,7 +97,92 @@
 <!--            </field>-->
 <!--        </record>-->
 
+        <record id="view_sales_visit_form" model="ir.ui.view">
+            <field name="name">sales.visit.form</field>
+            <field name="model">sales.visit</field>
+            <field name="arch" type="xml">
+                <form string="Sales Visit">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                             <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="from_time"/>
+                            <field name="to_time"/>
+                            <field name="duration"/>
+                            <field name="notes"/>
+                        </group>
+                    </sheet>
+                          <div class="oe_chatter">
+                        <field name="message_follower_ids" groups="base.group_user"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
 
+
+        <record id="view_sales_visit_tree" model="ir.ui.view">
+            <field name="name">sales.visit.tree</field>
+            <field name="model">sales.visit</field>
+            <field eval="8" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Sales Visit" sample="1" multi_edit="1">
+                     <field name="name"/>
+                     <field name="partner_id"/>
+                    <field name="user_id"/>
+                    <field name="from_time"/>
+                    <field name="to_time"/>
+                    <field name="duration"/>
+                    <field name="notes" optional="hide"/>
+
+                </tree>
+            </field>
+        </record>
+
+        <!-- Search view for sales.visit -->
+        <record id="view_sales_visit_search" model="ir.ui.view">
+            <field name="name">sales.visit.search</field>
+            <field name="model">sales.visit</field>
+            <field name="arch" type="xml">
+                <search string="Sales Visit">
+                    <field name="name"/>
+                     <field name="partner_id"/>
+                    <field name="user_id"/>
+
+                </search>
+            </field>
+        </record>
+
+       <record id="sales_visit_action" model="ir.actions.act_window">
+           <field name="name">Sales Visit</field>
+           <field name="type">ir.actions.act_window</field>
+           <field name="res_model">sales.visit</field>
+           <field name="view_mode">tree,form</field>
+       </record>
+
+       <!-- This Menu Item must have a parent and an action -->
+       <menuitem id="sales_visit_menu" name="Visit Report" parent="sale.menu_sale_report"  action="sales_visit_action" sequence="5"/>
+
+       <record id="view_partner_form_visits" model="ir.ui.view">
+           <field name="name">res.partner</field>
+           <field name="model">res.partner</field>
+           <field name="inherit_id" ref="base.view_partner_form"/>
+           <field name="arch" type="xml">
+
+               <xpath expr="//div[@class='oe_button_box']" position="inside">
+                     <button name="action_view_visits"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-calendar">
+                        <field string="Visits" name="visit_count" widget="statinfo"/>
+                    </button>
+               </xpath>
+
+
+           </field>
+       </record>
 
 
     </data>
