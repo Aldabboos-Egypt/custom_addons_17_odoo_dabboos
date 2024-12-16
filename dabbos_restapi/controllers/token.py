@@ -194,6 +194,11 @@ class AccessToken(http.Controller):
                     'allow_edit_customer_location': user.allow_edit_customer_location,
                     'allow_order_outof_location': user.allow_order_outof_location,
                     'show_qty': user.show_qty,
+
+                    'can_confirm_invoice': user.can_confirm_invoice,
+                    'can_create_invoice': user.can_create_invoice,
+                    'can_confirm_order': user.can_confirm_order,
+
                 }
             ),
         )
