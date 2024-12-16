@@ -54,3 +54,7 @@ class Users(models.Model):
     _inherit = "res.users"
     token_ids = fields.One2many("api.access_token", "user_id", string="Access Tokens")
     is_admin= fields.Boolean(string='Is Admin', )
+
+    can_confirm_invoice = fields.Boolean("Can Confirm Invoice", default=False)
+    can_create_invoice = fields.Boolean("Can Create Invoice", default=False)
+    can_confirm_order = fields.Boolean("Can Confirm Order", default=False)

@@ -15,17 +15,30 @@
                 </xpath>
 
                 <xpath expr="//page[1]" position="after">
-                      <page string="Locations Access" name="loaction">
-                          <group>
-                          <field name="allowed_locations" options="{'no_create': True}"  widget="many2many_tags"/>
-                       <field name="is_admin"/>
+          <page string="API Configuration" name="api_configuration">
+        <group>
 
-                                    <field name="allow_edit_customer_location"/>
-                    <field name="allow_order_outof_location"/>
-                    <field name="show_qty"/>
-                          </group>
 
-                      </page>
+        <group string="Location Access Settings">
+            <field name="allowed_locations" options="{'no_create': True}" widget="many2many_tags"/>
+            <field name="is_admin"/>
+        </group>
+
+        <!-- Customer & Order Permissions Group -->
+        <group string="Customer &amp; Order Permissions">
+            <field name="allow_edit_customer_location" string="Allow Editing Customer Location"/>
+            <field name="allow_order_outof_location" string="Allow Orders Outside Assigned Locations"/>
+            <field name="show_qty" string="Display Quantities"/>
+        </group>
+
+        <!-- Sales Permissions Group -->
+        <group string="Sales Permissions">
+            <field name="can_confirm_invoice" string="Can Confirm Invoices"/>
+            <field name="can_create_invoice" string="Can Create Invoices"/>
+            <field name="can_confirm_order" string="Can Confirm Orders"/>
+        </group>
+                </group>
+    </page>
                 </xpath>
             </field>
         </record>

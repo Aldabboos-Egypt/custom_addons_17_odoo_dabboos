@@ -3,8 +3,7 @@ import base64
 import functools
 import json
 import logging
-import re
-from datetime import datetime
+
 
 import werkzeug
 from odoo import http
@@ -207,12 +206,9 @@ class APIController(http.Controller):
     @validate_token
     @http.route("/salesperson/product_price", methods=["GET"], type="http", auth="none", csrf=False)
     def get_product_price(self,**kwargs):
-
         # image_url = "http://lenovo-legion:8017/web/image?model=product.product&id=2123&field=image_1920"
         #
         # return image_url
-
-
         pricelist_id = int(kwargs.get("pricelist_id"))
         user_id = int(kwargs.get("user_id"))
 
@@ -527,6 +523,40 @@ class APIController(http.Controller):
             )
         return invalid_response("Not Confirmed")
 
+    @validate_token
+    @http.route('/salesperson/confirm_invoice', methods=["POST"], type="http", auth="none", csrf=False)
+    def confirm_invoice(self, **kwargs):
+        invoice_id = kwargs.get("invoice_id")
+
+        # Validate the input
+        if not invoice_id:
+            return invalid_response("Missing invoice ID.")
+
+        try:
+            invoice_obj = request.env['account.move'].sudo().browse(int(invoice_id))
+            if not invoice_obj or invoice_obj.move_type != 'out_invoice':
+                return invalid_response("Invalid or non-existent invoice ID.")
+
+            if invoice_obj.state == 'posted':
+                return werkzeug.wrappers.Response(
+                    status=200,
+                    content_type="application/json; charset=utf-8",
+                    headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                    response=json.dumps({"status": "Already Confirmed"}),
+                )
+
+            # Confirm the invoice
+            invoice_obj.action_post()
+            if invoice_obj.state == 'posted':
+                return werkzeug.wrappers.Response(
+                    status=200,
+                    content_type="application/json; charset=utf-8",
+                    headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                    response=json.dumps({"status": True}),
+                )
+            return invalid_response("Invoice confirmation failed.")
+        except Exception as e:
+            return invalid_response(f"An error occurred: {str(e)}")
 
     @validate_token
     @http.route('/salesperson/register_payment', methods=["post"], type="http", auth="none", csrf=False)

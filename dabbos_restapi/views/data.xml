@@ -111,10 +111,7 @@
 <!-- Res Users (res.users) -->
 <record id="fetch_res_users_fields" model="fetch.data">
     <field name="model_id" ref="base.model_res_users"/>
-    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',
-        ['name']),
-        ('model_id.model','=','res.users')
-    ]"/>
+    <field name="field_ids" model="ir.model.fields" search="[('name', 'in',['name']), ('model_id.model','=','res.users')]"/>
 </record>
 
 <!-- Journal Item (account.move.line) -->
