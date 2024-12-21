@@ -205,7 +205,7 @@ class SaleOrderLineInherit(models.Model):
 class SalesVisit(models.Model):
     _name = 'sales.visit'
     _description = 'Sales Visit'
-    _inherit = [ 'mail.thread', 'mail.activity.mixin' ]
+    _inherit = ['mail.thread', 'mail.activity.mixin']  # Enables chatter and attachments
 
     @api.model
     def create(self, vals):
@@ -220,6 +220,19 @@ class SalesVisit(models.Model):
     to_time = fields.Datetime(string='To Time',)
     duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
     notes = fields.Char(string='Notes')
+    message_ids = fields.One2many('mail.message', 'res_id', string="Messages", domain=[('model', '=', 'sales.visit')])
+    message_follower_ids = fields.One2many('mail.followers', 'res_id', string="Followers",
+                                           domain=[('res_model', '=', 'sales.visit')])
+
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'sales.visit')], string='Attachments')
+    from_time_str= fields.Char(
+        string='',
+        required=False)
+
+    to_time_str= fields.Char(
+        string='',
+        required=False)
+
 
     @api.depends('from_time', 'to_time')
     def _compute_duration(self):

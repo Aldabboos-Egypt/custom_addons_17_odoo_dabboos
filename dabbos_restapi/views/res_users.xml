@@ -107,17 +107,28 @@
                             <field name="name"/>
                              <field name="partner_id"/>
                             <field name="user_id"/>
-                            <field name="from_time"/>
-                            <field name="to_time"/>
+<!--                            <field name="from_time"/>-->
+<!--                            <field name="to_time"/>-->
+                                <field name="from_time_str"  readonly="1"/>
+                                <field name="to_time_str" readonly="1"/>
                             <field name="duration"/>
                             <field name="notes"/>
+                                = fields.Char(
+
+
+                        </group>
+
+                        <group>
+
+
                         </group>
                     </sheet>
-                          <div class="oe_chatter">
-                        <field name="message_follower_ids" groups="base.group_user"/>
+              <div class="oe_chatter">
+                        <field name="message_follower_ids"  />
                         <field name="activity_ids"/>
-                        <field name="message_ids"/>
+                        <field name="message_ids" widget="mail_thread"/>
                     </div>
+
                 </form>
             </field>
         </record>
@@ -132,8 +143,10 @@
                      <field name="name"/>
                      <field name="partner_id"/>
                     <field name="user_id"/>
-                    <field name="from_time"/>
-                    <field name="to_time"/>
+<!--                    <field name="from_time"/>-->
+<!--                    <field name="to_time"/>-->
+                    <field name="from_time_str"  readonly="1"/>
+                    <field name="to_time_str" readonly="1"/>
                     <field name="duration"/>
                     <field name="notes" optional="hide"/>
 
