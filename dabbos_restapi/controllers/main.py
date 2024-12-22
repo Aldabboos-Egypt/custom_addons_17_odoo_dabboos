@@ -3,7 +3,11 @@ import base64
 import functools
 import json
 import logging
-
+from datetime import datetime
+import pytz
+import werkzeug.wrappers
+import json
+import base64
 
 import werkzeug
 from odoo import http
@@ -841,46 +845,51 @@ class APIController(http.Controller):
                 response=json.dumps({"status": False, "error": "Missing required parameters."}),
             )
 
-        try:
-            # Create the sales.visit record
-            visit = request.env['sales.visit'].sudo().create({
-                'partner_id': partner_id,
-                'user_id': user_id,
-                'from_time': from_time,
-                'to_time': to_time,
-                'notes': notes,
-            })
 
-            # Handling image files from the body
-            data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
-            if data_files:
-                for file in data_files:
-                    filename = secure_filename(file.filename)
-                    attachment = request.env['ir.attachment'].sudo().create({
-                        'name': filename,
-                        'res_model': 'sales.visit',
-                        'res_id': visit.id,
-                        'type': 'binary',
-                        'datas': base64.b64encode(file.read()),  # Encode the image in base64
-                        'mimetype': file.content_type,
-                    })
+        visit = request.env['sales.visit'].sudo().create({
+            'partner_id': partner_id,
+            'user_id': user_id,
+            'from_time': from_time,
+            'to_time': to_time,
+        'from_time_str': str(from_time),
+        'to_time_str': str(to_time),
+            'notes': notes,
+        })
+        data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
 
-                    visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+        print(data_files)
 
-            return werkzeug.wrappers.Response(
-                status=200,
-                content_type="application/json; charset=utf-8",
-                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-                response=json.dumps({"status": True, "visit_id": visit.id}),
-            )
 
-        except Exception as e:
-            return werkzeug.wrappers.Response(
-                status=500,
-                content_type="application/json; charset=utf-8",
-                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-                response=json.dumps({"status": False, "error": str(e)}),
-            )
+        if data_files:
+            for file in data_files:
+                filename = secure_filename(file.filename)
+                attachment = request.env['ir.attachment'].sudo().create({
+                    'name': filename,
+                    'res_model': 'sales.visit',
+                    'res_id': visit.id,
+                    'type': 'binary',
+                    'datas': base64.b64encode(file.read()),  # Encode the image in base64
+                    'mimetype': file.content_type,
+                })
+
+                print(attachment)
+                print(visit)
+                print(visit.id)
+
+
+                visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+
+
+
+
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps({"status": True, "visit_id": visit.id}),
+        )
+
+
     @validate_token
     @http.route('/salesperson/update_visit', methods=["POST"], type="http", auth="none", csrf=False)
     def update_visit(self, **kwargs):
@@ -910,50 +919,44 @@ class APIController(http.Controller):
                 response=json.dumps({"status": False, "error": "Visit not found."}),
             )
 
-        # Update the sales.visit record
-        try:
-            visit.write({
-                'partner_id': partner_id,
-                'user_id': user_id,
-                'from_time': from_time,
-                'to_time': to_time,
-                'notes': notes,
-            })
+
+        visit.write({
+            'partner_id': partner_id,
+            'user_id': user_id,
+            'from_time': from_time,
+            'to_time': to_time,
+            'from_time_str': str(from_time),
+            'to_time_str': str(to_time),
+            'notes': notes,
+        })
 
 
-            # Handling image files from the body
-            data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
-            if data_files:
-                for file in data_files:
-                    filename = secure_filename(file.filename)
-                    attachment = request.env['ir.attachment'].sudo().create({
-                        'name': filename,
-                        'res_model': 'sales.visit',
-                        'res_id': visit.id,
-                        'type': 'binary',
-                        'datas': base64.b64encode(file.read()),  # Encode the image in base64
-                        'mimetype': file.content_type,
-                    })
-
-                    visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+        # Handling image files from the body
+        data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body
 
 
+        if data_files:
+            for file in data_files:
+                filename = secure_filename(file.filename)
+                attachment = request.env['ir.attachment'].sudo().create({
+                    'name': filename,
+                    'res_model': 'sales.visit',
+                    'res_id': visit.id,
+                    'type': 'binary',
+                    'datas': base64.b64encode(file.read()),  # Encode the image in base64
+                    'mimetype': file.content_type,
+                })
+
+                visit.message_post(body="Attachments", attachment_ids=[attachment.id])
 
 
-            return werkzeug.wrappers.Response(
-                status=200,
-                content_type="application/json; charset=utf-8",
-                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-                response=json.dumps({"status": True, "visit_id": visit.id}),
-            )
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps({"status": True, "visit_id": visit.id}),
+        )
 
-        except Exception as e:
-            return werkzeug.wrappers.Response(
-                status=500,
-                content_type="application/json; charset=utf-8",
-                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-                response=json.dumps({"status": False, "error": str(e)}),
-            )
 
     @validate_token
     @http.route('/salesperson/create_invoice', methods=["post"], type="http", auth="none", csrf=False)
