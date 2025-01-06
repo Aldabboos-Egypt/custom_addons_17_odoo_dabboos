@@ -1,0 +1,36 @@
+<odoo>
+  <data>
+
+          <record id="view_account_move_line_tree_inherit" model="ir.ui.view">
+        <field name="name">account.move.line.tree.inherit</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="salesperson_id" />
+                <field name="product_id"  />
+                <field name="product_tag_ids" widget="many2many_tags" />
+            </xpath>
+        </field>
+    </record>
+
+<!--    <record id="view_account_invoice_report_search" model="ir.ui.view">-->
+<!--        <field name="inherit_id" ref="account.view_account_invoice_report_search" />-->
+<!--        <field name="model">account.invoice.report</field>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <filter name="category_product" position="after">-->
+<!--                <filter-->
+<!--                    string="Product Template Tags"-->
+<!--                    name="product_tag_ids_fil"-->
+<!--                    context="{'group_by':'product_tag_ids'}"-->
+<!--                />-->
+
+<!--            </filter>-->
+
+<!--        </field>-->
+<!--    </record>-->
+
+  </data>
+</odoo>
+
+
