@@ -1,0 +1,23 @@
+<odoo>
+  <data>
+      <record id="view_employee_form_inherit_location" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.location</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Locations" colspan="6">
+                    <field name="location_ids" editable="bottom">
+                        <tree editable="bottom">
+                            <field name="latitude"/>
+                            <field name="longitude"/>
+                            <field name="check_in_allowed" widget="boolean_toggle"/>
+                        </tree>
+
+                    </field>
+                </group>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</odoo>
