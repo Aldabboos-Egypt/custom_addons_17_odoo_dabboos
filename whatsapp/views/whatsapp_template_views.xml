@@ -41,6 +41,9 @@
                                 widget="DynamicModelFieldSelectorChar"
                                 options="{'model': 'model'}"/>
                             <field name="template_type" readonly="status != 'draft'"/>
+                            <field name="start_automatic_send"  widget="boolean_toggle" invisible="status!='approved' or model!='account.payment'"/>
+                            <field name="report_automatic_send"  widget="boolean_toggle" invisible="status!='approved'  or model!='account.payment'"/>
+
 <!--                            <field name="allowed_user_ids"-->
 <!--                                widget="many2many_tags_avatar"-->
 <!--                                placeholder="Users who can use this template.If empty then public."/>-->

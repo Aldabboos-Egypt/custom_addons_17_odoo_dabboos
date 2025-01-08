@@ -59,6 +59,9 @@ class WhatsAppTemplate(models.Model):
         copy=False)
     sequence = fields.Integer(required=True, default=0)
     active = fields.Boolean(default=True)
+    start_automatic_send = fields.Boolean(default=True,copy=False)
+    report_automatic_send = fields.Boolean(default=True,copy=False)
+
 
     wa_account_id = fields.Many2one(
         comodel_name='whatsapp.account', string="Account", default=_get_default_wa_account_id,

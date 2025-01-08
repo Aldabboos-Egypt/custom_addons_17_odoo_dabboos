@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <data noupdate="1">
+
+
     <menuitem name="WhatsApp"
-        id="whatsapp_menu_main"
+        id="whatsapp_menu_main_id"
         web_icon="whatsapp,static/description/icon.png"
         sequence="260"/>
 
     <menuitem name="Messages"
         id="whatsapp_message_menu"
-        parent="whatsapp_menu_main"
+        parent="whatsapp_menu_main_id"
         sequence="1"
         action="whatsapp_message_action"
         groups="whatsapp.group_whatsapp_admin"/>
 
     <menuitem name="Configuration"
         id="whatsapp_configuration_menu"
-        parent="whatsapp_menu_main"
+        parent="whatsapp_menu_main_id"
         groups="whatsapp.group_whatsapp_admin"/>
     <menuitem name="WhatsApp Business Accounts"
         id="whatsapp_account_menu"
@@ -23,12 +26,12 @@
 
     <menuitem name="Templates"
         id="whatsapp_template_menu"
-        parent="whatsapp_menu_main"
+        parent="whatsapp_menu_main_id"
         sequence="0"
         action="whatsapp_template_action"
         groups="whatsapp.group_whatsapp_admin"/>
 
-           <menuitem id="menu_whatsapp_campaign" name="Campaigns" parent="whatsapp.whatsapp_menu_main"   sequence="15"/>
+           <menuitem id="menu_whatsapp_campaign" name="Campaigns" parent="whatsapp.whatsapp_menu_main_id"   sequence="15"/>
 
 
         <menuitem id="menu_whatsapp_template_campaign" name="Campaign Templates" action="whatsapp_template_campain_action" sequence="1"
@@ -37,5 +40,5 @@
     <menuitem id="menu_whatsapp_message_campaign" name="Campaign" action="action_whatsapp_campaign" sequence="2"
                   parent="menu_whatsapp_campaign"/>
 
-
+ </data>
 </odoo>
