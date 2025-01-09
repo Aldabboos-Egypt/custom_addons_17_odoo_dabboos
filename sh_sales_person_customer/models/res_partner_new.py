@@ -12,7 +12,7 @@ class ResPartner(models.Model):
 
     sales_persons_ids = fields.Many2many(
         "res.users",
-        string="Allocate Sales Persons"
+        string="Allocate Sales Persons",domain="[('company_id', '=',company_id)]",
     )
 
     @api.model

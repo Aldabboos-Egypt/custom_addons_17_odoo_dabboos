@@ -18,4 +18,4 @@ class ShResUsers(models.Model):
         return rec
 
     journal_ids = fields.Many2many(
-        'account.journal', string="Journals", copy=False)
+        'account.journal', string="Journals", copy=False,domain="[('company_id', '=',company_id)]",)
