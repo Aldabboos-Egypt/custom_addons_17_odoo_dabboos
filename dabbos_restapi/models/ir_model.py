@@ -153,7 +153,7 @@ class ResUsers(models.Model):
 
     allowed_locations = fields.Many2many(
         comodel_name='stock.location',
-        string='Allowed Locations',domain="[('company_id', '=',company_id),('company_id', '=',False)]",
+        string='Allowed Locations',domain="['|',('company_id', '=',company_id),('company_id', '=',False)]",
         default=lambda self: self.env['stock.location'].search([('usage', '=', 'internal')])
     )
 

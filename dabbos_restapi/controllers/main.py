@@ -109,9 +109,8 @@ class APIController(http.Controller):
         category_id = int(kwargs.get("category_id"))
         pricelist_id = int(kwargs.get("pricelist_id"))
         user_id = int(kwargs.get("user_id"))
-        company_ids = kwargs.get("company_ids")
+        company_domain = kwargs.get("company_domain")
         print(category_id,pricelist_id,user_id)
-
         data_input = all([category_id, pricelist_id, user_id])
         if not data_input:
             # Empty 'db' or 'username' or 'password:
@@ -134,9 +133,8 @@ class APIController(http.Controller):
             domain = [('categ_id', '=', int(category_id))]
 
 
-        if company_ids  :
-            company_ids_list = [int(id) for id in company_ids.split(',')]
-            domain += [('company_id', 'in', company_ids_list)]
+        if company_domain  :
+            domain += ast.literal_eval(company_domain)
 
 
         pricelist = request.env['product.pricelist'].sudo().browse(pricelist_id)
@@ -221,6 +219,7 @@ class APIController(http.Controller):
         # return image_url
         pricelist_id = int(kwargs.get("pricelist_id"))
         user_id = int(kwargs.get("user_id"))
+        company_domain = kwargs.get("company_domain")
 
         data_input = all([pricelist_id, user_id])
         if not data_input:
@@ -234,7 +233,12 @@ class APIController(http.Controller):
             return invalid_response(
                 "Pricelist Not Found", 403,
             )
-        product_ids = request.env['product.product'].sudo().search([])
+
+        if company_domain  :
+            domain = ast.literal_eval(company_domain)
+
+
+        product_ids = request.env['product.product'].sudo().search(domain)
         all_product_list = []
         for product in product_ids:
             line = pricelist.item_ids.filtered(lambda line: line.product_tmpl_id.product_variant_id.id == product.id)
