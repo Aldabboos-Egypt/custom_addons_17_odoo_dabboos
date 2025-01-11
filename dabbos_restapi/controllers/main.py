@@ -109,7 +109,7 @@ class APIController(http.Controller):
         category_id = int(kwargs.get("category_id"))
         pricelist_id = int(kwargs.get("pricelist_id"))
         user_id = int(kwargs.get("user_id"))
-
+        company_ids = kwargs.get("company_ids")
         print(category_id,pricelist_id,user_id)
 
         data_input = all([category_id, pricelist_id, user_id])
@@ -132,6 +132,12 @@ class APIController(http.Controller):
             domain = ['|', ('categ_id', '=', int(category_id)), ('categ_id', 'in', all_child_ids)]
         else:
             domain = [('categ_id', '=', int(category_id))]
+
+
+        if company_ids  :
+            company_ids_list = [int(id) for id in company_ids.split(',')]
+            domain += [('company_id', 'in', company_ids_list)]
+
 
         pricelist = request.env['product.pricelist'].sudo().browse(pricelist_id)
         if not pricelist:
