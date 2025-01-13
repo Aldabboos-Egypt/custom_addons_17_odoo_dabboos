@@ -8,7 +8,7 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     sales_persons_ids = fields.Many2many(
-        "res.users", string="Allocate Sales Persons",domain="[('company_id', '=',company_id)]",)
+        "res.users", string="Allocate Sales Persons",domain="['|',('company_id', '=',company_id),('company_id', '=',False)]",)
 
     # To apply domain to action
     @api.model

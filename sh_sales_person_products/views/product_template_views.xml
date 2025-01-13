@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <field name="categ_id" position="after">
                 <field name="company_id"/>
-                <field name="sales_persons_ids" domain="[('company_id', '=',company_id),('active','=',True)]" widget="many2many_tags" groups="sales_team.group_sale_manager" />
+                <field name="sales_persons_ids" domain="['|',('company_id', '=',company_id),('company_id', '=',False)]" widget="many2many_tags" groups="sales_team.group_sale_manager" />
             </field>
         </field>
     </record>
