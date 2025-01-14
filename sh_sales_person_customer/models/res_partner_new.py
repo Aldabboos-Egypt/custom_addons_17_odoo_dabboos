@@ -12,8 +12,25 @@ class ResPartner(models.Model):
 
     sales_persons_ids = fields.Many2many(
         "res.users",
-        string="Allocate Sales Persons",domain="['|',('company_id', '=',company_id),('company_id', '=',False)]",
+        string="Allocate Sales Persons",
+        domain="[('id', 'in', eligible_sales_person_ids)]",
     )
+
+    eligible_sales_person_ids = fields.Many2many(
+        "res.users",
+        string="Eligible Sales Persons",
+        compute="_compute_eligible_sales_persons",
+        store=False,  # Computed field does not need to be stored unless necessary
+    )
+
+    @api.depends('company_id')
+    def _compute_eligible_sales_persons(self):
+        for partner in self:
+            if partner.company_id:
+                partner.eligible_sales_person_ids = self.env['res.users'].search([('company_id', '=', partner.company_id.id)])
+            else:
+                partner.eligible_sales_person_ids = self.env['res.users'].search([])
+
 
     @api.model
     def default_get(self, fields):
@@ -54,13 +71,13 @@ class ResPartner(models.Model):
     @api.model
     def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
         """ For expense, we want to show all sales order but only their display_name (no ir.rule applied), this is the only way to do it. """
-        
+
         # FOR SUPER USER WE DO NOTHING
         if self.env.su:
             return super()._name_search(name, domain, operator, limit, order)
 
-        # if user 
-        #   has 'User: Own Documents Only' and 
+        # if user
+        #   has 'User: Own Documents Only' and
         #   not have 'User: All Documents' then we add
         #   our domain
         if (
@@ -69,8 +86,8 @@ class ResPartner(models.Model):
         ):
             list_user_ids = self.env.user.ids
             list_partner_ids = self.env.user.partner_id.ids
-            domain_own_customer =  ['|','|', 
-                                        ('sales_persons_ids', 'in', list_user_ids), 
+            domain_own_customer =  ['|','|',
+                                        ('sales_persons_ids', 'in', list_user_ids),
                                         ('user_id', 'in', list_user_ids),
                                         ('id', 'in', list_partner_ids)
                                     ]
@@ -78,15 +95,15 @@ class ResPartner(models.Model):
         return super()._name_search(name, domain, operator, limit, order)
 
 
-        
+
     @api.model
     def web_search_read(self, domain, specification, offset=0, limit=None, order=None, count_limit=None):
         # FOR SUPER USER WE DO NOTHING
         if self.env.su:
             return super().web_search_read(domain, specification, offset=offset, limit=limit, order=order, count_limit=count_limit)
 
-        # if user 
-        #   has 'User: Own Documents Only' and 
+        # if user
+        #   has 'User: Own Documents Only' and
         #   not have 'User: All Documents' then we add
         #   our domain
         if (
@@ -95,8 +112,8 @@ class ResPartner(models.Model):
         ):
             list_user_ids = self.env.user.ids
             list_partner_ids = self.env.user.partner_id.ids
-            domain_own_customer =  ['|','|', 
-                                        ('sales_persons_ids', 'in', list_user_ids), 
+            domain_own_customer =  ['|','|',
+                                        ('sales_persons_ids', 'in', list_user_ids),
                                         ('user_id', 'in', list_user_ids),
                                         ('id', 'in', list_partner_ids)
                                     ]

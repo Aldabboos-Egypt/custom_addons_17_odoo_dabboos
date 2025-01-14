@@ -8,7 +8,26 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     sales_persons_ids = fields.Many2many(
-        "res.users", string="Allocate Sales Persons",domain="['|',('company_id', '=',company_id),('company_id', '=',False)]",)
+        "res.users",
+        string="Allocate Sales Persons",
+        domain="[('id', 'in', eligible_sales_person_ids)]",
+    )
+
+    eligible_sales_person_ids = fields.Many2many(
+        "res.users",
+        string="Eligible Sales Persons",
+        compute="_compute_eligible_sales_persons",
+        store=False,  # Computed field does not need to be stored unless necessary
+    )
+
+    @api.depends('company_id')
+    def _compute_eligible_sales_persons(self):
+        for partner in self:
+            if partner.company_id:
+                partner.eligible_sales_person_ids = self.env['res.users'].search([('company_id', '=', partner.company_id.id)])
+            else:
+                partner.eligible_sales_person_ids = self.env['res.users'].search([])
+
 
     # To apply domain to action
     @api.model
