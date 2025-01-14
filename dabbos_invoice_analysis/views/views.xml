@@ -14,21 +14,8 @@
         </field>
     </record>
 
-<!--    <record id="view_account_invoice_report_search" model="ir.ui.view">-->
-<!--        <field name="inherit_id" ref="account.view_account_invoice_report_search" />-->
-<!--        <field name="model">account.invoice.report</field>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <filter name="category_product" position="after">-->
-<!--                <filter-->
-<!--                    string="Product Template Tags"-->
-<!--                    name="product_tag_ids_fil"-->
-<!--                    context="{'group_by':'product_tag_ids'}"-->
-<!--                />-->
 
-<!--            </filter>-->
 
-<!--        </field>-->
-<!--    </record>-->
 
   </data>
 </odoo>
