@@ -112,6 +112,7 @@ class APIController(http.Controller):
         company_domain = kwargs.get("company_domain")
         print(category_id,pricelist_id,user_id)
         data_input = all([category_id, pricelist_id, user_id])
+        domain=[]
         if not data_input:
             # Empty 'db' or 'username' or 'password:
             return invalid_response(
@@ -220,7 +221,7 @@ class APIController(http.Controller):
         pricelist_id = int(kwargs.get("pricelist_id"))
         user_id = int(kwargs.get("user_id"))
         company_domain = kwargs.get("company_domain")
-
+        domain=[]
         data_input = all([pricelist_id, user_id])
         if not data_input:
             # Empty 'db' or 'username' or 'password:
