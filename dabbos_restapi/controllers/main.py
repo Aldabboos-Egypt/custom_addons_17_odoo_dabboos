@@ -619,19 +619,24 @@ class APIController(http.Controller):
                 item['date'] = item['date'].strftime('%Y-%m-%d')
 
 
-        return werkzeug.wrappers.Response(
-            status=200,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-            response=json.dumps(
-                {
-                    "status": True,
-                    "invoice_state": invoice_obj.payment_state,
-                    "data": data ,
+        # data['status']=True
+        # data['invoice_state']=invoice_obj.payment_state
+        #
 
-                }
-            ),
-        )
+        return valid_response(data=data)
+        # return werkzeug.wrappers.Response(
+        #     status=200,
+        #     content_type="application/json; charset=utf-8",
+        #     headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+        #     response=json.dumps(
+        #         {
+        #             "status": True,
+        #             "invoice_state": invoice_obj.payment_state,
+        #             "data": data ,
+        #
+        #         }
+        #     ),
+        # )
 
 
     @validate_token
@@ -685,18 +690,20 @@ class APIController(http.Controller):
                 elif isinstance(item['date'], date):  # Correctly check for datetime.date objects
                     item['date'] = item['date'].strftime('%Y-%m-%d')
 
-            return werkzeug.wrappers.Response(
-                status=200,
-                content_type="application/json; charset=utf-8",
-                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-                response=json.dumps(
-                    {
-                        "status": True,
-                         "data": data,
+            # return werkzeug.wrappers.Response(
+            #     status=200,
+            #     content_type="application/json; charset=utf-8",
+            #     headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            #     response=json.dumps(
+            #         {
+            #             "status": True,
+            #              "data": data,
+            #
+            #         }
+            #     ),
+            # )
+            return valid_response(data=data)
 
-                    }
-                ),
-            )
 
         except:
             return invalid_response("Not Created")
