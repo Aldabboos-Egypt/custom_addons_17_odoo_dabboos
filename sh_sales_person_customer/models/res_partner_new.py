@@ -27,7 +27,11 @@ class ResPartner(models.Model):
     def _compute_eligible_sales_persons(self):
         for partner in self:
             if partner.company_id:
+<<<<<<< Updated upstream
                 partner.eligible_sales_person_ids = self.env['res.users'].search([('company_id', '=', partner.company_id.id)])
+=======
+                partner.eligible_sales_person_ids = self.env['res.users'].search([('company_ids', 'in', partner.company_id.id)])
+>>>>>>> Stashed changes
             else:
                 partner.eligible_sales_person_ids = self.env['res.users'].search([])
 

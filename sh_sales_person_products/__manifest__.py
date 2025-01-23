@@ -5,7 +5,7 @@
     "author": "Softhealer Technologies",
     "website": "https://www.softhealer.com",
     "license": "OPL-1",
-    "version": "0.0.1",
+    "version": "17.1",
     "category": "Sales",    
     "summary": "Salespersons own Products Sales Person Own Product Salesperson Products Salesperson specific Products salesperson see particular product special product By salesperson Salesperson can see own Products user wise product,use own product Odoo",
     "description": """Currently, in odoo all products are visible to the salesperson, sometimes it necessary that salesperson can see their products only. Our module will help to show only specific products to the salesperson. You can assign a salesperson to a particular product so that salesperson only can see the product and its variants in odoo.""",
