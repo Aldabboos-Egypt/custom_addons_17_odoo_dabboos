@@ -377,124 +377,77 @@ class APIController(http.Controller):
             )
 
     @validate_token
-    @http.route('/salesperson/new_customer', methods=["post"], type="http", auth="none", csrf=False)
+    @http.route('/salesperson/new_customer', methods=["POST"], type="http", auth="none", csrf=False)
     def create_customer(self, **post):
-
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization", "user_id"]
-
+        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment",
+                  "partner_latitude", "map_url", "partner_longitude", "date_localization", "user_id"]
         params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, partner_latitude,map_url, partner_longitude, date_localization, user_id = (
-            params.get("name"),
-            params.get("mobile"),
-            params.get("phone"),
-            params.get("city"),
-            params.get("state_id"),
-            params.get("street"),
-            params.get("comment"),
-            params.get("partner_latitude"),
-            params.get("map_url"),
-            params.get("partner_longitude"),
-            params.get("date_localization"),
-            params.get("user_id")
+        name = params.get("name")
 
-        )
-        if not all([name]):
-            return invalid_response(
-                "missing error", "Name are missing  ", 403,
-            )
+        if not name:
+            return invalid_response("missing error", "Name is missing", 403)
 
-        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
+        date_localization = params.get("date_localization")
+        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date() if date_localization else None
+
         try:
-            request.env['res.partner'].sudo().create_partner({
+
+            profile_picture = request.httprequest.files.get('profile_picture')
+            image_data = base64.b64encode(profile_picture.read()) if profile_picture else None
+
+            partner = request.env['res.partner'].sudo().create({
                 'name': name,
-                'mobile': mobile,
-                'phone': phone,
-                'city': city,
-                'state_id': int(state_id),
-                'street': street,
-                'comment': comment,
-                'partner_latitude': partner_latitude,
-                'map_url': map_url,
-                'partner_longitude': partner_longitude,
+                'mobile': params.get("mobile"),
+                'phone': params.get("phone"),
+                'city': params.get("city"),
+                'state_id': int(params.get("state_id", 0)) or False,
+                'street': params.get("street"),
+                'comment': params.get("comment"),
+                'partner_latitude': params.get("partner_latitude"),
+                'map_url': params.get("map_url"),
+                'partner_longitude': params.get("partner_longitude"),
                 'date_localization': date_obj,
-                "user_id": int(user_id),
-                "customer_rank": 1,
-                "sales_persons_ids":  [(4,int(user_id))],
-
-
+                'user_id': int(params.get("user_id")),
+                'customer_rank': 1,
+                'image_1920': image_data,
             })
-        except:
-            return invalid_response(
-                "error", "Partner Not Created", 403,
-            )
 
-        return werkzeug.wrappers.Response(
-            status=200,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-            response=json.dumps(
-                {"status": True,
+            return valid_response({"status": True, "partner_id": partner.id})
 
-                 }
-            ),
-        )
+        except Exception as e:
+            return invalid_response("error", f"Partner not created. Reason: {str(e)}", 403)
 
     @validate_token
-    @http.route('/salesperson/edit_customer', methods=["post"], type="http", auth="none", csrf=False)
+    @http.route('/salesperson/edit_customer', methods=["POST"], type="http", auth="none", csrf=False)
     def edit_customer(self, **post):
-
-        # Check if at least one non-empty field is present in the post data
-        if not any(post.get(key) for key in post if post.get(key)):
-            return invalid_response(
-                "missing error", "At least one non-empty field is missing", 403,
-            )
-
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization", "user_id",
-                  "customer_id"]
-
-        params = {key: post.get(key) for key in params if post.get(key)}
-        name, mobile, phone, city, state_id, street, comment, partner_latitude,map_url, partner_longitude, date_localization, user_id, customer_id = (
-            params.get("name"),
-            params.get("mobile"),
-            params.get("phone"),
-            params.get("city"),
-            params.get("state_id"),
-            params.get("street"),
-            params.get("comment"),
-            params.get("partner_latitude"),
-            params.get("map_url"),
-            params.get("partner_longitude"),
-            params.get("date_localization"),
-            params.get("user_id"),
-            params.get("customer_id")
-        )
-
-        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date()
-
+        customer_id = post.get("customer_id")
+        if not customer_id:
+            return invalid_response("missing error", "Customer ID is missing", 403)
 
         partner = request.env['res.partner'].sudo().browse(int(customer_id))
-        if partner:
-            # Define the fields that can be updated
-            allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment", "partner_latitude","map_url", "partner_longitude", "date_localization",
-                              "user_id"]
+        if not partner.exists():
+            return invalid_response("error", "Customer not found", 404)
 
-            # Filter the allowed fields based on the provided parameters
-            update_fields = {key: params.get(key) for key in allowed_fields if params.get(key) is not None}
+        allowed_fields = ["name", "mobile", "phone", "city", "state_id", "street", "comment",
+                          "partner_latitude", "map_url", "partner_longitude", "date_localization", "user_id"]
+        update_fields = {key: post.get(key) for key in allowed_fields if post.get(key)}
+
+        try:
+
+            profile_picture = request.httprequest.files.get('profile_picture')
+            if profile_picture:
+                update_fields['image_1920'] = base64.b64encode(profile_picture.read())
+
+            if "date_localization" in update_fields:
+                update_fields['date_localization'] = datetime.strptime(update_fields['date_localization'],
+                                                                       '%Y-%m-%d').date()
 
             partner.write(update_fields)
-        else:
-            return invalid_response(
-                "error", "Customer not found", 404,
-            )
 
-        return werkzeug.wrappers.Response(
-            status=200,
-            content_type="application/json; charset=utf-8",
-            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
-            response=json.dumps(
-                {"status": True}
-            ),
-        )
+            return valid_response({"status": True, "partner_id": partner.id})
+
+        except Exception as e:
+            return invalid_response("error", f"Customer not updated. Reason: {str(e)}", 403)
 
     @validate_token
     @http.route('/salesperson/confirm_quotation', methods=["post"], type="http", auth="none", csrf=False)
