@@ -3,11 +3,12 @@ from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command
 
 
-
 class SaleOrderLine(models.Model):
-    _inherit = "sale.order.line"
-    gift = fields.Char(string='Gift', )
-    notes = fields.Char(string='Notes', )
+    _inherit = 'sale.order.line'
+
+    notes_for_us = fields.Char("Notes For Us")
+    notes_for_customer = fields.Char("Notes For Customer")
+
 
     fixed_discount = fields.Float(string="Fixed Discount ", digits="Product Price")
 
@@ -50,8 +51,9 @@ class SaleOrderLine(models.Model):
             'quantity': self.qty_to_invoice,
             'discount': self.discount,
             'fixed_discount': self.fixed_discount,
-            'gift': self.gift,
-            'notes': self.notes,
+            'notes_for_us': self.notes_for_us,
+            'notes_for_customer': self.notes_for_customer,
+
 
         'price_unit': self.price_unit,
             'tax_ids': [Command.set(self.tax_id.ids)],

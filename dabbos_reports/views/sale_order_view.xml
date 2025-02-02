@@ -15,8 +15,8 @@
                 <field name="fixed_discount"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
-                <field name="gift"/>
-                <field name="notes"/>
+                 <field name="notes_for_us"  />
+                    <field name="notes_for_customer"  />
             </xpath>
    <xpath expr="//field[@name='note']" position="replace">
                    <field name="note" placeholder="Notes For Us" colspan="2" nolabel="1"/>

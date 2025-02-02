@@ -71,20 +71,7 @@
             </field>
         </record>
 
-       <!-- Inherit Form View to Modify it -->
-       <record id="view_order_form_inherietd1" model="ir.ui.view">
-           <field name="name">sale.order</field>
-           <field name="model">sale.order</field>
-           <field name="inherit_id" ref="sale.view_order_form"/>
-           <field name="arch" type="xml">
 
-               <xpath expr="//field[@name='note']" position="after">
-                 <field name="notes_for_customer" placeholder="Notes For Customer" string="Notes For Customer"/>
-
-               </xpath>
-
-           </field>
-       </record>
 
 <!--        <record model="ir.ui.view" id="account_payment_method_form_view_inherited">-->
 <!--            <field name="name">account.payment.method.form.inherited</field>-->
@@ -113,7 +100,6 @@
                                 <field name="to_time_str" readonly="1"/>
                             <field name="duration"/>
                             <field name="notes"/>
-                                = fields.Char(
 
 
                         </group>

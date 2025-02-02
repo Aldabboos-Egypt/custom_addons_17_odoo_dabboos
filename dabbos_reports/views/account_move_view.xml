@@ -15,8 +15,8 @@
             </xpath>
 
             <xpath expr="//field[@name='invoice_line_ids']/tree//field[@name='price_subtotal']" position="after">
-                <field name="gift"/>
-                <field name="notes"/>
+                   <field name="notes_for_us"  />
+                    <field name="notes_for_customer"  />
             </xpath>
 
 

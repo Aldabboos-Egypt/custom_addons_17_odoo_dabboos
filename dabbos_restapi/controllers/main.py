@@ -677,7 +677,9 @@ class APIController(http.Controller):
                         'product_uom_qty': line.get('product_uom_qty'),
                         'discount': line.get('discount'),
                         'fixed_discount': line.get('fixed_discount'),
-                        'sale_order_note': line.get('sale_order_note'),
+                        'notes_for_us': line.get('notes_for_us'),
+                        'notes_for_customer': line.get('notes_for_customer'),
+
                         'product_uom': line.get('product_uom'),
 
                         # Add other relevant fields
@@ -699,7 +701,9 @@ class APIController(http.Controller):
                     order_lines.append(
                         (0, 0, {
                             'product_id': int(gift.get('product_id')),
-                            'sale_order_note': gift.get('note'),
+                            'notes_for_us': gift.get('notes_for_us'),
+                            'notes_for_customer': gift.get('notes_for_customer'),
+
                              'product_uom_qty': 1,
                             'price_unit': 0.0,
 

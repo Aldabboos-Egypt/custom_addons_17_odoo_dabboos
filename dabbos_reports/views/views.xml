@@ -50,7 +50,10 @@
          <field name="arch" type="xml">
 
              <xpath expr="//field[@name='currency_id']" position="after">
+             <field name="company_description_ar"/>
+             <field name="contact_information"/>
              <field name="qrcode"/>
+
              </xpath>
 
          </field>

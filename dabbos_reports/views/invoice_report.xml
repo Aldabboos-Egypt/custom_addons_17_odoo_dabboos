@@ -91,7 +91,7 @@
                         <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)"
                              style="height:135px;width:216px;" alt="Logo"/>
                         <br/>
-                              <img t-if="doc.partner_id.map_qr" t-att-src="image_data_uri(doc.partner_id.map_qr)"
+                              <img t-if="doc.map_qr_image" t-att-src="image_data_uri(doc.map_qr_image)"
                              style="height:130px;width:150px;margin-left:30px"  />
                     </div>
 
@@ -172,7 +172,7 @@
 
                             <div class="row">
                                 <strong>
-                                    ﺷﺮﻛﺔ اﻟﺪﺑﻮس ﻟﻠﺘﺠﺎرة اﻟﻌﺎﻣﺔ اﻟﻤﺤﺪودة / ﺑﺒﻐﺪاد ﺟﻤﻴﻠﺔ
+                                   <span t-esc="doc.company_id.company_description_ar"/>
                                 </strong>
 
                             </div>
@@ -182,11 +182,7 @@
 
 
                                     <p>
-                                        أزهر : 07728860006 - مهند : 07835000307 - محمود : 07825080333
-                                        -
-                                        انمار
-                                        :
-                                        07825080444
+                                <span t-esc="doc.company_id.contact_information"/>
 
 
                                     </p>
@@ -347,9 +343,9 @@
                                             <th style="font-size: 14px;;width:12%">
                                                 القيمة
                                             </th>
-                                            <th style="font-size: 14px;;width:12%">
-                                                الهدايا
-                                            </th>
+<!--                                            <th style="font-size: 14px;;width:12%">-->
+<!--                                                الهدايا-->
+<!--                                            </th>-->
                                             <th style="font-size: 14px;;width:12%">
                                                 ملاحظات
                                             </th>
@@ -385,11 +381,11 @@
                                                         <td style="font-size: 13px;color:red">
                                                             <span t-esc="int(line.price_subtotal)"/>
                                                         </td>
+<!--                                                        <td style="font-size: 13px;color:red">-->
+<!--                                                            <span t-esc="line.gift"/>-->
+<!--                                                        </td>-->
                                                         <td style="font-size: 13px;color:red">
-                                                            <span t-esc="line.gift"/>
-                                                        </td>
-                                                        <td style="font-size: 13px;color:red">
-                                                            <span t-esc="line.notes"/>
+                                                            <span t-esc="line.notes_for_customer"/>
                                                         </td>
                                                     </t>
 

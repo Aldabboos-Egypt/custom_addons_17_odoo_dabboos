@@ -196,10 +196,8 @@ class ResUsers(models.Model):
             return quantities
 
 
-class SaleOrderLineInherit(models.Model):
-    _inherit = 'sale.order.line'
 
-    sale_order_note = fields.Char("Notes")
+
 
 
 class SalesVisit(models.Model):
