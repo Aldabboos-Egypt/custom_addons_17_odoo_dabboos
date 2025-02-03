@@ -415,9 +415,9 @@
                                                         <td style="font-size: 13px;">
                                                             <span t-esc="int(line.price_subtotal)"/>
                                                         </td>
-                                                        <td style="font-size: 13px;">
-                                                            <span t-esc="line.gift"/>
-                                                        </td>
+<!--                                                        <td style="font-size: 13px;">-->
+<!--                                                            <span t-esc="line.gift"/>-->
+<!--                                                        </td>-->
                                                         <td style="font-size: 13px;">
                                                             <span t-esc="line.notes"/>
                                                         </td>
