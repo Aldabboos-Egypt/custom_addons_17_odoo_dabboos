@@ -419,7 +419,7 @@
 <!--                                                            <span t-esc="line.gift"/>-->
 <!--                                                        </td>-->
                                                         <td style="font-size: 13px;">
-                                                            <span t-esc="line.notes"/>
+                                                            <span t-esc="line.notes_for_us"/>
                                                         </td>
 
                                                     </t>
