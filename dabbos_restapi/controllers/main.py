@@ -379,50 +379,107 @@ class APIController(http.Controller):
     @validate_token
     @http.route('/salesperson/new_customer', methods=["POST"], type="http", auth="none", csrf=False)
     def create_customer(self, **post):
-        params = ["name", "mobile", "phone", "city", "state_id", "street", "comment",
-                  "partner_latitude", "map_url", "partner_longitude", "date_localization", "user_id"]
-        params = {key: post.get(key) for key in params if post.get(key)}
-        name = params.get("name")
 
-        if not name:
-            return invalid_response("missing error", "Name is missing", 403)
+        # Ensure all fields are retrieved
+        params = {
+            "name": post.get("name"),
+            "mobile": post.get("mobile"),
+            "phone": post.get("phone"),
+            "city": post.get("city"),
+            "state_id": post.get("state"),
+            "street": post.get("street"),
+            "comment": post.get("description"),
+            "partner_latitude": post.get("lat"),
+            "partner_longitude": post.get("lang"),
+            "map_url": post.get("map_url"),
+            "date_localization": post.get("date"),
+            "user_id": post.get("user_id"),
+            "sales_person_ids": post.get("sales_persons_ids"),
+        }
 
-        date_localization = params.get("date_localization")
-        date_obj = datetime.strptime(date_localization, '%Y-%m-%d').date() if date_localization else None
+        print("Received Data:", params)  # Debugging
 
-        try:
+        # Ensure required field `name` is present
+        if not params["name"]:
+            return invalid_response("missing_error", "Name is required", 403)
 
-            profile_picture = request.httprequest.files.get('profile_picture')
-            image_data = base64.b64encode(profile_picture.read()) if profile_picture else None
+        # Convert date
+        date_obj = None
+        if params["date_localization"]:
+            try:
+                date_obj = datetime.strptime(params["date_localization"], '%Y-%m-%d').date()
+            except ValueError:
+                return invalid_response("format_error", "Invalid date format", 400)
 
-            partner = request.env['res.partner'].sudo().create({
-                'name': name,
-                'mobile': params.get("mobile"),
-                'phone': params.get("phone"),
-                'city': params.get("city"),
-                'state_id': int(params.get("state_id", 0)) or False,
-                'street': params.get("street"),
-                'comment': params.get("comment"),
-                'partner_latitude': params.get("partner_latitude"),
-                'map_url': params.get("map_url"),
-                'partner_longitude': params.get("partner_longitude"),
-                'date_localization': date_obj,
-                'user_id': int(params.get("user_id")),
-                'customer_rank': 1,
-                'image_1920': image_data,
-            })
+        # Process profile picture
+        profile_picture = request.httprequest.files.get('profile_picture')
+        image_data = base64.b64encode(profile_picture.read()).decode('utf-8') if profile_picture else None
 
-            return valid_response({"status": True, "partner_id": partner.id})
+        # Convert state_id to valid integer
+        state_id = request.env['res.country.state'].sudo().search([('name', '=', params["state_id"])],
+                                                                  limit=1).id or False
 
-        except Exception as e:
-            return invalid_response("error", f"Partner not created. Reason: {str(e)}", 403)
+        # Convert user_id to integer
+        user_id = int(params["user_id"]) if params["user_id"] and params["user_id"].isdigit() else False
+
+        # Ensure sales_person_ids are properly parsed
+        sales_persons_ids = params["sales_person_ids"]
+        print(f"Raw sales_person_ids: {sales_persons_ids}")  # Debugging
+
+        if sales_persons_ids:
+            try:
+                cleaned_ids = json.loads(sales_persons_ids) if sales_persons_ids.startswith('"') else sales_persons_ids
+                sales_persons_list = [int(uid) for uid in cleaned_ids.split(",") if uid.strip().isdigit()]
+            except json.JSONDecodeError:
+                sales_persons_list = [int(uid) for uid in sales_persons_ids.split(",") if uid.strip().isdigit()]
+        else:
+            sales_persons_list = []
+
+        print("Sales Persons List:", sales_persons_list)  # Debugging
+
+        # Validate sales_person_ids exist
+        valid_users = request.env['res.users'].sudo().browse(sales_persons_list)
+        valid_user_ids = valid_users.ids if valid_users else []
+
+        print("Valid Users:", valid_user_ids)  # Debugging
+
+        # Create customer
+        partner = request.env['res.partner'].sudo().create({
+            'name': params["name"],
+            'mobile': params["mobile"],
+            'phone': params["phone"],
+            'city': params["city"],
+            'state_id': state_id or False,
+            'street': params["street"],
+            'comment': params["comment"],
+            'partner_latitude': params["partner_latitude"],
+            'partner_longitude': params["partner_longitude"],
+            'map_url': params["map_url"],
+            'date_localization': date_obj,
+            'user_id': user_id,
+            'customer_rank': 1,
+            'image_1920': image_data,
+        })
+
+        # Assign salespersons if valid
+        if valid_user_ids:
+            partner.sudo().write({'sales_persons_ids': [(6, 0, valid_user_ids)]})
+
+        print("Updated Sales Persons:", partner.sales_persons_ids.ids)  # Debugging
+
+
+
+        return valid_response({"status": True, "partner_id": partner.id})
+
 
     @validate_token
     @http.route('/salesperson/edit_customer', methods=["POST"], type="http", auth="none", csrf=False)
     def edit_customer(self, **post):
         customer_id = post.get("customer_id")
-        if not customer_id:
-            return invalid_response("missing error", "Customer ID is missing", 403)
+
+        # Validate customer_id
+        if not customer_id or not customer_id.isdigit():
+            return invalid_response("missing_error", "Valid Customer ID is required", 403)
 
         partner = request.env['res.partner'].sudo().browse(int(customer_id))
         if not partner.exists():
@@ -433,17 +490,53 @@ class APIController(http.Controller):
         update_fields = {key: post.get(key) for key in allowed_fields if post.get(key)}
 
         try:
+            # Debugging: Print received fields
+            print(f"Received Update Fields: {update_fields}")
 
+            # Handle profile picture update
             profile_picture = request.httprequest.files.get('profile_picture')
             if profile_picture:
-                update_fields['image_1920'] = base64.b64encode(profile_picture.read())
+                update_fields['image_1920'] = base64.b64encode(profile_picture.read()).decode('utf-8')
 
+            # Handle date_localization conversion
             if "date_localization" in update_fields:
-                update_fields['date_localization'] = datetime.strptime(update_fields['date_localization'],
-                                                                       '%Y-%m-%d').date()
+                try:
+                    update_fields['date_localization'] = datetime.strptime(update_fields['date_localization'],
+                                                                           '%Y-%m-%d').date()
+                except ValueError:
+                    return invalid_response("format_error", "Invalid date format", 400)
 
-            partner.write(update_fields)
+            # Handle state_id conversion
+            if "state_id" in update_fields:
+                state_id = request.env['res.country.state'].sudo().search([('name', '=', update_fields["state_id"])],
+                                                                          limit=1).id or False
+                update_fields["state_id"] = state_id
 
+            # Handle user_id conversion
+            user_id = post.get("user_id")
+            update_fields["user_id"] = int(user_id) if user_id and user_id.isdigit() else False
+
+            # Handle sales_persons_ids (if provided)
+            sales_persons_ids = post.get("sales_persons_ids")
+            if sales_persons_ids:
+                try:
+                    cleaned_ids = json.loads(sales_persons_ids) if sales_persons_ids.startswith(
+                        '"') else sales_persons_ids
+                    sales_persons_list = [int(uid) for uid in cleaned_ids.split(",") if uid.strip().isdigit()]
+                except json.JSONDecodeError:
+                    sales_persons_list = [int(uid) for uid in sales_persons_ids.split(",") if uid.strip().isdigit()]
+
+                # Validate if users exist
+                valid_users = request.env['res.users'].sudo().browse(sales_persons_list)
+                valid_user_ids = valid_users.ids if valid_users else []
+                update_fields["sales_persons_ids"] = [(6, 0, valid_user_ids)]
+
+                print(f"Valid Sales Persons: {valid_user_ids}")  # Debugging
+
+            # Update partner record
+            partner.sudo().write(update_fields)
+
+            print(f"Updated Customer ID {partner.id} Successfully!")  # Debugging
             return valid_response({"status": True, "partner_id": partner.id})
 
         except Exception as e:

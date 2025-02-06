@@ -11,7 +11,7 @@
     'author': "Mohsen Sayed ",
 
     'category': 'reports',
-    'version': '17.5',
+    'version': '17.6',
 
     'depends': ['base','account','sale','nati_arabic_font','partner_map_qr_code'],
 
