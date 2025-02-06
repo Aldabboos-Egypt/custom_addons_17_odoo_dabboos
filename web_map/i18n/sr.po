@@ -3,19 +3,17 @@
 # 	* web_map
 # 
 # Translators:
+# Milan Bojovic, 2023
 # Dragan Vukosavljevic <dragan.vukosavljevic@gmail.com>, 2023
 # Martin Trigaux, 2023
-# Milan Bojovic <mbojovic@outlook.com>, 2023
-# Jelena Stamatović, 2024
-# コフスタジオ, 2024
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-05 13:47+0000\n"
+"POT-Creation-Date: 2023-10-26 22:22+0000\n"
 "PO-Revision-Date: 2023-10-26 23:10+0000\n"
-"Last-Translator: コフスタジオ, 2024\n"
+"Last-Translator: Martin Trigaux, 2023\n"
 "Language-Team: Serbian (https://app.transifex.com/odoo/teams/41243/sr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -32,8 +30,6 @@ msgid ""
 ".st0{opacity:0.3;enable-background:new;}\n"
 "                .st1{fill:currentColor;stroke:#1A1919;stroke-width:3;stroke-miterlimit:10;}"
 msgstr ""
-".st0{opacity:0.3;enable-background:new;}\n"
-"                .st1{fill:currentColor;stroke:#1A1919;stroke-width:3;stroke-miterlimit:10;}"
 
 #. module: web_map
 #: model_terms:ir.ui.view,arch_db:web_map.res_config_settings_view_form
@@ -45,7 +41,7 @@ msgstr ""
 #. module: web_map
 #: model:ir.model,name:web_map.model_ir_actions_act_window_view
 msgid "Action Window View"
-msgstr "Prikaz prozora radnje"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -82,7 +78,7 @@ msgstr "Kontakt"
 #: model:ir.model.fields,field_description:web_map.field_res_partner__contact_address_complete
 #: model:ir.model.fields,field_description:web_map.field_res_users__contact_address_complete
 msgid "Contact Address Complete"
-msgstr "Kontakt adresa kompletna"
+msgstr ""
 
 #. module: web_map
 #: model:ir.model,name:web_map.model_ir_http
@@ -94,14 +90,14 @@ msgstr "HTTP rutiranje"
 #: code:addons/web_map/static/src/map_view/map_view.js:0
 #, python-format
 msgid "Items"
-msgstr "Stavke"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_renderer.xml:0
 #, python-format
 msgid "Locating new addresses..."
-msgstr "Lociranje novih adresa..."
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -110,7 +106,7 @@ msgstr "Lociranje novih adresa..."
 #: model:ir.model.fields.selection,name:web_map.selection__ir_ui_view__type__map
 #, python-format
 msgid "Map"
-msgstr "Mapa"
+msgstr ""
 
 #. module: web_map
 #: model_terms:ir.ui.view,arch_db:web_map.res_config_settings_view_form
@@ -122,7 +118,7 @@ msgstr ""
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "MapBox servers unreachable"
-msgstr "MapBox servers unreachable"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -141,7 +137,7 @@ msgstr ""
 #. module: web_map
 #: model:ir.model.fields,help:web_map.field_res_config_settings__map_box_token
 msgid "Necessary for some functionalities in the map view"
-msgstr "Necessary for some functionalities in the map view"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -169,40 +165,40 @@ msgstr "Otvori"
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "OpenStreetMap's request limit exceeded, try again later."
-msgstr "OpenStreetMap's request limit exceeded, try again later."
+msgstr ""
 
 #. module: web_map
 #: model_terms:ir.ui.view,arch_db:web_map.res_config_settings_view_form
 msgid "Set a MapBox account to activate routes and style"
-msgstr "Postavite MapBox nalog da biste aktivirali rute i stil."
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_renderer.xml:0
 #, python-format
 msgid "Set up token"
-msgstr "Set up token"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "Some routing points are too far apart"
-msgstr "Some routing points are too far apart"
+msgstr ""
 
 #. module: web_map
 #. odoo-python
 #: code:addons/web_map/models/res_config_settings.py:0
 #, python-format
 msgid "The MapBox server is unreachable"
-msgstr "The MapBox server is unreachable"
+msgstr ""
 
 #. module: web_map
 #. odoo-python
 #: code:addons/web_map/models/res_config_settings.py:0
 #, python-format
 msgid "The token input is not valid"
-msgstr "The token input is not valid"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -214,15 +210,13 @@ msgid ""
 "The view has switched to another provider but functionalities will be "
 "limited"
 msgstr ""
-"Prikaz je prebačen na drugog pružaoca, ali funkcionalnosti će biti "
-"ograničene."
 
 #. module: web_map
 #. odoo-python
 #: code:addons/web_map/models/res_config_settings.py:0
 #, python-format
 msgid "This referer is not authorized"
-msgstr "Ovaj referer nije autorizovan."
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -241,56 +235,56 @@ msgstr "Token"
 #. module: web_map
 #: model:ir.model.fields,field_description:web_map.field_res_config_settings__map_box_token
 msgid "Token Map Box"
-msgstr "Token Map Box"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "Token invalid"
-msgstr "Token invalid"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "Too many requests, try again in a few minutes"
-msgstr "Too many requests, try again in a few minutes"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "Too many routing points (maximum 25)"
-msgstr "Too many routing points (maximum 25)"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_model.js:0
 #, python-format
 msgid "Unauthorized connection"
-msgstr "Nepoželjna veza"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_renderer.xml:0
 #, python-format
 msgid "Undefined"
-msgstr "Nedefinisano"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_renderer.xml:0
 #, python-format
 msgid "Unsuccessful routing request:"
-msgstr "Unsuccessful routing request:"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
 #: code:addons/web_map/static/src/map_view/map_controller.js:0
 #, python-format
 msgid "Untitled"
-msgstr "Bez naslova"
+msgstr ""
 
 #. module: web_map
 #: model:ir.model,name:web_map.model_ir_ui_view
@@ -300,6 +294,8 @@ msgstr "Pregled"
 #. module: web_map
 #: model:ir.model.fields,field_description:web_map.field_ir_actions_act_window_view__view_mode
 #: model:ir.model.fields,field_description:web_map.field_ir_ui_view__type
+#: model:ir.model.fields,field_description:web_map.field_website_controller_page__type
+#: model:ir.model.fields,field_description:web_map.field_website_page__type
 msgid "View Type"
 msgstr "Vrsta pregleda"
 
@@ -308,7 +304,7 @@ msgstr "Vrsta pregleda"
 #: code:addons/web_map/static/src/map_view/map_renderer.xml:0
 #, python-format
 msgid "View in Google Maps"
-msgstr "View in Google Maps"
+msgstr ""
 
 #. module: web_map
 #. odoo-javascript
@@ -323,5 +319,3 @@ msgstr "Da"
 #, python-format
 msgid "You need to set a Contact field on this model to use the Map View"
 msgstr ""
-"Potrebno je da postavite polje Kontakta na ovom modelu kako biste koristili "
-"Prikaz mape"
