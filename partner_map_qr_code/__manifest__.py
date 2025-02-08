@@ -4,7 +4,7 @@
 
 {
     'name': 'Partner Map QR Code',
-    'version': '17.0.1.0',
+    'version': '17.3',
     'license': 'OPL-1',
     'depends': ['base', 'base_geolocalize'],
     'category': 'Hidden/Tools',
