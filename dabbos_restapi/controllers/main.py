@@ -416,7 +416,7 @@ class APIController(http.Controller):
         image_data = base64.b64encode(profile_picture.read()).decode('utf-8') if profile_picture else None
 
         # Convert state_id to valid integer
-        state_id = request.env['res.country.state'].sudo().search([('name', '=', params["state_id"])],
+        state_id = request.env['res.country.state'].sudo().search([('id', '=', params["state_id"])],
                                                                   limit=1).id or False
 
         # Convert user_id to integer
@@ -508,7 +508,7 @@ class APIController(http.Controller):
 
             # Handle state_id conversion
             if "state_id" in update_fields:
-                state_id = request.env['res.country.state'].sudo().search([('name', '=', update_fields["state_id"])],
+                state_id = request.env['res.country.state'].sudo().search([('id', '=', update_fields["state_id"])],
                                                                           limit=1).id or False
                 update_fields["state_id"] = state_id
 
