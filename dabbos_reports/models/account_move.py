@@ -3,6 +3,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
 from odoo import api, fields, models
+import qrcode
+import base64
+from io import BytesIO
 
 
 
@@ -21,7 +24,8 @@ class AccountMove(models.Model):
     driver_id = fields.Many2one(comodel_name='res.partner', string='Driver')
     # narration = fields.Text(string='ملاحظة دفع الفاتورة')
     invoice_notes = fields.Char(string='Payment Notes')
-    notes_for_customer = fields.Char(string='Notes')
+    notes_for_us = fields.Char("Notes For Us")
+    notes_for_customer = fields.Char("Notes For Customer")
     total_product = fields.Integer(string='Total Product:',compute='_total_product',help="total Products")
     total_quantity = fields.Integer(string='Total Quantity:',compute='_total_quantity',help="total Quantity")
     total_quantity_packet = fields.Integer(string='Total Quantity Packet:',compute='_total_quantity',help="total Quantity Packet")
@@ -34,6 +38,28 @@ class AccountMove(models.Model):
     all_discounts = fields.Monetary("Discount ", compute='total_discount')
     partner_balance_before = fields.Monetary("  Balance Before", compute='total_discount')
     partner_balance_after = fields.Monetary("  Balance After", compute='total_discount')
+
+    map_qr_image = fields.Binary("Map QRCode", compute='_generate_map_qrcode', store=True)
+
+
+    @api.depends('partner_id')
+    def _generate_map_qrcode(self):
+        for record in self:
+
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(record.partner_id.map_url)
+            qr.make(fit=True)
+
+            img = qr.make_image(fill='black', back_color='white')
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            map_qr_image = base64.b64encode(buffer.getvalue())
+            record.map_qr_image = map_qr_image
 
     # Count the total discount
     @api.depends('invoice_line_ids.quantity', 'invoice_line_ids.price_unit', 'invoice_line_ids.discount')
@@ -101,8 +127,8 @@ class AccountMoveLine(models.Model):
 
     fixed_discount = fields.Float( string="Fixed Discount", digits="Product Price", default=0.000)
     discount = fields.Float(string='Discount (%)', digits='Discount', default=0.0, readonly=False)
-    gift = fields.Char(string='Gift', )
-    notes = fields.Char(string='Notes', )
+    notes_for_us = fields.Char("Notes For Us")
+    notes_for_customer = fields.Char("Notes For Customer")
 
     @api.onchange("discount")
     def _onchange_discount(self):
@@ -139,6 +165,8 @@ class ProductProduct(models.Model):
 class ResCompany(models.Model):
     _inherit = 'res.company'
     qrcode=  fields.Binary(string="",  )
+    company_description_ar = fields.Text(string='Company Description AR' ,default=' ﺷﺮﻛﺔ اﻟﺪﺑﻮس ﻟﻠﺘﺠﺎرة اﻟﻌﺎﻣﺔ اﻟﻤﺤﺪودة / ﺑﺒﻐﺪاد ﺟﻤﻴﻠﺔ')
+    contact_information = fields.Text(string='Contact Information' ,default="""أزهر : 07728860006 - مهند :  07835000307 -  محمود : 07825080333  - انمار : 07825080444""")
 
 
 class ResPartner(models.Model):

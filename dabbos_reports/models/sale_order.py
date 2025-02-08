@@ -3,11 +3,12 @@ from odoo.exceptions import ValidationError, UserError
 from odoo.fields import Command
 
 
-
 class SaleOrderLine(models.Model):
-    _inherit = "sale.order.line"
-    gift = fields.Char(string='Gift', )
-    notes = fields.Char(string='Notes', )
+    _inherit = 'sale.order.line'
+
+    notes_for_us = fields.Char("Notes For Us")
+    notes_for_customer = fields.Char("Notes For Customer")
+
 
     fixed_discount = fields.Float(string="Fixed Discount ", digits="Product Price")
 
@@ -50,8 +51,9 @@ class SaleOrderLine(models.Model):
             'quantity': self.qty_to_invoice,
             'discount': self.discount,
             'fixed_discount': self.fixed_discount,
-            'gift': self.gift,
-            'notes': self.notes,
+            'notes_for_us': self.notes_for_us,
+            'notes_for_customer': self.notes_for_customer,
+
 
         'price_unit': self.price_unit,
             'tax_ids': [Command.set(self.tax_id.ids)],
@@ -80,7 +82,10 @@ class SaleOrder(models.Model):
     driver_id = fields.Many2one(comodel_name='res.partner', string='Driver')
 
     invoice_notes = fields.Char(string='Payment Notes')
-    notes_for_customer = fields.Char(string='Notes')
+
+    notes_for_us = fields.Char("Notes For Us")
+    notes_for_customer = fields.Char("Notes For Customer")
+
     total_product = fields.Integer(string='Total Product:', compute='_get_total_product', help="total Products" ,default=0)
     total_quantity = fields.Integer(string='Total Quantity:', compute='_get_total_quantity', help="total Quantity")
     total_quantity_packet = fields.Integer(string='Total Quantity Packet:', compute='_get_total_quantity',
@@ -97,6 +102,7 @@ class SaleOrder(models.Model):
     def _prepare_invoice(self):
         invoice_vals = super(SaleOrder, self)._prepare_invoice()
         invoice_vals.update({
+            'notes_for_us': self.notes_for_us,
             'notes_for_customer': self.notes_for_customer,
 
         })

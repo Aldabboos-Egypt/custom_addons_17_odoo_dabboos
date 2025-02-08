@@ -327,9 +327,9 @@
                                                 <th style="font-size: 14px;;width:12%">
                                                     القيمة
                                                 </th>
-                                                <th style="font-size: 14px;;width:12%">
-                                                    الهدايا
-                                                </th>
+<!--                                                <th style="font-size: 14px;;width:12%">-->
+<!--                                                    الهدايا-->
+<!--                                                </th>-->
                                                 <th style="font-size: 14px;;width:12%">
                                                     ملاحظات
                                                 </th>
@@ -367,11 +367,11 @@
                                                     <td style="font-size: 13px;">
                                                         <span t-esc="int(line.price_subtotal)"/>
                                                     </td>
+<!--                                                    <td style="font-size: 13px;">-->
+<!--                                                        <span t-esc="line.gift"/>-->
+<!--                                                    </td>-->
                                                     <td style="font-size: 13px;">
-                                                        <span t-esc="line.gift"/>
-                                                    </td>
-                                                    <td style="font-size: 13px;">
-                                                        <span t-esc="line.notes"/>
+                                                        <span t-esc="line.notes_for_customer"/>
                                                     </td>
 
                                                     <t t-set="i" t-value="i+1"/>

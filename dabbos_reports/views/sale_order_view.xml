@@ -15,12 +15,13 @@
                 <field name="fixed_discount"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree//field[@name='price_subtotal']" position="after">
-                <field name="gift"/>
-                <field name="notes"/>
+                 <field name="notes_for_us"  />
+                    <field name="notes_for_customer"  />
             </xpath>
-   <xpath expr="//field[@name='note']" position="replace">
-                   <field name="note" placeholder="Notes For Us" colspan="2" nolabel="1"/>
-            </xpath>
+<!--   <xpath expr="//field[@name='note']" position="replace">-->
+<!--                   <field name="note" placeholder="Notes For Us" colspan="2" nolabel="1"/>-->
+<!--            </xpath>-->
+
 
             <xpath expr="//field[@name='tax_totals']" position="replace">
 
@@ -37,7 +38,8 @@
             </xpath>
 
             <xpath expr="//field[@name='note']" position="after">
-
+                        <field name="notes_for_us" placeholder="Notes For Us" string="Notes For Us"/>
+                    <field name="notes_for_customer" placeholder="Notes For Customer" string="Notes For Customer"/>
                 <field name="driver_id" domain="[('is_have_user', '=', True)]"/>
                        <field name="total_product" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
                      <field name="total_quantity" style="color: #3498db; font-weight: bold; text-decoration: underline; font-family: 'clear-font';"/>
