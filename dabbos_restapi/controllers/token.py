@@ -160,6 +160,8 @@ class AccessToken(http.Controller):
                     'can_confirm_invoice': user_id.can_confirm_invoice,
                     'can_create_invoice': user_id.can_create_invoice,
                     'can_confirm_order': user_id.can_confirm_order,
+                    'company_id': user_id.company_id.id,
+
 
                 }
             ),
@@ -198,6 +200,7 @@ class AccessToken(http.Controller):
                     'can_confirm_invoice': user.can_confirm_invoice,
                     'can_create_invoice': user.can_create_invoice,
                     'can_confirm_order': user.can_confirm_order,
+                    'company_id': user.company_id.id,
 
                 }
             ),

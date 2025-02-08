@@ -1,10 +1,21 @@
 {
     "name": "Dabbos Rest API",
-    "version": "17.2.3",
+    "version": "17.2.9",
     "category": "API",
     "summary": "Dabbos Rest API",
 
-    "depends": ["web", "base_setup", "base_geolocalize", "sh_sales_person_customer", 'account','sale_management','stock','dabbos_reports' ],
+    'depends': [
+        'account',
+        'base',
+        'base_geolocalize',
+        'base_setup',
+        'dabbos_reports',
+        'sale_management',
+        'sh_sales_person_customer',
+        'sh_sales_person_products',
+        'stock',
+        'web',
+    ],
     "data": ["views/ir_model.xml", "views/res_users.xml","views/data.xml", "security/ir.model.access.csv",],
 
 }
