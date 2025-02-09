@@ -291,29 +291,89 @@ class WhatsAppComposer(models.TransientModel):
                 # Extract text from HTML snippet
             formatted_text = extract_text_from_html(body)
             final_message = f"{formatted_text}\n\n{self.wa_template_id.footer_text}"
-            self.send_ws_msg(message=final_message, number=mobile_number)
+
+            header_chat_data=''
+            if self.wa_template_id.header_type  in ('document' ,'image' , 'video'):
+                header_chat_data =self.wa_template_id.header_attachment_ids
+
+                print(self.wa_template_id.header_attachment_ids.datas)
+
+            if self.wa_template_id.header_type =='text':
+                header_chat_data = f"{formatted_text}\n\n{self.wa_template_id.header_text}"
+
+
+
+            self.send_ws_msg(message=final_message,header_chat=header_chat_data, number=mobile_number)
             message = self.env['whatsapp.message'].create(message_vals)
 
 
             # message._send(force_send_by_cron=force_send_by_cron)
 
 
-    def send_ws_msg(self,message,number  ):
+    def send_ws_msg(self,message,header_chat,number  ):
         #
         # instance = "instance71676"
         # token = "grlv10mh1tc04319"
         instance = self.wa_account_id.account_uid
         token = self.wa_account_id.token
 
-        chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
 
+        chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
+        header_chat_url=None
         data = {
             "token": token,
             "body": message,
             "to": number,
-            "filename": 'payment.pdf',
+
         }
+
+        header_data = {
+            "token": token,
+            "body": message,
+            "to": number,
+
+        }
+
+
+
         headers = {"content-type": "application/x-www-form-urlencoded"}
+
+        if self.wa_template_id.header_type =='text':
+            header_chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
+
+
+        if self.wa_template_id.header_type =='image':
+
+            header_data = {
+                "token": token,
+                "image": header_chat.datas,
+                "to": number,
+            }
+            header_chat_url = f"https://api.ultramsg.com/{instance}/messages/image"
+
+            requests.request("POST", header_chat_url, data=header_data, headers=headers)
+
+        elif self.wa_template_id.header_type in ('document' , 'video'):
+            header_chat_url = f"https://api.ultramsg.com/{instance}/messages/document"
+            header_data = {
+                "token": token,
+                "document": header_chat.datas,
+                "filename": header_chat.name,
+                "to": number,
+            }
+            requests.request("POST", header_chat_url, data=header_data, headers=headers)
+        elif self.wa_template_id.header_type =='text':
+            header_chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
+
+            header_data = {
+                "token": token,
+                "document": header_chat,
+                 "to": number,
+            }
+            requests.request("POST", header_chat_url, data=header_data, headers=headers)
+        else:
+            pass
+
         chat_response = requests.request("POST", chat_url, data=data, headers=headers)
         chat_res = chat_response.json()
         print('chat_res', chat_res)
@@ -367,3 +427,4 @@ class WhatsAppComposer(models.TransientModel):
     def _get_active_records(self):
         self.ensure_one()
         return self.env[self.res_model].browse(literal_eval(self.res_ids))
+

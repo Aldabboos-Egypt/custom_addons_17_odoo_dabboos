@@ -34,7 +34,7 @@ class SalesPartner(models.Model):
 
     def _get_last_payment(self,partner ):
         if  self.date_to:
-            move_line=self.env['account.move.line'].search(['&','&', '&', '&',('move_id.state', '=','posted'), ('journal_id.type','in',('bank','cash')), ('account_id.user_type_id.type','=','receivable'), ('date','<=',self.date_to),('partner_id','=',partner.id)] )
+            move_line=self.env['account.move.line'].search(['&','&', '&', '&',('move_id.state', '=','posted'), ('journal_id.type','in',('bank','cash')), ('account_id.account_type','=','asset_receivable'), ('date','<=',self.date_to),('partner_id','=',partner.id)] )
         else:
             move_line=self.env['account.move.line'].search([ '&', '&','&',('move_id.state', '=','posted'),('journal_id.type','in',('bank','cash')),('account_id.account_type', '=', 'asset_receivable'),('partner_id','=',partner.id)  ]  )
         print("Last Payment :::",move_line)

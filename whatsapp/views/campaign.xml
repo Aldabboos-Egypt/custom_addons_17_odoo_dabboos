@@ -1,37 +1,37 @@
 <odoo>
 
 
-   <data>
-           <record id="error_view_form" model="ir.ui.view">
-               <field name="name">error_view_form</field>
-               <field name="model">error.send</field>
-               <field name="arch" type="xml">
-                   <form string="_form">
-                       <sheet>
-                           <group>
-                               <field name="partner_id"/>
-                               <field name="number"/>
-                               <field name="cause"/>
+    <data>
+        <record id="error_view_form" model="ir.ui.view">
+            <field name="name">error_view_form</field>
+            <field name="model">error.send</field>
+            <field name="arch" type="xml">
+                <form string="_form">
+                    <sheet>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="number"/>
+                            <field name="cause"/>
 
-                           </group>
-                       </sheet>
-                   </form>
-               </field>
-           </record>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
-         <record id="error_view_tree" model="ir.ui.view">
-               <field name="name">error_view_form</field>
-               <field name="model">error.send</field>
-               <field name="arch" type="xml">
-                   <tree >
 
-                               <field name="partner_id" />
-                               <field name="number"  />
-                               <field name="cause"  />
+        <record id="error_view_tree" model="ir.ui.view">
+            <field name="name">_view_tree</field>
+            <field name="model">error.send</field>
+            <field name="arch" type="xml">
+                <tree string="Error Sending">
+                    <field name="partner_id"/>
+                    <field name="number"/>
+                    <field name="cause"/>
+                </tree>
+            </field>
+        </record>
 
-                   </tree>
-               </field>
-           </record>
     </data>
     <data>
         <!-- Form View -->
@@ -52,7 +52,7 @@
                                     name="action_view_error_details" icon="fa-warning"
 
                                     invisible="errors_count==0"
-                                   >
+                            >
 
                                 <field name="errors_count"/>
                                 /
@@ -65,52 +65,52 @@
                                 name="web_ribbon"
                                 text="Sent"
                                 bg_color="bg-success"
-                                                                    invisible="not send_done"
+                                invisible="not send_done"
 
-                         />
+                        />
 
                         <h1>
                             <field name="name" placeholder="Enter Name"/>
                         </h1>
 
-          <group>
+                        <group>
 
 
                             <group string="Account Configurations">
-                                <field name="account_id" options="{'no_create': True}" />
+                                <field name="account_id" options="{'no_create': True}"/>
 
 
                                 <field name="msg_timer"/>
 
                             </group>
                             <group string="Template Configurations">
-                                <field name="template_id" placeholder="Campaign Template" options="{'no_create': True}" />
+                                <field name="template_id" placeholder="Campaign Template"
+                                       options="{'no_create': True}"/>
 
                                 <field name="prefix"/>
 
                             </group>
-     </group>
+                        </group>
 
-                            <group string="Contact Configurations">
-                                <group>
-                                      <field name="title" options="{'no_create': True}" string="Filter By Title "/>
+                        <group string="Contact Configurations">
+                            <group>
+                                <field name="title" options="{'no_create': True}" string="Filter By Title "/>
 
                                 <field name="tags" options="{'no_create': True}" widget="many2many_tags"
                                        string="Filter By Tag "/>
-                                </group>
+                            </group>
 
-                                   <group>
-                                <field name="company_id" options="{'no_create': True}"   string="Select Company"/>
+                            <group>
+                                <field name="company_id" options="{'no_create': True}" string="Select Company"/>
 
                                 <field name="partners" options="{'no_create': True}" widget="many2many_tags"
                                        string="Select Contacts"/>
 
                             </group>
-                            </group>
+                        </group>
 
 
-
-<hr/>
+                        <hr/>
                         <notebook>
                             <page string="Msg">
                                 <group>
@@ -178,9 +178,6 @@
         <!-- Menu Item -->
 
 
-
-
-
         <record model="ir.ui.view" id="whatsapp_template_tree_view">
             <field name="name">whatsapp.campaign.template.tree.view</field>
             <field name="model">whatsapp.campaign.template</field>
@@ -214,13 +211,15 @@
                             <group>
 
                                 <field name="title" options="{'no_create': True}" string="Filter By Title "/>
-                                <field name="tags" options="{'no_create': True}" widget="many2many_tags" string="Filter By Tag "/>
+                                <field name="tags" options="{'no_create': True}" widget="many2many_tags"
+                                       string="Filter By Tag "/>
                             </group>
 
                             <group>
 
-                                <field name="company_id" options="{'no_create': True}"   string="Select Company"/>
-                                <field name="partners" options="{'no_create': True}" widget="many2many_tags" string="Select Contacts"/>
+                                <field name="company_id" options="{'no_create': True}" string="Select Company"/>
+                                <field name="partners" options="{'no_create': True}" widget="many2many_tags"
+                                       string="Select Contacts"/>
 
                             </group>
 
@@ -254,23 +253,23 @@
             </field>
         </record>
 
-<!--        &lt;!&ndash; Inherit Form View to Modify it &ndash;&gt;-->
-<!--        <record id="view_account_payment_form_inherit" model="ir.ui.view">-->
-<!--            <field name="name">account.payment</field>-->
-<!--            <field name="model">account.payment</field>-->
-<!--            <field name="inherit_id" ref="account.view_account_payment_form"/>-->
-<!--            <field name="arch" type="xml">-->
+        <!--        &lt;!&ndash; Inherit Form View to Modify it &ndash;&gt;-->
+        <!--        <record id="view_account_payment_form_inherit" model="ir.ui.view">-->
+        <!--            <field name="name">account.payment</field>-->
+        <!--            <field name="model">account.payment</field>-->
+        <!--            <field name="inherit_id" ref="account.view_account_payment_form"/>-->
+        <!--            <field name="arch" type="xml">-->
 
-<!--&lt;!&ndash;                <xpath expr="//button[@name='action_post']" position="after">&ndash;&gt;-->
-<!--&lt;!&ndash;                    <button name="send_ws_msg" type="object" string="Send Msg" invisible="state!='posted'"/>&ndash;&gt;-->
-<!--&lt;!&ndash;                </xpath>&ndash;&gt;-->
+        <!--&lt;!&ndash;                <xpath expr="//button[@name='action_post']" position="after">&ndash;&gt;-->
+        <!--&lt;!&ndash;                    <button name="send_ws_msg" type="object" string="Send Msg" invisible="state!='posted'"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;                </xpath>&ndash;&gt;-->
 
-<!--                <xpath expr="//field[@name='partner_id']" position="after">-->
-<!--                    <field name="attachment_ids" widget="many2many_tags" />-->
-<!--                </xpath>-->
+        <!--                <xpath expr="//field[@name='partner_id']" position="after">-->
+        <!--                    <field name="attachment_ids" widget="many2many_tags" />-->
+        <!--                </xpath>-->
 
-<!--            </field>-->
-<!--        </record>-->
+        <!--            </field>-->
+        <!--        </record>-->
 
 
         <record model="ir.actions.act_window" id="whatsapp_template_campain_action">

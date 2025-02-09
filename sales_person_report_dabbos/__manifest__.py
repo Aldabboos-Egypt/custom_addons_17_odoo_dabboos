@@ -1,7 +1,7 @@
 {
     'name' : 'Sales Person  Report Dabbos',
     'author': "Mohsen",
-    'version' : '17.0',
+    'version' : '17.1',
      'summary' : 'Sales Person Report Dabbos',
 
     'depends' : ['base','sale_management','purchase','stock','account'],

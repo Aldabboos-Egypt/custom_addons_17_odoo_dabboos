@@ -107,6 +107,27 @@ class WhatsAppMessage(models.Model):
             'domain': [('msgs_id', '=', self.id)],
         }
 
+    def validate_contact(self, number, instance, token):
+
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        check_url = f"https://api.ultramsg.com/{instance}/contacts/check"
+
+        # Format the number for the chatId (e.g., "1234567890@c.us")
+        check_params = {
+            "token": token,
+            "chatId": number.replace("+", "") + "@c.us",  # Ensure proper chat ID format
+            "nocache": "true"
+        }
+
+        try:
+            response = requests.request("GET", check_url, headers=headers, params=check_params)
+            if response.status_code == 200 and response.json().get('status') == "valid":
+                return True
+            return False
+        except Exception as e:
+            print(f"Error validating contact {number}: {e}")
+            return False
+
     def _check_send(self, number, response, partner):
 
         mobile_number = number.replace(" ", "")
@@ -148,7 +169,31 @@ class WhatsAppMessage(models.Model):
             chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
             doc_url = f"https://api.ultramsg.com/{instance}/messages/document"
             img_url = f"https://api.ultramsg.com/{instance}/messages/image"
+            check_url = f"https://api.ultramsg.com/{instance}/contacts/check"
 
+            # Validate contact number using the check endpoint
+            check_params = {
+                "token": token,
+                "chatId": number.replace("+", "") + "@c.us",  # Ensure proper chat ID format
+                "nocache": "true"
+            }
+            response = requests.request("GET", check_url, headers=headers, params=check_params)
+
+            # Parse response from the check endpoint
+            if response.status_code != 200 or response.json().get('status') != "valid":
+                # Log invalid or unregistered numbers
+                ids = self.error_send_ids.mapped('partner_id').ids
+                if partner.id not in ids:
+                    self.env['error.send'].create({
+                        'partner_id': partner.id,
+                        'number': number,
+                        'cause': "Invalid or Unregistered Number",
+                        'msgs_id': self.id,
+                    })
+                print(f"Error: {partner.name} has an invalid number: {number}")
+                return
+
+            # Send images if provided
             if image_attachments:
                 if len(image_attachments) == 1:
                     data = {
@@ -158,7 +203,6 @@ class WhatsAppMessage(models.Model):
                         "caption": full_msg
                     }
                     response = requests.request("POST", img_url, data=data, headers=headers)
-                    self._check_send(response=response, partner=partner, number=number)
                 else:
                     for image in image_attachments:
                         data = {
@@ -167,7 +211,6 @@ class WhatsAppMessage(models.Model):
                             "image": image.datas,
                         }
                         response = requests.request("POST", img_url, data=data, headers=headers)
-                        self._check_send(response=response, partner=partner, number=number)
 
                     data = {
                         "token": token,
@@ -175,8 +218,8 @@ class WhatsAppMessage(models.Model):
                         "body": full_msg
                     }
                     response = requests.request("POST", chat_url, data=data, headers=headers)
-                    self._check_send(response=response, partner=partner, number=number)
 
+            # Send files if provided
             for file in file_attachments:
                 data = {
                     "token": token,
@@ -185,8 +228,8 @@ class WhatsAppMessage(models.Model):
                     "filename": file.name
                 }
                 response = requests.request("POST", doc_url, data=data, headers=headers)
-                self._check_send(response=response, partner=partner, number=number)
 
+            # Send the main message if no images
             if not image_attachments:
                 data = {
                     "token": token,
@@ -194,8 +237,8 @@ class WhatsAppMessage(models.Model):
                     "body": full_msg
                 }
                 response = requests.request("POST", chat_url, data=data, headers=headers)
-                self._check_send(response=response, partner=partner, number=number)
 
+            # Delay between messages if configured
             if self.msg_timer > 0:
                 time.sleep(self.msg_timer)
 
@@ -265,88 +308,3 @@ class WhatsTemplate(models.Model):
 
     msg = fields.Text(string='Message', required=True)
     attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
-
-
-# class AccountPayment(models.Model):
-#     _inherit = 'account.payment'
-# 
-#     attachment_ids = fields.Many2many(
-#         'ir.attachment')
-# 
-#     def get_attachments(self):
-#         #
-#         # template = self.env.ref('account.email_template_edi_invoice')
-#         # report = template.report_template_ids[0] if template.report_template_ids.ids else ''
-#         report = self.env.ref('account.action_report_payment_receipt')
-#         # report = self.env.ref('account.action_report_payment_receipt')
-# 
-#         Attachment = self.env['ir.attachment']
-# 
-#         report_xml_id = report.get_external_id()[report.id]
-#         res, format = self.env['ir.actions.report'].with_context(
-#             force_report_rendering=True)._render_qweb_pdf(report_xml_id, res_ids=[self.id])
-#         res = base64.b64encode(res)
-# 
-#         attachments = []
-# 
-#         attachments.append((self.name, res))
-#         attachment_ids = []
-#         for attachment in attachments:
-#             attachment_data = {
-#                 'name': attachment[0],
-#                 'datas': attachment[1],
-#                 'type': 'binary',
-#                 'res_model': 'account.payment',
-#                 'res_id': self.id,
-#             }
-#             attachment_ids.append(Attachment.create(attachment_data).id)
-#         if attachment_ids:
-#             self.attachment_ids = [(6, 0, attachment_ids)]
-# 
-#         print(self.attachment_ids)
-# 
-#     def send_ws_msg(self):
-# 
-#         self.get_attachments()
-#         number = self.partner_id.mobile
-#         instance = self.env["ir.default"].sudo()._get('res.config.settings', 'instance')
-#         print('instance', instance)
-#         token = self.env["ir.default"].sudo()._get('res.config.settings', 'token')
-#         print('token', token)
-#         if number:
-#             if '+' not in number:
-#                 number = str(self.partner_id.country_id.phone_code) + self.partner_id.mobile
-#         else:
-#             raise models.ValidationError("Number Not found")
-#         chat_url = f"https://api.ultramsg.com/{instance}/messages/chat"
-#         doc_url = f"https://api.ultramsg.com/{instance}/messages/document"
-#         msg = """
-#             Hello  ,
-#             I hope this message finds you well.
-#             We would like to inform you that your invoice for service is now ready. Please find the attached payment invoice for your reference.
-#             """
-#         data = {
-#             "token": token,
-#             "body": msg,
-#             "to": number,
-#             "filename": 'payment.pdf',
-#         }
-#         headers = {"content-type": "application/x-www-form-urlencoded"}
-#         chat_response = requests.request("POST", chat_url, data=data, headers=headers)
-#         chat_res = chat_response.json()
-#         print('chat_res', chat_res)
-#         res_dict = {'chat_res': chat_res}
-#         if self.attachment_ids.ids:
-#             pdf_url = self.attachment_ids[0].datas
-#             # pdf_url = report_url + '/report/pdf/' + 'roya_reports.sale_order_template_id/' + str(self.id)
-#             data.update({"document": pdf_url, })
-#             doc_response = requests.request("POST", doc_url, data=data, headers=headers)
-#             doc_res = doc_response.json()
-#             print('doc_res', doc_res)
-#             res_dict.update({'doc_res': doc_res})
-#         return self.attachment_ids
-# 
-#     def action_post(self):
-#         res = super(AccountPayment, self).action_post()
-#         self.send_ws_msg()
-#         return res

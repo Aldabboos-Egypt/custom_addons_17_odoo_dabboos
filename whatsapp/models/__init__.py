@@ -14,3 +14,4 @@ from . import whatsapp_template
 from . import whatsapp_template_button
 from . import whatsapp_template_variable
 from . import campaign
+from . import Payments

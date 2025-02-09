@@ -386,11 +386,11 @@ class APIController(http.Controller):
             "mobile": post.get("mobile"),
             "phone": post.get("phone"),
             "city": post.get("city"),
-            "state_id": post.get("state"),
+            "state_id": post.get("state_id"),
             "street": post.get("street"),
             "comment": post.get("description"),
-            "partner_latitude": post.get("lat"),
-            "partner_longitude": post.get("lang"),
+            "partner_latitude": post.get("partner_latitude"),
+            "partner_longitude": post.get("partner_longitude"),
             "map_url": post.get("map_url"),
             "date_localization": post.get("date"),
             "user_id": post.get("user_id"),
@@ -416,7 +416,7 @@ class APIController(http.Controller):
         image_data = base64.b64encode(profile_picture.read()).decode('utf-8') if profile_picture else None
 
         # Convert state_id to valid integer
-        state_id = request.env['res.country.state'].sudo().search([('name', '=', params["state_id"])],
+        state_id = request.env['res.country.state'].sudo().search([('id', '=', params["state_id"])],
                                                                   limit=1).id or False
 
         # Convert user_id to integer
@@ -508,7 +508,7 @@ class APIController(http.Controller):
 
             # Handle state_id conversion
             if "state_id" in update_fields:
-                state_id = request.env['res.country.state'].sudo().search([('name', '=', update_fields["state_id"])],
+                state_id = request.env['res.country.state'].sudo().search([('id', '=', update_fields["state_id"])],
                                                                           limit=1).id or False
                 update_fields["state_id"] = state_id
 
@@ -808,8 +808,8 @@ class APIController(http.Controller):
                 'pricelist_id': data.get('pricelist_id'),
                 'user_id': data.get('user_id'),
                 'date_order': data.get('date_order'),
+                'notes_for_us': data.get('notes_for_us'),
                 'notes_for_customer': data.get('notes_for_customer'),
-                'note': data.get('note'),
                 'company_id': request.env['res.users'].sudo().browse(data.get('user_id')).company_id.id,
                 'order_line': order_lines,
 
