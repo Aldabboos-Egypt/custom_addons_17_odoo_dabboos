@@ -41,16 +41,16 @@ class AccountMove(models.Model):
     partner_balance_before = fields.Monetary(string="Balance Before", compute="_compute_balances", store=True)
     partner_balance_after = fields.Monetary(string="Balance After", compute="_compute_balances", store=True)
 
-    @api.depends('line_ids', 'line_ids.amount_residual', 'state','date')
+    @api.depends('line_ids', 'line_ids.amount_residual', 'state', 'date')
     def _compute_balances(self):
         for move in self:
             if move.partner_id:
                 partner_balance_before = 0.0
-                if move.id:  # Check if the record is saved in the database
+                if move.date:  # Ensure the date field is set
                     domain = [
                         ('partner_id', '=', move.partner_id.id),
                         ('state', '=', 'posted'),
-                        ('id', '<', move.id)  # Only filter if move.id exists
+                        ('date', '<=', move.date)  # Filter by date instead of ID
                     ]
                     partner_balance_before = sum(self.env['account.move'].search(domain).mapped('amount_total'))
 
