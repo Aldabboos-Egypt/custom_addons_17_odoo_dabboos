@@ -44,21 +44,30 @@ class AccountMove(models.Model):
     @api.depends('line_ids', 'line_ids.amount_residual', 'state', 'date')
     def _compute_balances(self):
         for move in self:
-            if move.partner_id:
-                partner_balance_before = 0.0
-                if move.date:  # Ensure the date field is set
-                    domain = [
-                        ('partner_id', '=', move.partner_id.id),
-                        ('state', '=', 'posted'),
-                        ('date', '<=', move.date)  # Filter by date instead of ID
-                    ]
-                    partner_balance_before = sum(self.env['account.move'].search(domain).mapped('amount_total'))
+            move.partner_balance_before = 0.0
+            move.partner_balance_after = 0.0
 
-                move.partner_balance_before = partner_balance_before
-                move.partner_balance_after = partner_balance_before + move.amount_total
+            partner_balance_before = 0.0
+            if move.date:
+                if move.id:
+                    move_line_for_debit = self.env['account.move.line'].search(
+                        ['&', '&', '&', '&',  ('account_id.account_type', '=', 'asset_receivable'),
+                         ('move_id.state', '=', 'posted'), ('move_id', '<', move.id),
+                         ('partner_id', '=', move.partner_id.id), ('date', '<=', move.date), ])
+                    total_debt = sum(line.balance for line in move_line_for_debit)
+                    partner_balance_before =total_debt
             else:
-                move.partner_balance_before = 0.0
-                move.partner_balance_after = 0.0
+                if move.id:
+                    move_line_for_debit = self.env['account.move.line'].search(
+                        ['&', '&', '&',   ('account_id.account_type', '=', 'asset_receivable'),
+                         ('move_id.state', '=', 'posted'), ('move_id', '<', move.id),
+                         ('partner_id', '=', move.partner_id.id),  ])
+                    total_debt = sum(line.balance for line in move_line_for_debit)
+                    partner_balance_before =total_debt
+
+            move.partner_balance_before = partner_balance_before
+            move.partner_balance_after = partner_balance_before + move.amount_total
+
 
     map_qr_image = fields.Binary("Map QRCode", compute='_generate_map_qrcode', store=True)
 
