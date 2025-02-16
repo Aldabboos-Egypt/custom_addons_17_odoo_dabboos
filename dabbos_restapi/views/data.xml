@@ -162,5 +162,18 @@
         </record>
 
     </data>
+
+    <record id="cron_delete_old_visit_attachments" model="ir.cron">
+    <field name="name">Delete Attachments of Old Sales Visits</field>
+    <field name="model_id" ref="model_sales_visit"/>
+    <field name="state">code</field>
+    <field name="code">model.cron_delete_old_visit_attachments()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+    <field name="numbercall">-1</field>
+    <field name="active" eval="True"/>
+</record>
+
+
 </odoo>
 

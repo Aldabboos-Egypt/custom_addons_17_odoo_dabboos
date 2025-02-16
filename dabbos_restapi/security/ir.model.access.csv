@@ -3,4 +3,6 @@ access_api_access_token,access_api_access_token,model_api_access_token,,1,1,1,1
 fetch_data_id,fetch_data,model_fetch_data,,1,1,1,1
 ir_model_id,ir_model,base.model_ir_model,,1,1,1,1
 ir_model_fields_id,ir_model_fields,base.model_ir_model_fields,,1,1,1,1
-access_sales_visit_user,sales.visit user,model_sales_visit,,1,0,0,0
+access_sales_visit_user,sales.visit user,model_sales_visit,,1,1,1,1
+visit_stage_id,visit_stage,model_visit_stage,,1,1,1,1
+access_res_users_all,res.users all,base.model_res_users,,1,1,1,1
