@@ -903,9 +903,11 @@ class APIController(http.Controller):
         from_time = kwargs.get("from_time").strip('"')
         to_time = kwargs.get("to_time").strip('"')
         notes = kwargs.get("notes", "")
+        stage_id = int(kwargs.get("stage_id"))
+
 
         # Validate required parameters
-        if not (partner_id and user_id and from_time and to_time):
+        if not (partner_id and user_id and from_time ):
             return werkzeug.wrappers.Response(
                 status=400,
                 content_type="application/json; charset=utf-8",
@@ -917,6 +919,7 @@ class APIController(http.Controller):
         visit = request.env['sales.visit'].sudo().create({
             'partner_id': partner_id,
             'user_id': user_id,
+            'stage_id': stage_id,
             'from_time': from_time,
             'to_time': to_time,
         'from_time_str': str(from_time),
@@ -967,9 +970,10 @@ class APIController(http.Controller):
         from_time = kwargs.get("from_time").strip('"')
         to_time = kwargs.get("to_time").strip('"')
         notes = kwargs.get("notes", "")
+        stage_id = int(kwargs.get("stage_id"))
 
         # Validate required parameters
-        if not (visit_id and partner_id and user_id and from_time and to_time):
+        if not (visit_id and partner_id and user_id and from_time and to_time and stage_id):
             return werkzeug.wrappers.Response(
                 status=400,
                 content_type="application/json; charset=utf-8",
@@ -991,6 +995,8 @@ class APIController(http.Controller):
         visit.write({
             'partner_id': partner_id,
             'user_id': user_id,
+            'stage_id': stage_id,
+
             'from_time': from_time,
             'to_time': to_time,
             'from_time_str': str(from_time),

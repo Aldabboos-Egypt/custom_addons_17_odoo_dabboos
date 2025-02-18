@@ -175,5 +175,18 @@
 </record>
 
 
+        <data>
+
+
+    <record id="sales_visit_rule_company_users" model="ir.rule">
+        <field name="name">Sales Visit: Restrict Access to Company Users</field>
+        <field name="model_id" ref="dabbos_restapi.model_sales_visit"/>
+        <field name="domain_force">[('company_id', 'in', user.company_ids.ids)]</field>
+    </record>
+
+
+        </data>
+
+
 </odoo>
 

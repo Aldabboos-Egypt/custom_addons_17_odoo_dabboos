@@ -2,9 +2,9 @@
 import json
 
 from odoo import api, models, fields,SUPERUSER_ID
-from datetime import datetime, timedelta
+from datetime import timedelta
 from odoo import api, fields, models,_
-
+from odoo.exceptions import ValidationError
 
 class IrModel(models.Model):
     _inherit = "ir.model"
@@ -32,8 +32,6 @@ class Partner(models.Model):
     _inherit = "res.partner"
 
     visit_count = fields.Integer(string='Visits', compute='_compute_visit_count')
-
-
 
 
     def _compute_visit_count(self):
@@ -201,22 +199,19 @@ class ResUsers(models.Model):
 class SalesVisit(models.Model):
     _name = 'sales.visit'
     _description = 'Sales Visit'
-    _inherit = ['mail.thread', 'mail.activity.mixin']  # Enables chatter and attachments
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Name')
     partner_id = fields.Many2one('res.partner', string='Partner', required=True)
-    user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
+    user_id = fields.Many2one('res.users', string='Sales Person', required=True, default=lambda self: self.env.user)
 
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     from_time = fields.Datetime(string='From Time', required=True)
     to_time = fields.Datetime(string='To Time')
 
-    duration = fields.Float(string='Duration (Hours)', compute='_compute_duration', store=True)
 
-    day = fields.Integer(string="Days", compute="_compute_duration", store=True)
-    hour = fields.Integer(string="Hours", compute="_compute_duration", store=True)
-    minutes = fields.Integer(string="Minutes", compute="_compute_duration", store=True)
+
 
     notes = fields.Text(string='Notes')
 
@@ -262,21 +257,17 @@ class SalesVisit(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('visit.seq') or _('New')
         return super(SalesVisit, self).create(vals)
 
+    duration = fields.Float(string="Duration (Hours)", compute="_compute_duration", store=True)
+
     @api.depends('from_time', 'to_time')
     def _compute_duration(self):
         for visit in self:
             if visit.from_time and visit.to_time:
                 delta = visit.to_time - visit.from_time
                 total_seconds = delta.total_seconds()
-                visit.duration = total_seconds / 3600.0 if total_seconds >= 0 else 0.0
-                visit.day = int(total_seconds // 86400)
-                visit.hour = int((total_seconds % 86400) // 3600)
-                visit.minutes = int((total_seconds % 3600) // 60)
+                visit.duration = total_seconds / 3600.0  # Store as hours (e.g., 2.5 for 2 hours 30 mins)
             else:
                 visit.duration = 0.0
-                visit.day = 0
-                visit.hour = 0
-                visit.minutes = 0
 
 
 class VisitStage(models.Model):
@@ -284,5 +275,19 @@ class VisitStage(models.Model):
     _description = 'Visit Stage'
 
     name = fields.Char(string="Stage Name", required=True)
-    sequence = fields.Integer(string="Sequence", default=10)
+    sequence = fields.Integer(string="Sequence", default=1)
+    is_draft = fields.Boolean(string="Draft Stage", default=False)
     is_closed = fields.Boolean(string="Closed Stage", default=False)
+
+    @api.constrains('is_draft', 'is_closed')
+    def _check_unique_draft_closed(self):
+        for record in self:
+            if record.is_draft:
+                existing_draft = self.search_count([('is_draft', '=', True), ('id', '!=', record.id)])
+                if existing_draft:
+                    raise ValidationError("Only one draft stage is allowed.")
+
+            if record.is_closed:
+                existing_closed = self.search_count([('is_closed', '=', True), ('id', '!=', record.id)])
+                if existing_closed:
+                    raise ValidationError("Only one closed stage is allowed.")
