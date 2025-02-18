@@ -901,7 +901,6 @@ class APIController(http.Controller):
         partner_id = int(kwargs.get("partner_id"))
         user_id = int(kwargs.get("user_id"))
         from_time = kwargs.get("from_time").strip('"')
-        to_time = kwargs.get("to_time").strip('"')
         notes = kwargs.get("notes", "")
         stage_id = int(kwargs.get("stage_id"))
 
@@ -921,9 +920,7 @@ class APIController(http.Controller):
             'user_id': user_id,
             'stage_id': stage_id,
             'from_time': from_time,
-            'to_time': to_time,
         'from_time_str': str(from_time),
-        'to_time_str': str(to_time),
             'notes': notes,
         })
         data_files = request.httprequest.files.getlist('data_files')  # 'data_files' field name in body

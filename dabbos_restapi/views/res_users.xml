@@ -104,8 +104,10 @@
                     <group>
 
                         <group>
-                            <field name="from_time_str" readonly="1"/>
-                        <field name="to_time_str" readonly="1"/>
+                       <field name="from_time_str" readonly="1" />
+                        <field name="to_time_str" readonly="1"  />
+
+
                       <field name="duration" widget="float_time" string="Duration" />
 
                         </group>
@@ -141,7 +143,7 @@
             <field name="stage_id"/>
             <field name="from_time_str" readonly="1"/>
             <field name="to_time_str" readonly="1"/>
-            <field name="duration"/>
+            <field name="duration"  widget="float_time" string="Duration"/>
 
             <field name="notes" optional="hide"/>
         </tree>
