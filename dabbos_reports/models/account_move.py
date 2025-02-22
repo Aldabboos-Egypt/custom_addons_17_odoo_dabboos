@@ -36,8 +36,38 @@ class AccountMove(models.Model):
     discount_total_line = fields.Monetary("Discount Total Line ", compute='total_discount')
     total_with_line_discount = fields.Monetary(" Total With Line Discount ", compute='total_discount')
     all_discounts = fields.Monetary("Discount ", compute='total_discount')
-    partner_balance_before = fields.Monetary("  Balance Before", compute='total_discount')
-    partner_balance_after = fields.Monetary("  Balance After", compute='total_discount')
+
+
+    partner_balance_before = fields.Monetary(string="Balance Before", compute="_compute_balances", store=True)
+    partner_balance_after = fields.Monetary(string="Balance After", compute="_compute_balances", store=True)
+
+    @api.depends('line_ids', 'line_ids.amount_residual', 'state', 'date')
+    def _compute_balances(self):
+        for move in self:
+            move.partner_balance_before = 0.0
+            move.partner_balance_after = 0.0
+
+            partner_balance_before = 0.0
+            if move.date:
+                if move.id:
+                    move_line_for_debit = self.env['account.move.line'].search(
+                        ['&', '&', '&', '&',  ('account_id.account_type', '=', 'asset_receivable'),
+                         ('move_id.state', '=', 'posted'), ('move_id', '<', move.id),
+                         ('partner_id', '=', move.partner_id.id), ('date', '<=', move.date), ])
+                    total_debt = sum(line.balance for line in move_line_for_debit)
+                    partner_balance_before =total_debt
+            else:
+                if move.id:
+                    move_line_for_debit = self.env['account.move.line'].search(
+                        ['&', '&', '&',   ('account_id.account_type', '=', 'asset_receivable'),
+                         ('move_id.state', '=', 'posted'), ('move_id', '<', move.id),
+                         ('partner_id', '=', move.partner_id.id),  ])
+                    total_debt = sum(line.balance for line in move_line_for_debit)
+                    partner_balance_before =total_debt
+
+            move.partner_balance_before = partner_balance_before
+            move.partner_balance_after = partner_balance_before + move.amount_total
+
 
     map_qr_image = fields.Binary("Map QRCode", compute='_generate_map_qrcode', store=True)
 
@@ -78,17 +108,11 @@ class AccountMove(models.Model):
                             if line.price_unit < 0 and line.product_id.is_discount:
                                 final_discount_amount_line = final_discount_amount_line + line.price_subtotal
 
-                balance_after = 0.0
-                if invoice.partner_id.balance:
-                    balance_after = invoice.partner_id.balance
-                    balance_before = invoice.partner_id.balance - invoice.amount_total
-                else:
-                    balance_before = invoice.amount_total
+
 
                 invoice.update({
                     'discount_total': final_discount_amount,
-                    'partner_balance_before': balance_before,
-                    'partner_balance_after': balance_after,
+
                     'discount_total_line': final_discount_amount_line,
                     'total_with_line_discount': invoice.amount_total - final_discount_amount_line,
                     'all_discounts': abs(final_discount_amount_line) + abs(final_discount_amount),

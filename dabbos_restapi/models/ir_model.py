@@ -2,9 +2,9 @@
 import json
 
 from odoo import api, models, fields,SUPERUSER_ID
-
+from datetime import timedelta
 from odoo import api, fields, models,_
-
+from odoo.exceptions import ValidationError
 
 class IrModel(models.Model):
     _inherit = "ir.model"
@@ -32,8 +32,6 @@ class Partner(models.Model):
     _inherit = "res.partner"
 
     visit_count = fields.Integer(string='Visits', compute='_compute_visit_count')
-
-
 
 
     def _compute_visit_count(self):
@@ -198,12 +196,60 @@ class ResUsers(models.Model):
 
 
 
-
-
 class SalesVisit(models.Model):
     _name = 'sales.visit'
     _description = 'Sales Visit'
-    _inherit = ['mail.thread', 'mail.activity.mixin']  # Enables chatter and attachments
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    name = fields.Char(string='Name')
+    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
+    user_id = fields.Many2one('res.users', string='Sales Person', required=True, default=lambda self: self.env.user)
+
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
+    from_time = fields.Datetime(string='From Time', required=True)
+    to_time = fields.Datetime(string='To Time')
+
+
+
+
+    notes = fields.Text(string='Notes')
+
+
+    stage_id = fields.Many2one(
+        'visit.stage',
+        string='Stage',
+        tracking=True,
+        default=lambda self: self._default_stage()
+    )
+
+    @api.model
+    def cron_delete_old_visit_attachments(self):
+        """ Deletes attachments of visits older than 60 days """
+        sixty_days_ago = fields.Datetime.now() - timedelta(days=60)
+        old_visits = self.search([('create_date', '<', sixty_days_ago)])
+
+        for visit in old_visits:
+            attachments = self.env['ir.attachment'].search([
+                ('res_model', '=', 'sales.visit'),
+                ('res_id', '=', visit.id)
+            ])
+            attachments.unlink()
+
+        return True
+
+
+    def _default_stage(self):
+        return self.env['visit.stage'].search([], order="sequence asc", limit=1).id
+
+    message_ids = fields.One2many('mail.message', 'res_id', string="Messages", domain=[('model', '=', 'sales.visit')])
+    message_follower_ids = fields.One2many('mail.followers', 'res_id', string="Followers",
+                                           domain=[('res_model', '=', 'sales.visit')])
+    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'sales.visit')],
+                                     string='Attachments')
+
+    from_time_str = fields.Char(string='From Time (Str)')
+    to_time_str = fields.Char(string='To Time (Str)')
 
     @api.model
     def create(self, vals):
@@ -211,32 +257,37 @@ class SalesVisit(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('visit.seq') or _('New')
         return super(SalesVisit, self).create(vals)
 
-    name = fields.Char(string='Name' )
-    partner_id = fields.Many2one('res.partner', string='Partner', required=True)
-    user_id = fields.Many2one('res.users', string='User', required=True, default=lambda self: self.env.user)
-    from_time = fields.Datetime(string='From Time', required=True)
-    to_time = fields.Datetime(string='To Time',)
-    duration = fields.Float(string='Duration', compute='_compute_duration', store=True)
-    notes = fields.Char(string='Notes')
-    message_ids = fields.One2many('mail.message', 'res_id', string="Messages", domain=[('model', '=', 'sales.visit')])
-    message_follower_ids = fields.One2many('mail.followers', 'res_id', string="Followers",
-                                           domain=[('res_model', '=', 'sales.visit')])
-
-    attachment_ids = fields.One2many('ir.attachment', 'res_id', domain=[('res_model', '=', 'sales.visit')], string='Attachments')
-    from_time_str= fields.Char(
-        string='',
-        required=False)
-
-    to_time_str= fields.Char(
-        string='',
-        required=False)
-
+    duration = fields.Float(string="Duration (Hours)", compute="_compute_duration", store=True)
 
     @api.depends('from_time', 'to_time')
     def _compute_duration(self):
         for visit in self:
             if visit.from_time and visit.to_time:
                 delta = visit.to_time - visit.from_time
-                visit.duration = delta.total_seconds() / 3600.0 if delta.total_seconds() >= 0 else 0.0
+                total_seconds = delta.total_seconds()
+                visit.duration = total_seconds / 3600.0  # Store as hours (e.g., 2.5 for 2 hours 30 mins)
             else:
                 visit.duration = 0.0
+
+
+class VisitStage(models.Model):
+    _name = 'visit.stage'
+    _description = 'Visit Stage'
+
+    name = fields.Char(string="Stage Name", required=True)
+    sequence = fields.Integer(string="Sequence", default=1)
+    is_draft = fields.Boolean(string="Draft Stage", default=False)
+    is_closed = fields.Boolean(string="Closed Stage", default=False)
+
+    @api.constrains('is_draft', 'is_closed')
+    def _check_unique_draft_closed(self):
+        for record in self:
+            if record.is_draft:
+                existing_draft = self.search_count([('is_draft', '=', True), ('id', '!=', record.id)])
+                if existing_draft:
+                    raise ValidationError("Only one draft stage is allowed.")
+
+            if record.is_closed:
+                existing_closed = self.search_count([('is_closed', '=', True), ('id', '!=', record.id)])
+                if existing_closed:
+                    raise ValidationError("Only one closed stage is allowed.")
