@@ -25,7 +25,7 @@
         <field name="arch" type="xml">
             <form string="Salesperson Location">
                 <sheet>
-                <button name="action_open_map" type="object" string="View Movement on Map" class="oe_highlight"/>
+<!--                <button name="action_open_map" type="object" string="View Movement on Map" class="oe_highlight"/>-->
 
                     <!-- Main Sections in Two Columns -->
                     <group>
@@ -71,6 +71,40 @@
         </field>
     </record>
 
+<record id="action_salesperson_contacts" model="ir.actions.act_window">
+        <field name="name">Salesperson</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,tree,form,map,activity</field>
+        <field name="domain">[('is_salesperson','=',True)]</field>
+        <field name="context">{'default_is_salesperson': True}</field>
+    </record>
+
+            <record id="sales_person_location_action" model="ir.actions.act_window">
+        <field name="name">SalesPerson Locations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">salesperson.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_salesperson_contacts_root"
+              name="Salesperson"
+              action="action_salesperson_contacts"
+              parent="contacts.menu_contacts"
+              sequence="1"/>
+
+       <menuitem id="menu_salesperson_contacts"
+              name="Salesperson"
+              action="action_salesperson_contacts"
+              parent="menu_salesperson_contacts_root"
+              sequence="10"/>
+
+        <menuitem id="menu_salesperson_locations"
+              name="Locations History"
+              action="sales_person_location_action"
+              parent="menu_salesperson_contacts_root"
+              sequence="20"/>
+
+
 
 
     <record id="view_partner_form_inherit_salesperson_location" model="ir.ui.view">
@@ -78,8 +112,15 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
+              <xpath expr="//field[@name='vat']" position="after">
+                <field name="is_salesperson" invisible="1"/>
+                </xpath>
             <notebook position="inside">
-                <page string="Salesperson Locations" invisible="not salesperson_locations">
+
+
+
+
+                <page string="Salesperson Locations" invisible="not salesperson_locations or not is_salesperson">
                     <group>
                         <field name="salesperson_locations" widget="one2many_list">
                             <tree create="false" edit="false">
@@ -209,16 +250,7 @@
         <field name="view_mode">tree,form</field>
     </record>
 
-    <record id="sales_person_location_action" model="ir.actions.act_window">
-        <field name="name">SalesPerson Locations</field>
-        <field name="type">ir.actions.act_window</field>
-        <field name="res_model">salesperson.location</field>
-        <field name="view_mode">tree,form</field>
-    </record>
 
-    <!-- Menu Item under Sales Report -->
-    <menuitem id="sales_person_location_menu" name="SalesPerson Locations" parent="sale.menu_sale_report"
-              action="sales_person_location_action" sequence="5"/>
     <menuitem id="sales_visit_menu" name="Visit Report" parent="sale.menu_sale_report" action="sales_visit_action"
               sequence="5"/>
 

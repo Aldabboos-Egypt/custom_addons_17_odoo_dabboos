@@ -1,8 +1,7 @@
 # Part of odoo. See LICENSE file for full copyright and licensing details.
-import json
-
+import folium
+import os
 from odoo import api, models, fields,SUPERUSER_ID
-from datetime import timedelta
 from odoo import api, fields, models,_
 from odoo.exceptions import ValidationError
 from odoo import models, fields, api
@@ -35,6 +34,8 @@ class Partner(models.Model):
     _inherit = "res.partner"
 
     visit_count = fields.Integer(string='Visits', compute='_compute_visit_count')
+
+    is_salesperson = fields.Boolean(string='',)
 
 
     def _compute_visit_count(self):
@@ -152,6 +153,9 @@ class AccountMove(models.Model):
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    is_salesperson = fields.Boolean(string='',)
+
+
     allowed_locations = fields.Many2many(
         comodel_name='stock.location',
         string='Allowed Locations',domain="['|',('company_id', '=',company_id),('company_id', '=',False)]",
@@ -172,7 +176,12 @@ class ResUsers(models.Model):
         help="Enable this option to allow the user to view product quantities."
     )
 
-
+    def write(self, vals):
+        res = super(ResUsers, self).write(vals)
+        if 'is_salesperson' in vals:
+            for record in self:
+                record.partner_id.write({'is_salesperson': vals['is_salesperson']})
+        return res
 
     def _get_qty(self):
         with self.pool.cursor() as cr:
@@ -388,9 +397,7 @@ class ResPartner(models.Model):
     customer_locations = fields.One2many(
         'salesperson.location', 'customer_id', string="Customer Locations"
     )
-import folium
-import os
-from odoo import api, fields, models
+
 
 class SalespersonLocationMapWizard(models.TransientModel):
     _name = 'salesperson.location.map.wizard'
