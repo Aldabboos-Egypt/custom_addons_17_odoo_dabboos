@@ -1,0 +1,321 @@
+<odoo>
+
+    <record id="view_salesperson_location_tree" model="ir.ui.view">
+        <field name="name">salesperson.location.tree</field>
+        <field name="model">salesperson.location</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="salesperson_id"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="timestamp"/>
+                <field name="device_id"/>
+                <field name="os"/>
+                <field name="app_version"/>
+                <field name="distance_from_last"/>
+                <field name="map_link" widget="url"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record id="view_salesperson_location_form" model="ir.ui.view">
+        <field name="name">salesperson.location.form</field>
+        <field name="model">salesperson.location</field>
+        <field name="arch" type="xml">
+            <form string="Salesperson Location">
+                <sheet>
+                <button name="action_open_map" type="object" string="View Movement on Map" class="oe_highlight"/>
+
+                    <!-- Main Sections in Two Columns -->
+                    <group>
+
+                        <group string="👤 Associated Partner"
+                               style="border: 1px solid #d3d3d3; padding: 10px; background-color: #f9f9f9;">
+                            <field name="salesperson_id" required="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="customer_id"/>
+                        </group>
+                        <group string="📍 Location Details" style="border: 1px solid #d3d3d3; padding: 10px; background-color: #f9f9f9;">
+                            <group>
+                                                            <field name="latitude"/>
+                            <field name="distance_from_last" string="Distance"/>
+
+                            </group>
+                            <group>
+                                                            <field name="longitude"/>
+                            <field name="timestamp"/>
+
+                            </group>
+                             <label string="Location : " for="map_link"/>
+                              <field name="map_link" readonly="1" widget="url"/>
+
+
+
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="📱 Device  Details"
+                               style="border: 1px solid #d3d3d3; padding: 10px; background-color: #f9f9f9;">
+                            <field name="device_id"/>
+                            <field name="os"/>
+                            <field name="app_version"/>
+
+                        </group>
+
+
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="view_partner_form_inherit_salesperson_location" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.salesperson.location</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Salesperson Locations" invisible="not salesperson_locations">
+                    <group>
+                        <field name="salesperson_locations" widget="one2many_list">
+                            <tree create="false" edit="false">
+                                <field name="salesperson_id"/>
+                                <field name="customer_id"/>
+                                <field name="latitude"/>
+                                <field name="longitude"/>
+                                <field name="distance_from_last"/>
+                                <field name="timestamp"/>
+                                <field name="map_link" widget="url"/>
+                            </tree>
+                        </field>
+                    </group>
+                </page>
+
+<!--                <page string="Customer Locations">-->
+<!--                    <group>-->
+<!--                        <field name="customer_locations" widget="one2many_list">-->
+<!--                            <tree create="false" edit="false">-->
+<!--                                <field name="salesperson_id"/>-->
+<!--                                <field name="latitude"/>-->
+<!--                                <field name="longitude"/>-->
+<!--                                <field name="timestamp"/>-->
+<!--                                <field name="map_link" widget="url"/>-->
+<!--                            </tree>-->
+<!--                        </field>-->
+<!--                    </group>-->
+<!--                </page>-->
+            </notebook>
+        </field>
+    </record>
+
+
+
+
+    <record id="view_sales_visit_form" model="ir.ui.view">
+        <field name="name">sales.visit.form</field>
+        <field name="model">sales.visit</field>
+        <field name="arch" type="xml">
+            <form string="Sales Visit">
+                <header>
+                    <field name="stage_id" widget="statusbar"/>
+
+                </header>
+                <sheet>
+
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group>
+
+                            <group>
+                                <field name="from_time_str" readonly="1"/>
+                                <field name="to_time_str" readonly="1"/>
+
+
+                                <field name="duration" widget="float_time" string="Duration"/>
+
+                            </group>
+
+                        </group>
+
+                    </group>
+
+                    <label for="notes" string="Notes"/>
+                    <field name="notes"/>
+
+                </sheet>
+
+                <!-- Chatter for communication -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sales_visit_tree" model="ir.ui.view">
+        <field name="name">sales.visit.tree</field>
+        <field name="model">sales.visit</field>
+        <field eval="8" name="priority"/>
+        <field name="arch" type="xml">
+            <tree string="Sales Visit" sample="1" multi_edit="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <field name="stage_id"/>
+                <field name="from_time_str" readonly="1"/>
+                <field name="to_time_str" readonly="1"/>
+                <field name="duration" widget="float_time" string="Duration"/>
+
+                <field name="notes" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search view for sales.visit -->
+    <record id="view_sales_visit_search" model="ir.ui.view">
+        <field name="name">sales.visit.search</field>
+        <field name="model">sales.visit</field>
+        <field name="arch" type="xml">
+            <search string="Sales Visit">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <field name="stage_id"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_stage" string="Stage" domain="[]" context="{'group_by': 'stage_id'}"/>
+                </group>
+            </search>
+
+        </field>
+    </record>
+
+    <record id="sales_visit_action" model="ir.actions.act_window">
+        <field name="name">Sales Visit</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sales.visit</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="sales_person_location_action" model="ir.actions.act_window">
+        <field name="name">SalesPerson Locations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">salesperson.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu Item under Sales Report -->
+    <menuitem id="sales_person_location_menu" name="SalesPerson Locations" parent="sale.menu_sale_report"
+              action="sales_person_location_action" sequence="5"/>
+    <menuitem id="sales_visit_menu" name="Visit Report" parent="sale.menu_sale_report" action="sales_visit_action"
+              sequence="5"/>
+
+    <!-- Partner Form Button for Visits -->
+    <record id="view_partner_form_visits" model="ir.ui.view">
+        <field name="name">res.partner</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_button_box']" position="inside">
+                <button name="action_view_visits"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-calendar">
+                    <field string="Visits" name="visit_count" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Views for Visit Stages -->
+    <record id="view_visit_stage_tree" model="ir.ui.view">
+        <field name="name">visit.stage.tree</field>
+        <field name="model">visit.stage</field>
+        <field name="arch" type="xml">
+            <tree string="Visit Stages">
+                <field name="sequence" widget='handle'/>
+                <field name="name"/>
+                <field name="is_draft"/>
+                <field name="is_closed"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_visit_stage_form" model="ir.ui.view">
+        <field name="name">visit.stage.form</field>
+        <field name="model">visit.stage</field>
+        <field name="arch" type="xml">
+            <form string="Visit Stage">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="sequence"/>
+                        <field name="is_draft"/>
+                        <field name="is_closed"/>
+
+
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_visit_stage_search" model="ir.ui.view">
+        <field name="name">visit.stage.search</field>
+        <field name="model">visit.stage</field>
+        <field name="arch" type="xml">
+            <search string="Visit Stages">
+                <field name="name"/>
+                <field name="is_draft"/>
+                <field name="is_closed"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="visit_stage_action" model="ir.actions.act_window">
+        <field name="name">Visit Stages</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">visit.stage</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu for Visit Stages under Sales Configuration -->
+    <menuitem id="visit_stage_menu" name="Visit Stages" parent="sale.menu_sale_config" action="visit_stage_action"/>
+<record id="view_salesperson_location_map_wizard" model="ir.ui.view">
+    <field name="name">salesperson.location.map.wizard.form</field>
+    <field name="model">salesperson.location.map.wizard</field>
+    <field name="arch" type="xml">
+        <form string="Salesperson Movement">
+            <sheet>
+                <group>
+                    <field name="salesperson_id"/>
+                </group>
+                <div>
+
+
+                            <field name="map_file"/>
+                </div>
+            </sheet>
+            <footer>
+
+ <button name="action_generate_map" string="Generate Map" type="object"  class="oe_highlight"/>
+                <button string="Close" class="btn-secondary" special="cancel"/>
+
+            </footer>
+        </form>
+    </field>
+</record>
+
+</odoo>

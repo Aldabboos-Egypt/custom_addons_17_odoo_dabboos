@@ -959,6 +959,57 @@ class APIController(http.Controller):
 
 
     @validate_token
+    @http.route('/salesperson/log_location', methods=["POST"], type="http", auth="none", csrf=False)
+    def log_location(self, **kwargs):
+        """Logs the location of a salesperson"""
+        # Extract parameters from request
+        user_id = kwargs.get("user_id")
+        latitude = kwargs.get("latitude")
+        longitude = kwargs.get("longitude")
+        timestamp = kwargs.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        device_id = kwargs.get("device_id", "")
+        os = kwargs.get("os", "")
+        app_version = kwargs.get("app_version", "")
+        customer_id = kwargs.get("customer_id")
+        company_id = kwargs.get("company_id")
+
+        # Validate required fields
+        if not (user_id and latitude and longitude):
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                response=json.dumps({"status": False, "error": "Missing required parameters."}),
+            )
+
+
+        user_id = int(user_id)
+        latitude = float(latitude)
+        longitude = float(longitude)
+        customer_id = int(customer_id) if customer_id else None
+
+        # Create a new location record
+        location = request.env['salesperson.location'].sudo().create({
+            'salesperson_id': user_id,
+            'company_id': company_id,
+
+            'latitude': latitude,
+            'longitude': longitude,
+            'timestamp': timestamp,
+            'device_id': device_id,
+            'os': os,
+            'app_version': app_version,
+            'customer_id': customer_id
+        })
+
+        return werkzeug.wrappers.Response(
+                status=200,
+                content_type="application/json; charset=utf-8",
+                response=json.dumps({"status": True, "location_id": location.id}),
+            )
+
+
+
+    @validate_token
     @http.route('/salesperson/update_visit', methods=["POST"], type="http", auth="none", csrf=False)
     def update_visit(self, **kwargs):
         visit_id = int(kwargs.get("visit_id"))

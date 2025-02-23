@@ -1,6 +1,6 @@
 {
     "name": "Dabbos Rest API",
-    "version": "17.2.13",
+    "version": "17.3.14",
     "category": "API",
     "summary": "Dabbos Rest API",
 
@@ -16,6 +16,6 @@
         'stock',
         'web',
     ],
-    "data": ["views/ir_model.xml", "views/res_users.xml","views/data.xml", "security/ir.model.access.csv",],
+    "data": ["views/ir_model.xml", "views/res_users.xml","views/salesperson.xml","views/data.xml", "security/ir.model.access.csv",],
 
 }

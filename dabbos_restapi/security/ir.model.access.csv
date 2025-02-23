@@ -6,3 +6,5 @@ ir_model_fields_id,ir_model_fields,base.model_ir_model_fields,,1,1,1,1
 access_sales_visit_user,sales.visit user,model_sales_visit,,1,1,1,1
 visit_stage_id,visit_stage,model_visit_stage,,1,1,1,1
 access_res_users_all,res.users all,base.model_res_users,,1,1,1,1
+access_salesperson_location,salesperson.location,model_salesperson_location,base.group_user,1,1,1,0
+
