@@ -1079,6 +1079,73 @@ class APIController(http.Controller):
             response=json.dumps({"status": True, "visit_id": visit.id}),
         )
 
+    @validate_token
+    @http.route('/salesperson/update_last_visit', methods=["POST"], type="http", auth="none", csrf=False)
+    def update_last_visit(self, **kwargs):
+        partner_id = int(kwargs.get("partner_id"))
+        user_id = int(kwargs.get("user_id"))
+        to_time = kwargs.get("to_time", "").strip('"')
+        notes = kwargs.get("notes", "")
+
+        # Validate required parameters
+        if not (partner_id and user_id and to_time):
+            return werkzeug.wrappers.Response(
+                status=400,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "Missing required parameters."}),
+            )
+
+        # Find the latest visit for the given partner and user
+        visit = request.env['sales.visit'].sudo().search(
+            [('partner_id', '=', partner_id),
+             ('user_id', '=', user_id),
+             ('to_time', '=', False)],  # Ensures only visits where checkout is not done
+            order='id desc', limit=1
+        )
+
+        print(visit)
+
+
+        if not visit:
+            return werkzeug.wrappers.Response(
+                status=404,
+                content_type="application/json; charset=utf-8",
+                headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+                response=json.dumps({"status": False, "error": "No visit found for this customer."}),
+            )
+
+        # Update visit details (checkout time and optional notes)
+        visit.write({
+            'to_time': to_time,
+            'to_time_str': str(to_time),
+            'notes': notes or visit.notes,  # Keep existing notes if not provided
+        })
+
+        # Handling image files from the body
+        data_files = request.httprequest.files.getlist('data_files')
+
+        if data_files:
+            for file in data_files:
+                filename = secure_filename(file.filename)
+                attachment = request.env['ir.attachment'].sudo().create({
+                    'name': filename,
+                    'res_model': 'sales.visit',
+                    'res_id': visit.id,
+                    'type': 'binary',
+                    'datas': base64.b64encode(file.read()),  # Encode the image in base64
+                    'mimetype': file.content_type,
+                })
+
+                visit.message_post(body="Attachments", attachment_ids=[attachment.id])
+
+        return werkzeug.wrappers.Response(
+            status=200,
+            content_type="application/json; charset=utf-8",
+            headers=[("Cache-Control", "no-store"), ("Pragma", "no-cache")],
+            response=json.dumps({"status": True, "visit_id": visit.id}),
+        )
+
 
     @validate_token
     @http.route('/salesperson/create_invoice', methods=["post"], type="http", auth="none", csrf=False)

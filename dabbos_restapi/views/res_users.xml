@@ -22,7 +22,7 @@
         <group string="Location Access Settings">
             <field name="allowed_locations" options="{'no_create': True}" widget="many2many_tags"/>
             <field name="is_admin"/>
-            <field name="is_salesperson"/>
+            <field name="is_salesperson" string="Track"/>
 
 
         </group>

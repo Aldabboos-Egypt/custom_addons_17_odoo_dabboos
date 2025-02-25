@@ -79,7 +79,7 @@
         <field name="context">{'default_is_salesperson': True}</field>
     </record>
 
-            <record id="sales_person_location_action" model="ir.actions.act_window">
+     <record id="sales_person_location_action" model="ir.actions.act_window">
         <field name="name">SalesPerson Locations</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">salesperson.location</field>
@@ -87,7 +87,7 @@
     </record>
 
     <menuitem id="menu_salesperson_contacts_root"
-              name="Salesperson"
+              name="Track"
               action="action_salesperson_contacts"
               parent="contacts.menu_contacts"
               sequence="1"/>
